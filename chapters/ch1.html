@@ -1,0 +1,782 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="microservices">ارتباط بین Microserviceها</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Monolith vs Microservices</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">🏗️ معماری نرم‌افزار</div>
+    <h1>1.1 Monolith vs Microservices</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: ۱۴۰۵/۰۴/۱۶</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۱۲ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Article Content -->
+<div class="content">
+
+    <p>
+        اولین قدم برای یادگیری <strong>Microservices</strong>، درک تفاوت آن با معماری
+        <strong>Monolithic</strong> است. بسیاری از توسعه‌دهندگان بدون شناخت مشکلات
+        معماری Monolith مستقیماً به سراغ RabbitMQ، Kafka یا سایر ابزارهای ارتباطی
+        می‌روند؛ در حالی که این ابزارها تنها راه‌حل‌هایی برای مشکلات سیستم‌های
+        توزیع‌شده هستند.
+    </p>
+
+    <p>
+        در این فصل ابتدا با معماری Monolith آشنا می‌شویم، سپس بررسی می‌کنیم چرا
+        شرکت‌های بزرگ مانند Amazon، Netflix، Uber و Spotify به سمت معماری
+        Microservices حرکت کردند و چه مشکلاتی باعث این تغییر شد.
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+            قبل از یادگیری Message Brokerها مانند RabbitMQ و Kafka، باید دلیل
+            وجود Microserviceها را بدانید. در غیر این صورت تنها با ابزارها آشنا
+            می‌شوید، نه با مسئله‌ای که این ابزارها برای حل آن ایجاد شده‌اند.
+        </div>
+    </div>
+
+    <h2>Monolith چیست؟</h2>
+
+    <p>
+        معماری <strong>Monolithic</strong> یا <strong>Monolith</strong> به معماری‌ای
+        گفته می‌شود که تمام بخش‌های یک نرم‌افزار در قالب <strong>یک پروژه یا یک
+            برنامه واحد (Single Deployable Unit)</strong> توسعه، Build و Deploy
+        می‌شوند.
+    </p>
+
+    <p>
+        در این معماری تمام ماژول‌های سیستم مانند مدیریت کاربران، محصولات،
+        سفارش‌ها، پرداخت، گزارش‌گیری و احراز هویت در یک برنامه قرار دارند و
+        معمولاً همگی از یک پایگاه داده مشترک استفاده می‌کنند.
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+            Monolith معمولاً بهترین انتخاب برای پروژه‌های کوچک و متوسط است، زیرا
+            توسعه، تست و استقرار آن ساده‌تر بوده و پیچیدگی معماری کمتری دارد.
+        </div>
+    </div>
+
+    <h3>نمونه‌ای از یک سیستم Monolith</h3>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="code-lang">Architecture</span>
+        </div>
+
+        <pre><code>+----------------------------------------------------+
+|                 E-Commerce System                  |
+|----------------------------------------------------|
+|                                                    |
+|  User Module                                       |
+|  Product Module                                    |
+|  Order Module                                      |
+|  Payment Module                                    |
+|  Inventory Module                                  |
+|  Notification Module                               |
+|                                                    |
+|------------------ Shared Database -----------------|
+|                    SQL Server                      |
++----------------------------------------------------+</code></pre>
+
+    </div>
+
+    <p>
+        همان‌طور که مشاهده می‌کنید، تمام ماژول‌ها داخل یک برنامه اجرا می‌شوند.
+        اگر تنها یک تغییر کوچک در ماژول سفارش ایجاد شود، معمولاً لازم است کل
+        برنامه مجدداً Build و Deploy شود.
+    </p>
+
+    <h2>Microservices چیست؟</h2>
+
+    <p>
+        معماری <strong>Microservices</strong> رویکردی است که در آن سیستم به چندین
+        سرویس مستقل تقسیم می‌شود. هر سرویس مسئول یک قابلیت مشخص از کسب‌وکار است
+        و می‌تواند به صورت مستقل توسعه، تست، استقرار و مقیاس‌دهی شود.
+    </p>
+
+    <p>
+        برخلاف Monolith، در این معماری هر سرویس معمولاً پایگاه داده اختصاصی خود
+        را دارد و از طریق APIها یا Message Brokerها با سایر سرویس‌ها ارتباط
+        برقرار می‌کند.
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">ℹ️</span>
+        <div class="callout-content">
+            استقلال سرویس‌ها مهم‌ترین ویژگی Microservices است. هر سرویس باید
+            بتواند بدون وابستگی مستقیم به سایر سرویس‌ها توسعه یافته و Deploy شود.
+        </div>
+    </div>
+
+    <h3>نمونه‌ای از یک سیستم Microservices</h3>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="code-lang">Architecture</span>
+        </div>
+
+        <pre><code>                 +----------------------+
+                 |     API Gateway      |
+                 +----------+-----------+
+                            |
+        +-------------------+-------------------+
+        |                   |                   |
++---------------+   +---------------+   +---------------+
+| User Service  |   | Order Service |   | ProductService|
++---------------+   +---------------+   +---------------+
+| User Database |   | Order Database|   | Product DB    |
++---------------+   +---------------+   +---------------+
+
+        |                   |                   |
+        +-------------------+-------------------+
+                            |
+                    Message Broker
+                 (RabbitMQ / Kafka)</code></pre>
+
+    </div>
+
+    <p>
+        در این معماری هر سرویس مسئول یک بخش از دامنه کسب‌وکار است و در صورت نیاز
+        از طریق REST API، gRPC یا Message Broker با سایر سرویس‌ها ارتباط برقرار
+        می‌کند. این استقلال باعث افزایش انعطاف‌پذیری، مقیاس‌پذیری و قابلیت
+        نگهداری سیستم می‌شود.
+    </p>
+
+    <h2>تفاوت معماری Monolith و Microservices</h2>
+
+    <p>
+        اگرچه هدف هر دو معماری ارائه یک نرم‌افزار کاربردی است، اما نحوه طراحی،
+        توسعه و استقرار آن‌ها تفاوت‌های اساسی دارد. جدول زیر مهم‌ترین تفاوت‌های
+        این دو رویکرد را نشان می‌دهد.
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ویژگی</th>
+                <th>Monolith</th>
+                <th>Microservices</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>ساختار پروژه</td>
+                <td>یک برنامه واحد</td>
+                <td>چندین سرویس مستقل</td>
+            </tr>
+
+            <tr>
+                <td>استقرار (Deployment)</td>
+                <td>کل برنامه</td>
+                <td>هر سرویس به صورت مستقل</td>
+            </tr>
+
+            <tr>
+                <td>پایگاه داده</td>
+                <td>معمولاً مشترک</td>
+                <td>اختصاصی برای هر سرویس</td>
+            </tr>
+
+            <tr>
+                <td>ارتباط بین ماژول‌ها</td>
+                <td>فراخوانی مستقیم متدها</td>
+                <td>REST، gRPC یا Message Broker</td>
+            </tr>
+
+            <tr>
+                <td>مقیاس‌پذیری</td>
+                <td>کل سیستم</td>
+                <td>هر سرویس به صورت جداگانه</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+            Microservices همیشه بهترین انتخاب نیست. اگر پروژه کوچک است یا تیم
+            توسعه محدود است، معماری Monolith معمولاً ساده‌تر، ارزان‌تر و سریع‌تر
+            خواهد بود. استفاده از Microservices زمانی ارزشمند است که پیچیدگی
+            سیستم و نیاز به توسعه مستقل سرویس‌ها افزایش پیدا کند.
+        </div>
+    </div>
+    <h2>مشکلات معماری Monolith</h2>
+
+    <p>
+        معماری Monolith در ابتدای توسعه بسیار ساده، سریع و کم‌هزینه است؛ به همین دلیل
+        بسیاری از استارتاپ‌ها و حتی شرکت‌های بزرگ، پروژه‌های خود را با این معماری آغاز
+        می‌کنند. اما با افزایش تعداد کاربران، توسعه‌دهندگان و قابلیت‌های سیستم،
+        مشکلات این معماری به‌تدریج نمایان می‌شود.
+    </p>
+
+    <p>
+        نکته مهم این است که مشکل اصلی Monolith خود معماری نیست؛ بلکه
+        <strong>رشد بیش از حد سیستم</strong> است. معماری Monolith برای پروژه‌های
+        کوچک و متوسط انتخاب مناسبی است، اما زمانی که نرم‌افزار به ده‌ها یا صدها
+        ماژول تبدیل شود، نگهداری آن بسیار دشوار خواهد شد.
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+            تقریباً تمام شرکت‌های بزرگ دنیا مانند Amazon، Netflix و Uber
+            کار خود را با یک Monolith آغاز کردند و پس از رشد کسب‌وکار به سمت
+            Microservices مهاجرت کردند.
+        </div>
+    </div>
+
+    <h3>۱- وابستگی شدید بین ماژول‌ها (Tight Coupling)</h3>
+
+    <p>
+        در معماری Monolith تمام بخش‌های سیستم در یک پروژه قرار دارند و معمولاً
+        به یکدیگر وابسته هستند. در نتیجه ایجاد تغییر در یک قسمت می‌تواند بخش‌های
+        دیگر سیستم را نیز تحت تأثیر قرار دهد.
+    </p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="code-lang">Architecture</span>
+        </div>
+
+        <pre><code>+----------------------------------------------------+
+|                     Monolith                       |
+|----------------------------------------------------|
+| User | Product | Order | Payment | Inventory      |
+|         ↑             ↓                          |
+|      همه ماژول‌ها به یکدیگر وابسته هستند         |
++----------------------------------------------------+</code></pre>
+
+    </div>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+            هرچه وابستگی بین ماژول‌ها بیشتر باشد، توسعه قابلیت‌های جدید
+            پرریسک‌تر خواهد شد.
+        </div>
+    </div>
+
+    <h3>۲- استقرار (Deployment) دشوار</h3>
+
+    <p>
+        فرض کنید تنها یک باگ کوچک در ماژول پرداخت برطرف شده است. در معماری
+        Monolith معمولاً امکان Deploy همان بخش وجود ندارد و باید کل برنامه
+        مجدداً Build، Test و Deploy شود.
+    </p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="code-lang">Deployment Flow</span>
+        </div>
+
+        <pre><code>Payment Bug Fix
+
+        │
+        ▼
+
+Build Entire Solution
+
+        │
+        ▼
+
+Run All Tests
+
+        │
+        ▼
+
+Deploy Entire Application</code></pre>
+
+    </div>
+
+    <p>
+        هرچه پروژه بزرگ‌تر باشد، زمان Build و Deployment نیز افزایش پیدا می‌کند.
+        در برخی سازمان‌ها ممکن است Build یک Monolith بیش از یک ساعت زمان ببرد.
+    </p>
+
+    <h3>۳- مقیاس‌پذیری (Scaling) نامناسب</h3>
+
+    <p>
+        یکی از بزرگ‌ترین مشکلات Monolith این است که نمی‌توان تنها یک بخش از
+        سیستم را مقیاس‌پذیر کرد.
+    </p>
+
+    <p>
+        فرض کنید در یک فروشگاه اینترنتی، تنها سرویس جستجوی محصولات تحت فشار
+        قرار گرفته است. در معماری Monolith مجبور هستید کل برنامه را Scale کنید،
+        حتی اگر سایر قسمت‌ها هیچ باری نداشته باشند.
+    </p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="code-lang">Scaling</span>
+        </div>
+
+        <pre><code>                Users
+                  │
+                  ▼
+          +----------------+
+          |   Monolith     |
+          +----------------+
+                  │
+         Scale Entire System
+                  │
+                  ▼
+      CPU ↑ RAM ↑ Cost ↑</code></pre>
+
+    </div>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">ℹ️</span>
+        <div class="callout-content">
+            در Microservices تنها همان سرویسی که تحت فشار است Scale می‌شود،
+            بنابراین منابع سخت‌افزاری بهینه‌تر مصرف خواهند شد.
+        </div>
+    </div>
+
+    <h3>۴- افزایش زمان Build</h3>
+
+    <p>
+        با اضافه شدن پروژه‌ها، کلاس‌ها و وابستگی‌ها، فرآیند Build به مرور
+        کندتر می‌شود. در پروژه‌های سازمانی ممکن است هزاران کلاس و صدها پروژه
+        در یک Solution وجود داشته باشد.
+    </p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="code-lang">Example</span>
+        </div>
+
+        <pre><code>Small Project
+Build Time : 40 Seconds
+
+Medium Project
+Build Time : 4 Minutes
+
+Enterprise Monolith
+Build Time : 25-60 Minutes</code></pre>
+
+    </div>
+
+    <h3>۵- دشوار شدن توسعه تیمی</h3>
+
+    <p>
+        هنگامی که تعداد برنامه‌نویسان افزایش پیدا می‌کند، همه افراد روی یک
+        Repository و یک Solution کار می‌کنند. این موضوع باعث افزایش Merge Conflict،
+        تداخل تغییرات و کاهش سرعت توسعه خواهد شد.
+    </p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="code-lang">Example Team</span>
+        </div>
+
+        <pre><code>Developer A → Payment
+
+Developer B → Order
+
+Developer C → Inventory
+
+Developer D → User
+
+        ↓
+
+همگی روی یک پروژه مشترک کار می‌کنند.</code></pre>
+
+    </div>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+            هرچه تعداد توسعه‌دهندگان بیشتر شود، احتمال ایجاد Conflict در کدها،
+            افزایش زمان Code Review و پیچیدگی فرآیند Release بیشتر خواهد شد.
+        </div>
+    </div>
+
+    <h3>۶- وابستگی به یک پایگاه داده</h3>
+
+    <p>
+        در اکثر سیستم‌های Monolith تمام ماژول‌ها از یک Database مشترک استفاده
+        می‌کنند. این موضوع باعث ایجاد وابستگی شدید بین بخش‌های مختلف سیستم
+        می‌شود.
+    </p>
+
+    <div class="code-block">
+        <div class="code-header">
+            <span class="code-lang">Shared Database</span>
+        </div>
+
+        <pre><code>+-------------------------------+
+|          SQL Server           |
++-------------------------------+
+        ▲   ▲   ▲   ▲   ▲
+
+      User
+      Order
+      Product
+      Payment
+      Inventory</code></pre>
+
+    </div>
+
+    <p>
+        تغییر ساختار یک جدول می‌تواند چندین ماژول مختلف را تحت تأثیر قرار دهد.
+        همچنین در صورت بروز مشکل در Database، کل سیستم از دسترس خارج خواهد شد.
+    </p>
+
+    <h2>یک مثال واقعی</h2>
+
+    <p>
+        فرض کنید یک فروشگاه اینترنتی در ابتدا تنها شامل چهار قابلیت اصلی است:
+    </p>
+
+    <ul>
+        <li>مدیریت کاربران</li>
+        <li>مدیریت محصولات</li>
+        <li>ثبت سفارش</li>
+        <li>پرداخت</li>
+    </ul>
+
+    <p>
+        این سیستم در ابتدا با معماری Monolith به‌خوبی کار می‌کند، اما پس از چند
+        سال امکانات جدیدی مانند انبارداری، تخفیف، کیف پول، باشگاه مشتریان،
+        ارسال پیامک، گزارش‌گیری، اعلان‌ها و سیستم پیشنهاد محصولات به آن اضافه
+        می‌شود.
+    </p>
+
+    <p>
+        اکنون صدها توسعه‌دهنده روی یک پروژه واحد کار می‌کنند و هر تغییر کوچک
+        ممکن است روی بخش‌های دیگر نیز تأثیر بگذارد. Build پروژه زمان زیادی
+        می‌برد، Deployment پیچیده شده و مقیاس‌پذیری نیز به یکی از مشکلات اصلی
+        سیستم تبدیل می‌شود.
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+            دقیقاً در چنین شرایطی است که بسیاری از سازمان‌ها تصمیم می‌گیرند
+            سیستم خود را به مجموعه‌ای از Microserviceهای مستقل تقسیم کنند تا
+            هر سرویس بتواند به‌صورت جداگانه توسعه، استقرار و مقیاس‌دهی شود.
+        </div>
+    </div>
+
+    <h2>چرا Microservices؟</h2>
+
+    <p>
+        معماری Microservices برای حل مشکلات Monolith به وجود آمده است، نه برای
+        جایگزین کردن آن در تمام پروژه‌ها. زمانی که یک سیستم رشد می‌کند، تعداد
+        کاربران افزایش می‌یابد، تیم توسعه بزرگ‌تر می‌شود و قابلیت‌های جدید به
+        نرم‌افزار اضافه می‌شوند، نگهداری یک پروژه Monolith دشوار خواهد شد.
+    </p>
+
+    <p>
+        در چنین شرایطی تقسیم سیستم به چندین سرویس مستقل باعث می‌شود هر بخش
+        بتواند به‌صورت جداگانه توسعه، استقرار، تست و مقیاس‌دهی شود. این استقلال،
+        مهم‌ترین مزیت معماری Microservices است.
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+            هدف Microservices کوچک کردن پروژه نیست؛ هدف آن کوچک کردن
+            <strong>مسئولیت هر سرویس</strong> و کاهش وابستگی بین بخش‌های مختلف
+            سیستم است.
+        </div>
+    </div>
+
+    <h3>چه زمانی باید به Microservices مهاجرت کنیم؟</h3>
+
+    <ul>
+        <li>تعداد کاربران سیستم به سرعت در حال افزایش است.</li>
+        <li>تیم توسعه از چند نفر به چندین تیم مستقل تبدیل شده است.</li>
+        <li>زمان Build و Deployment بسیار طولانی شده است.</li>
+        <li>هر Release احتمال ایجاد مشکل در بخش‌های دیگر را افزایش می‌دهد.</li>
+        <li>برخی قسمت‌های سیستم نیاز به مقیاس‌پذیری بیشتری نسبت به سایر بخش‌ها دارند.</li>
+        <li>نیاز به استفاده از فناوری‌های متفاوت در بخش‌های مختلف سیستم وجود دارد.</li>
+    </ul>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+            اگر پروژه کوچک است و تنها چند توسعه‌دهنده روی آن کار می‌کنند،
+            مهاجرت به Microservices معمولاً ارزش افزوده‌ای ایجاد نمی‌کند و تنها
+            پیچیدگی سیستم را افزایش می‌دهد.
+        </div>
+    </div>
+
+    <h2>مزایای Microservices</h2>
+
+    <h3>۱- توسعه مستقل (Independent Development)</h3>
+
+    <p>
+        هر سرویس می‌تواند توسط یک تیم مستقل توسعه داده شود، بدون اینکه نیاز باشد
+        سایر تیم‌ها منتظر پایان کار آن باشند.
+    </p>
+
+    <h3>۲- استقرار مستقل (Independent Deployment)</h3>
+
+    <p>
+        اگر تنها سرویس پرداخت تغییر کرده باشد، کافی است همان سرویس Deploy شود و
+        نیازی به انتشار مجدد کل سیستم نیست.
+    </p>
+
+    <h3>۳- مقیاس‌پذیری بهتر (Scalability)</h3>
+
+    <p>
+        تنها سرویس‌هایی که تحت فشار هستند Scale می‌شوند. این موضوع باعث کاهش
+        هزینه زیرساخت و استفاده بهینه از منابع می‌شود.
+    </p>
+
+    <h3>۴- افزایش قابلیت اطمینان (Fault Isolation)</h3>
+
+    <p>
+        خرابی یک سرویس الزاماً باعث از کار افتادن کل سیستم نمی‌شود. در صورت طراحی
+        صحیح، سایر سرویس‌ها می‌توانند به فعالیت خود ادامه دهند.
+    </p>
+
+    <h3>۵- آزادی انتخاب فناوری (Technology Diversity)</h3>
+
+    <p>
+        هر سرویس می‌تواند از فناوری مناسب خود استفاده کند. به عنوان مثال:
+    </p>
+
+    <ul>
+        <li>Order Service با ASP.NET Core</li>
+        <li>Notification Service با Go</li>
+        <li>AI Service با Python</li>
+        <li>Search Service با Elasticsearch</li>
+    </ul>
+
+    <h3>۶- نگهداری ساده‌تر</h3>
+
+    <p>
+        هر سرویس مسئول یک بخش مشخص از دامنه کسب‌وکار است. بنابراین درک کد،
+        تست، توسعه و رفع خطا بسیار ساده‌تر خواهد بود.
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+            مهم‌ترین مزیت Microservices این است که هر سرویس یک چرخه عمر مستقل
+            دارد و می‌تواند بدون وابستگی به سایر سرویس‌ها توسعه و منتشر شود.
+        </div>
+    </div>
+
+    <h2>معایب Microservices</h2>
+
+    <p>
+        در کنار تمام مزایا، معماری Microservices پیچیدگی‌های خاص خود را نیز دارد.
+        در بسیاری از پروژه‌ها این پیچیدگی‌ها از مزایای آن بیشتر هستند.
+    </p>
+
+    <h3>۱- پیچیدگی معماری</h3>
+
+    <p>
+        تعداد پروژه‌ها، Repositoryها، پایگاه‌های داده و سرویس‌ها افزایش پیدا
+        می‌کند و مدیریت آن‌ها دشوارتر خواهد شد.
+    </p>
+
+    <h3>۲- ارتباط بین سرویس‌ها</h3>
+
+    <p>
+        در Monolith فراخوانی یک متد در حافظه انجام می‌شود، اما در Microservices
+        ارتباط از طریق شبکه برقرار می‌شود که با مشکلاتی مانند Timeout،
+        Retry، Latency و Network Failure همراه است.
+    </p>
+
+    <h3>۳- مدیریت تراکنش‌ها</h3>
+
+    <p>
+        دیگر نمی‌توان از یک Transaction ساده بین چند سرویس استفاده کرد و باید
+        از الگوهایی مانند <strong>Outbox</strong>، <strong>Inbox</strong> و
+        <strong>Saga</strong> استفاده شود.
+    </p>
+
+    <h3>۴- مانیتورینگ دشوارتر</h3>
+
+    <p>
+        لاگ‌ها بین چندین سرویس توزیع می‌شوند و برای ردیابی یک درخواست باید از
+        Correlation ID و Distributed Tracing استفاده کرد.
+    </p>
+
+    <h3>۵- هزینه زیرساخت</h3>
+
+    <p>
+        اجرای چندین سرویس مستقل معمولاً به منابع سخت‌افزاری بیشتری نسبت به یک
+        Monolith نیاز دارد.
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+            Microservices یک راه‌حل برای پروژه‌های بزرگ است، نه یک هدف. انتخاب
+            این معماری بدون نیاز واقعی، تنها باعث افزایش هزینه و پیچیدگی خواهد شد.
+        </div>
+    </div>
+
+    <h2>جدول مقایسه Monolith و Microservices</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ویژگی</th>
+                <th>Monolith</th>
+                <th>Microservices</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>ساختار پروژه</td>
+                <td>یک برنامه واحد</td>
+                <td>چندین سرویس مستقل</td>
+            </tr>
+
+            <tr>
+                <td>Deployment</td>
+                <td>کل سیستم</td>
+                <td>هر سرویس به صورت مستقل</td>
+            </tr>
+
+            <tr>
+                <td>Database</td>
+                <td>مشترک</td>
+                <td>مستقل برای هر سرویس</td>
+            </tr>
+
+            <tr>
+                <td>Scaling</td>
+                <td>کل سیستم</td>
+                <td>هر سرویس جداگانه</td>
+            </tr>
+
+            <tr>
+                <td>Fault Isolation</td>
+                <td>ضعیف</td>
+                <td>بسیار مناسب</td>
+            </tr>
+
+            <tr>
+                <td>پیچیدگی توسعه</td>
+                <td>کم</td>
+                <td>زیاد</td>
+            </tr>
+
+            <tr>
+                <td>پیچیدگی زیرساخت</td>
+                <td>کم</td>
+                <td>زیاد</td>
+            </tr>
+
+            <tr>
+                <td>هزینه نگهداری</td>
+                <td>در پروژه‌های بزرگ بالا</td>
+                <td>در پروژه‌های بزرگ کمتر</td>
+            </tr>
+
+            <tr>
+                <td>ارتباط بین بخش‌ها</td>
+                <td>متدهای داخلی</td>
+                <td>REST، gRPC، RabbitMQ، Kafka</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <h2>Best Practices</h2>
+
+    <ul>
+        <li>از ابتدا پروژه را Microservice طراحی نکنید؛ ابتدا نیاز واقعی را بررسی کنید.</li>
+
+        <li>هر Microservice تنها یک مسئولیت مشخص (Single Responsibility) داشته باشد.</li>
+
+        <li>هر سرویس پایگاه داده مستقل خود را داشته باشد.</li>
+
+        <li>ارتباط Sync را تا حد امکان محدود کنید.</li>
+
+        <li>برای ارتباط‌های Asynchronous از Message Broker استفاده کنید.</li>
+
+        <li>برای جلوگیری از از دست رفتن پیام‌ها از Outbox Pattern استفاده کنید.</li>
+
+        <li>برای جلوگیری از پردازش تکراری پیام‌ها از Inbox Pattern یا Idempotency استفاده کنید.</li>
+
+        <li>از Correlation ID برای ردیابی درخواست‌ها بین سرویس‌ها استفاده کنید.</li>
+
+        <li>برای مانیتورینگ از OpenTelemetry، Prometheus و Grafana استفاده کنید.</li>
+
+        <li>قبل از مهاجرت به Microservices، مرزهای دامنه (Bounded Context) را مشخص کنید.</li>
+    </ul>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">📌</span>
+        <div class="callout-content">
+            یکی از رایج‌ترین اشتباهات، تقسیم یک Monolith به سرویس‌های کوچک بدون
+            در نظر گرفتن مرزهای دامنه (Domain Boundaries) است. چنین سیستمی نه
+            Monolith مناسبی است و نه Microservice موفقی.
+        </div>
+    </div>
+
+    <h2>جمع‌بندی</h2>
+
+    <p>
+        معماری Monolith و Microservices هر دو ابزارهایی برای حل مسائل مختلف هستند.
+        Monolith برای بسیاری از پروژه‌های کوچک و متوسط بهترین انتخاب است، زیرا
+        توسعه و نگهداری ساده‌تری دارد. در مقابل، Microservices زمانی ارزشمند است
+        که سیستم به اندازه‌ای رشد کرده باشد که توسعه، استقرار و مقیاس‌پذیری
+        مستقل سرویس‌ها به یک نیاز واقعی تبدیل شود.
+    </p>
+
+    <p>
+        در ادامه این مستند، نحوه ارتباط بین Microserviceها را بررسی خواهیم کرد.
+        ابتدا با ارتباط‌های همزمان (Synchronous Communication) مانند REST و gRPC
+        آشنا می‌شویم و سپس به سراغ ارتباط‌های غیرهمزمان (Asynchronous Communication)،
+        Message Brokerها، RabbitMQ، Kafka و الگوهای پیشرفته‌ای مانند Outbox،
+        Inbox و Saga خواهیم رفت.
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-content">
+            پس از مطالعه این فصل، باید بتوانید تشخیص دهید که چه زمانی استفاده از
+            معماری Monolith منطقی است و چه زمانی مهاجرت به Microservices می‌تواند
+            ارزش افزوده واقعی برای سیستم ایجاد کند.
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="nav-footer">
+
+        <a class="nav-card prev" href="#">
+            <span class="nav-card-arrow">›</span>
+            <div>
+                <div class="nav-card-label">قبلی</div>
+                <div class="nav-card-title">مقدمه ارتباط بین Microserviceها</div>
+            </div>
+        </a>
+
+        <a class="nav-card next" href="#">
+            <span class="nav-card-arrow">‹</span>
+            <div>
+                <div class="nav-card-label">بعدی</div>
+                <div class="nav-card-title">1.2 Communication بین Microserviceها</div>
+            </div>
+        </a>
+
+    </div>
+
+</div>

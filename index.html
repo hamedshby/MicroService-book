@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مستندات</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="header-actions">
+            <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+            <a href="#" class="logo">
+                <div class="logo-icon">📚</div>
+                <span>مستندات فنی</span>
+            </a>
+        </div>
+
+        <div class="header-search">
+            <span style="color: var(--text-dim)">🔍</span>
+            <input type="text" placeholder="جستجو در مستندات...">
+            <span style="color: var(--text-dim); font-size: 0.75rem">Ctrl+K</span>
+        </div>
+
+        <div class="header-actions">
+            <span class="version-badge">v2.1.0</span>
+        </div>
+    </header>
+
+    <!-- Layout -->
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+
+            <!-- ====================== بخش ۱ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header open" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">📘</span>
+                        بخش ۱ - مقدمه ارتباط بین Microserviceها
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items open">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch1');return false;">
+                        <span class="nav-item-dot"></span>
+                        1.1 Monolith vs Microservices
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch1-2');return false;">
+                        <span class="nav-item-dot"></span>
+                        1.2 Communication بین Microserviceها
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch1-3');return false;">
+                        <span class="nav-item-dot"></span>
+                        1.3 CAP Theorem
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch1-4');return false;">
+                        <span class="nav-item-dot"></span>
+                        1.4 Distributed System Challenges
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۲ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">🌐</span>
+                        بخش ۲ - Synchronous Communication
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch2-1');return false;">
+                        <span class="nav-item-dot"></span>
+                        2.1 HTTP REST
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch2-2');return false;">
+                        <span class="nav-item-dot"></span>
+                        2.2 gRPC
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch2-3');return false;">
+                        <span class="nav-item-dot"></span>
+                        2.3 GraphQL
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch2-4');return false;">
+                        <span class="nav-item-dot"></span>
+                        2.4 مشکلات ارتباط Sync
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۳ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">📨</span>
+                        بخش ۳ - Asynchronous Communication
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch3-1');return false;">
+                        <span class="nav-item-dot"></span>
+                        3.1 Message Broker چیست؟
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch3-2');return false;">
+                        <span class="nav-item-dot"></span>
+                        3.2 Message Queue
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch3-3');return false;">
+                        <span class="nav-item-dot"></span>
+                        3.3 Event
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch3-4');return false;">
+                        <span class="nav-item-dot"></span>
+                        3.4 Event Driven Architecture
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch3-5');return false;">
+                        <span class="nav-item-dot"></span>
+                        3.5 Message Driven Architecture
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۴ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">🐇</span>
+                        بخش ۴ - RabbitMQ
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-1');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.1 معرفی RabbitMQ
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-2');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.2 نصب RabbitMQ
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-3');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.3 مفاهیم RabbitMQ
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-4');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.4 انواع Exchange
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-5');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.5 Queue
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-6');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.6 Ack
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-7');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.7 Dead Letter Queue
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-8');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.8 Retry Queue
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-9');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.9 Priority Queue
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-10');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.10 Delayed Message
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-11');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.11 TTL
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-12');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.12 Prefetch Count
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-13');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.13 Publisher Confirm
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-14');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.14 Mandatory Message
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-15');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.15 Performance Tuning
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch4-16');return false;">
+                        <span class="nav-item-dot"></span>
+                        4.16 Monitoring RabbitMQ
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۵ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">⚡</span>
+                        بخش ۵ - Apache Kafka
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-1');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.1 معرفی Kafka
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-2');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.2 معماری Kafka
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-3');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.3 Producer
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-4');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.4 Consumer
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-5');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.5 Consumer Group
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-6');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.6 Offset
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-7');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.7 Ordering
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-8');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.8 Replication
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-9');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.9 Leader Election
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-10');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.10 Exactly Once
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-11');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.11 Kafka Streams
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-12');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.12 Performance
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch5-13');return false;">
+                        <span class="nav-item-dot"></span>
+                        5.13 Monitoring
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۶ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">⚖️</span>
+                        بخش ۶ - RabbitMQ vs Kafka
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch6-1');return false;">
+                        <span class="nav-item-dot"></span>
+                        6.1 معماری
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch6-2');return false;">
+                        <span class="nav-item-dot"></span>
+                        6.2 سرعت
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch6-3');return false;">
+                        <span class="nav-item-dot"></span>
+                        6.3 Throughput
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch6-4');return false;">
+                        <span class="nav-item-dot"></span>
+                        6.4 Latency
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch6-5');return false;">
+                        <span class="nav-item-dot"></span>
+                        6.5 Ordering
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch6-6');return false;">
+                        <span class="nav-item-dot"></span>
+                        6.6 Retry
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch6-7');return false;">
+                        <span class="nav-item-dot"></span>
+                        6.7 Persistence
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch6-8');return false;">
+                        <span class="nav-item-dot"></span>
+                        6.8 Scalability
+                    </a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch6-9');return false;">
+                        <span class="nav-item-dot"></span>
+                        6.9 Use Cases
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۷ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">🚌</span>
+                        بخش ۷ - MassTransit
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-1');return false;"><span
+                            class="nav-item-dot"></span>7.1 معرفی</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-2');return false;"><span
+                            class="nav-item-dot"></span>7.2 چرا MassTransit؟</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-3');return false;"><span
+                            class="nav-item-dot"></span>7.3 نصب</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-4');return false;"><span
+                            class="nav-item-dot"></span>7.4 Configuration</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-5');return false;"><span
+                            class="nav-item-dot"></span>7.5 Publish</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-6');return false;"><span
+                            class="nav-item-dot"></span>7.6 Send</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-7');return false;"><span
+                            class="nav-item-dot"></span>7.7 Consume</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-8');return false;"><span
+                            class="nav-item-dot"></span>7.8 Consumer Definition</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-9');return false;"><span
+                            class="nav-item-dot"></span>7.9 Retry</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-10');return false;"><span
+                            class="nav-item-dot"></span>7.10 Delayed Retry</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-11');return false;"><span
+                            class="nav-item-dot"></span>7.11 Redelivery</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-12');return false;"><span
+                            class="nav-item-dot"></span>7.12 Fault</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-13');return false;"><span
+                            class="nav-item-dot"></span>7.13 Scheduling</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-14');return false;"><span
+                            class="nav-item-dot"></span>7.14 Saga</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-15');return false;"><span
+                            class="nav-item-dot"></span>7.15 State Machine</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-16');return false;"><span
+                            class="nav-item-dot"></span>7.16 Courier Routing Slip</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-17');return false;"><span
+                            class="nav-item-dot"></span>7.17 Observability</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch7-18');return false;"><span
+                            class="nav-item-dot"></span>7.18 Health Check</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۸ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">📡</span>
+                        بخش ۸ - Messaging Patterns
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-1');return false;"><span
+                            class="nav-item-dot"></span>8.1 Publish / Subscribe</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-2');return false;"><span
+                            class="nav-item-dot"></span>8.2 Request / Response</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-3');return false;"><span
+                            class="nav-item-dot"></span>8.3 Competing Consumer</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-4');return false;"><span
+                            class="nav-item-dot"></span>8.4 Work Queue</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-5');return false;"><span
+                            class="nav-item-dot"></span>8.5 Routing</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-6');return false;"><span
+                            class="nav-item-dot"></span>8.6 Fanout</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-7');return false;"><span
+                            class="nav-item-dot"></span>8.7 Topic</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-8');return false;"><span
+                            class="nav-item-dot"></span>8.8 Saga</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-9');return false;"><span
+                            class="nav-item-dot"></span>8.9 Process Manager</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-10');return false;"><span
+                            class="nav-item-dot"></span>8.10 Choreography</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch8-11');return false;"><span
+                            class="nav-item-dot"></span>8.11 Orchestration</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۹ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">🛡️</span>
+                        بخش ۹ - Reliability Patterns
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch9-1');return false;"><span
+                            class="nav-item-dot"></span>9.1 Retry</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch9-2');return false;"><span
+                            class="nav-item-dot"></span>9.2 Exponential Backoff</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch9-3');return false;"><span
+                            class="nav-item-dot"></span>9.3 Circuit Breaker</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch9-4');return false;"><span
+                            class="nav-item-dot"></span>9.4 Timeout</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch9-5');return false;"><span
+                            class="nav-item-dot"></span>9.5 Bulkhead</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch9-6');return false;"><span
+                            class="nav-item-dot"></span>9.6 Rate Limiting</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch9-7');return false;"><span
+                            class="nav-item-dot"></span>9.7 Idempotency</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch9-8');return false;"><span
+                            class="nav-item-dot"></span>9.8 Duplicate Detection</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch9-9');return false;"><span
+                            class="nav-item-dot"></span>9.9 Poison Message</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch9-10');return false;"><span
+                            class="nav-item-dot"></span>9.10 Dead Letter Queue</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۱۰ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">💾</span>
+                        بخش ۱۰ - Distributed Transactions
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch10-1');return false;"><span
+                            class="nav-item-dot"></span>10.1 مشکل Transaction در Microservice</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch10-2');return false;"><span
+                            class="nav-item-dot"></span>10.2 Two Phase Commit</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch10-3');return false;"><span
+                            class="nav-item-dot"></span>10.3 چرا نباید استفاده کنیم؟</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch10-4');return false;"><span
+                            class="nav-item-dot"></span>10.4 Eventually Consistency</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۱۱ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">📤</span>
+                        بخش ۱۱ - Outbox Pattern
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch11-1');return false;"><span
+                            class="nav-item-dot"></span>11.1 مشکل Dual Write</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch11-2');return false;"><span
+                            class="nav-item-dot"></span>11.2 Outbox چیست؟</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch11-3');return false;"><span
+                            class="nav-item-dot"></span>11.3 ساخت جدول Outbox</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch11-4');return false;"><span
+                            class="nav-item-dot"></span>11.4 Background Publisher</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch11-5');return false;"><span
+                            class="nav-item-dot"></span>11.5 Transaction</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch11-6');return false;"><span
+                            class="nav-item-dot"></span>11.6 Outbox با EF Core</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch11-7');return false;"><span
+                            class="nav-item-dot"></span>11.7 Outbox با MassTransit</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch11-8');return false;"><span
+                            class="nav-item-dot"></span>11.8 Cleanup</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch11-9');return false;"><span
+                            class="nav-item-dot"></span>11.9 Performance</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۱۲ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">📥</span>
+                        بخش ۱۲ - Inbox Pattern
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch12-1');return false;"><span
+                            class="nav-item-dot"></span>12.1 Duplicate Message</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch12-2');return false;"><span
+                            class="nav-item-dot"></span>12.2 Inbox چیست؟</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch12-3');return false;"><span
+                            class="nav-item-dot"></span>12.3 Inbox Table</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch12-4');return false;"><span
+                            class="nav-item-dot"></span>12.4 Duplicate Detection</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch12-5');return false;"><span
+                            class="nav-item-dot"></span>12.5 Exactly Once Processing</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch12-6');return false;"><span
+                            class="nav-item-dot"></span>12.6 Inbox + Outbox</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۱۳ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">🔄</span>
+                        بخش ۱۳ - Saga Pattern
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch13-1');return false;"><span
+                            class="nav-item-dot"></span>13.1 Long Running Transaction</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch13-2');return false;"><span
+                            class="nav-item-dot"></span>13.2 Choreography Saga</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch13-3');return false;"><span
+                            class="nav-item-dot"></span>13.3 Orchestration Saga</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch13-4');return false;"><span
+                            class="nav-item-dot"></span>13.4 پیاده‌سازی در MassTransit</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۱۴ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">🆔</span>
+                        بخش ۱۴ - Idempotency
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch14-1');return false;"><span
+                            class="nav-item-dot"></span>14.1 مفهوم</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch14-2');return false;"><span
+                            class="nav-item-dot"></span>14.2 طراحی API</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch14-3');return false;"><span
+                            class="nav-item-dot"></span>14.3 طراحی Consumer</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch14-4');return false;"><span
+                            class="nav-item-dot"></span>14.4 Database Design</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch14-5');return false;"><span
+                            class="nav-item-dot"></span>14.5 Token</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch14-6');return false;"><span
+                            class="nav-item-dot"></span>14.6 Unique Constraint</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۱۵ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">📊</span>
+                        بخش ۱۵ - Monitoring
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch15-1');return false;"><span
+                            class="nav-item-dot"></span>15.1 Logging</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch15-2');return false;"><span
+                            class="nav-item-dot"></span>15.2 Correlation Id</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch15-3');return false;"><span
+                            class="nav-item-dot"></span>15.3 Trace Id</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch15-4');return false;"><span
+                            class="nav-item-dot"></span>15.4 Distributed Tracing</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch15-5');return false;"><span
+                            class="nav-item-dot"></span>15.5 OpenTelemetry</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch15-6');return false;"><span
+                            class="nav-item-dot"></span>15.6 Prometheus</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch15-7');return false;"><span
+                            class="nav-item-dot"></span>15.7 Grafana</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch15-8');return false;"><span
+                            class="nav-item-dot"></span>15.8 Jaeger</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch15-9');return false;"><span
+                            class="nav-item-dot"></span>15.9 Seq</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۱۶ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">🔒</span>
+                        بخش ۱۶ - Security
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch16-1');return false;"><span
+                            class="nav-item-dot"></span>16.1 SSL</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch16-2');return false;"><span
+                            class="nav-item-dot"></span>16.2 TLS</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch16-3');return false;"><span
+                            class="nav-item-dot"></span>16.3 Authentication</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch16-4');return false;"><span
+                            class="nav-item-dot"></span>16.4 Authorization</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch16-5');return false;"><span
+                            class="nav-item-dot"></span>16.5 JWT</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch16-6');return false;"><span
+                            class="nav-item-dot"></span>16.6 Message Encryption</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch16-7');return false;"><span
+                            class="nav-item-dot"></span>16.7 Message Signing</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۱۷ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">🚀</span>
+                        بخش ۱۷ - Performance
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch17-1');return false;"><span
+                            class="nav-item-dot"></span>17.1 Batch</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch17-2');return false;"><span
+                            class="nav-item-dot"></span>17.2 Compression</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch17-3');return false;"><span
+                            class="nav-item-dot"></span>17.3 Prefetch</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch17-4');return false;"><span
+                            class="nav-item-dot"></span>17.4 Parallel Consumer</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch17-5');return false;"><span
+                            class="nav-item-dot"></span>17.5 Async Consumer</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch17-6');return false;"><span
+                            class="nav-item-dot"></span>17.6 Partitioning</a>
+
+                </div>
+
+            </div>
+
+            <!-- ====================== بخش ۱۸ ====================== -->
+
+            <div class="sidebar-section">
+
+                <div class="chapter-header" onclick="toggleChapter(this)">
+                    <div class="chapter-title">
+                        <span class="chapter-icon">🏗️</span>
+                        بخش ۱۸ - پروژه عملی
+                    </div>
+                    <span class="chapter-arrow">▼</span>
+                </div>
+
+                <div class="chapter-items">
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch18-1');return false;"><span
+                            class="nav-item-dot"></span>18.1 API Gateway</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch18-2');return false;"><span
+                            class="nav-item-dot"></span>18.2 Identity Service</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch18-3');return false;"><span
+                            class="nav-item-dot"></span>18.3 Customer Service</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch18-4');return false;"><span
+                            class="nav-item-dot"></span>18.4 Product Service</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch18-5');return false;"><span
+                            class="nav-item-dot"></span>18.5 Inventory Service</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch18-6');return false;"><span
+                            class="nav-item-dot"></span>18.6 Order Service</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch18-7');return false;"><span
+                            class="nav-item-dot"></span>18.7 Payment Service</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch18-8');return false;"><span
+                            class="nav-item-dot"></span>18.8 Shipping Service</a>
+
+                    <a href="#" class="nav-item" onclick="setActive(this);showChapter('ch18-9');return false;"><span
+                            class="nav-item-dot"></span>18.9 Notification Service</a>
+
+                </div>
+
+            </div>
+
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+
+            <div id="content" class="content">
+
+                <h1>Docker Mastery for .NET Developers</h1>
+
+                <p>REST
+                </p>
+                </p>
+                <p>gRPC
+                </p>
+                </p>
+                <p>RabbitMQ
+                </p>
+                <p>Kafka
+                </p>
+                <p>MassTransit
+                </p>
+                <p>Outbox
+                </p>
+                <p>Inbox
+                </p>
+                <p>Saga
+                </p>
+                <p>Retry
+                </p>
+                <p>Dead Letter Queue
+                </p>
+                <p>Idempotency
+                </p>
+                <p>Correlation ID
+                </p>
+                <p>Distributed Tracing
+                </p>
+                <p>Health Checks
+                </p>
+                <p>Docker
+                </p>
+                <p>Docker Compose
+                </p>
+                <p>Kubernetes (مقدماتی)
+                </p>
+                <p>OpenTelemetry
+                </p>
+                <p>Prometheus
+                </p>
+                <p>Grafana
+
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
