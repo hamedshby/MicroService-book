@@ -1,0 +1,1174 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="microservices">ارتباط بین Microserviceها</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Communication بین Microserviceها</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">🔗 ارتباط بین سرویس‌ها</div>
+
+    <h1>1.2 Communication بین Microserviceها</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: ۱۴۰۵/۰۴/۱۶</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۱۵ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Article Content -->
+<div class="content">
+
+    <p>
+
+        یکی از مهم‌ترین تفاوت‌های معماری Monolith و Microservices، نحوه ارتباط بین بخش‌های مختلف سیستم است.
+        در معماری Monolith، تمام ماژول‌ها در یک Process اجرا می‌شوند و برای برقراری ارتباط تنها کافی است یک متد فراخوانی
+        شود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Monolith</span>
+        </div>
+
+        <pre><code>OrderService.ProcessOrder()
+
+        │
+
+        ▼
+
+PaymentService.Pay()
+
+        │
+
+        ▼
+
+InventoryService.Reserve()</code></pre>
+
+    </div>
+
+    <p>
+
+        اما در معماری Microservices هر سرویس در یک Process مستقل، و معمولاً روی یک ماشین یا Container جداگانه اجرا
+        می‌شود.
+        در نتیجه دیگر امکان فراخوانی مستقیم متدها وجود ندارد و سرویس‌ها باید از طریق شبکه با یکدیگر ارتباط برقرار کنند.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            در Microservices هر ارتباط، یک ارتباط شبکه‌ای (Network Call) است و هر ارتباط شبکه‌ای می‌تواند با خطا،
+            Timeout، قطع ارتباط یا کندی شبکه مواجه شود.
+
+        </div>
+    </div>
+
+    <h2>Communication چیست؟</h2>
+
+    <p>
+
+        Communication به مجموعه روش‌هایی گفته می‌شود که سرویس‌های مختلف برای تبادل اطلاعات، درخواست عملیات یا
+        اطلاع‌رسانی رویدادها از آن استفاده می‌کنند.
+
+    </p>
+
+    <p>
+
+        به عنوان مثال در یک فروشگاه اینترنتی، هنگام ثبت سفارش ممکن است سرویس سفارش نیاز داشته باشد:
+
+    </p>
+
+    <ul>
+
+        <li>موجودی کالا را بررسی کند.</li>
+
+        <li>پرداخت را انجام دهد.</li>
+
+        <li>پیامک ارسال کند.</li>
+
+        <li>ایمیل تأیید سفارش ارسال کند.</li>
+
+        <li>امتیاز باشگاه مشتریان را افزایش دهد.</li>
+
+    </ul>
+
+    <p>
+
+        تمام این عملیات نیازمند برقراری ارتباط بین چندین Microservice هستند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Example</span>
+        </div>
+
+        <pre><code>               Customer
+
+                   │
+
+                   ▼
+
+            Order Service
+
+      ┌────────┼─────────┐
+
+      ▼        ▼         ▼
+
+ Inventory   Payment   Notification
+
+      │                    │
+
+      ▼                    ▼
+
+ Database              Email / SMS</code></pre>
+
+    </div>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            در یک سیستم واقعی، یک درخواست ساده ممکن است باعث ارتباط همزمان چندین سرویس مختلف شود.
+
+        </div>
+    </div>
+
+    <h2>انواع ارتباط بین Microserviceها</h2>
+
+    <p>
+
+        به طور کلی ارتباط بین سرویس‌ها را می‌توان به دو دسته اصلی تقسیم کرد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Communication Types</span>
+        </div>
+
+        <pre><code>Microservices Communication
+
+│
+
+├── Synchronous
+
+│      │
+
+│      ├── REST API
+
+│      ├── gRPC
+
+│      └── GraphQL
+
+│
+
+└── Asynchronous
+
+       │
+
+       ├── RabbitMQ
+
+       ├── Kafka
+
+       ├── Azure Service Bus
+
+       └── Amazon SQS</code></pre>
+
+    </div>
+
+    <p>
+
+        هر کدام از این دو روش مزایا، معایب و کاربردهای خاص خود را دارند و انتخاب صحیح آن‌ها تأثیر مستقیمی بر
+        Performance، Reliability و Scalability سیستم خواهد داشت.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+
+            در اکثر سیستم‌های Enterprise از هر دو روش به صورت ترکیبی استفاده می‌شود. معمولاً عملیات‌های فوری با
+            ارتباط‌های Synchronous و عملیات‌های طولانی یا غیرضروری با ارتباط‌های Asynchronous انجام می‌شوند.
+
+        </div>
+    </div>
+
+    <h2>چه زمانی از کدام روش استفاده کنیم؟</h2>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>نیاز سیستم</th>
+
+                <th>روش مناسب</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>دریافت پاسخ فوری</td>
+
+                <td>REST یا gRPC</td>
+
+            </tr>
+
+            <tr>
+
+                <td>ارسال ایمیل</td>
+
+                <td>RabbitMQ</td>
+
+            </tr>
+
+            <tr>
+
+                <td>ارسال پیامک</td>
+
+                <td>RabbitMQ</td>
+
+            </tr>
+
+            <tr>
+
+                <td>ثبت لاگ</td>
+
+                <td>Kafka</td>
+
+            </tr>
+
+            <tr>
+
+                <td>پردازش گزارش</td>
+
+                <td>Kafka</td>
+
+            </tr>
+
+            <tr>
+
+                <td>پردازش‌های زمان‌بر</td>
+
+                <td>Message Broker</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">📌</span>
+        <div class="callout-content">
+
+            در بخش‌های بعدی ابتدا ارتباط‌های <strong>Synchronous</strong> را بررسی خواهیم کرد و سپس به سراغ ارتباط‌های
+            <strong>Asynchronous</strong>، Message Brokerها، RabbitMQ، Kafka و MassTransit خواهیم رفت.
+
+        </div>
+    </div>
+    <h2>Synchronous Communication</h2>
+
+    <p>
+        در ارتباط <strong>Synchronous</strong>، سرویس ارسال‌کننده درخواست (Client)
+        تا زمانی که پاسخ از سرویس مقصد دریافت نشود، منتظر می‌ماند. به عبارت دیگر،
+        فرآیند اجرای برنامه تا دریافت نتیجه متوقف خواهد شد.
+    </p>
+
+    <p>
+        این مدل دقیقاً مشابه فراخوانی یک متد در برنامه‌های Monolith است؛ با این تفاوت
+        که این بار فراخوانی از طریق شبکه انجام می‌شود و ممکن است با مشکلاتی مانند
+        Latency، Timeout یا قطع ارتباط مواجه شود.
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Synchronous Request</span>
+        </div>
+
+        <pre><code>Client
+
+   │
+
+   │ HTTP Request
+
+   ▼
+
+Order Service
+
+   │
+
+   │ REST / gRPC
+
+   ▼
+
+Payment Service
+
+   │
+
+   │ Response
+
+   ▲
+
+Order Service
+
+   │
+
+   ▼
+
+Client</code></pre>
+
+    </div>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            در ارتباط‌های Synchronous، سرویس درخواست‌دهنده تا پایان پردازش سرویس مقصد
+            منتظر باقی می‌ماند.
+
+        </div>
+    </div>
+
+    <h2>Request / Response Pattern</h2>
+
+    <p>
+
+        متداول‌ترین الگوی ارتباط همزمان، الگوی
+        <strong>Request / Response</strong>
+        است.
+
+    </p>
+
+    <p>
+
+        در این الگو، یک سرویس درخواستی را ارسال می‌کند و منتظر پاسخ همان درخواست
+        می‌ماند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Request / Response</span>
+        </div>
+
+        <pre><code>Request
+
+Client
+   │
+   ▼
+Order Service
+   │
+   ▼
+Inventory Service
+
+Response
+
+Inventory Service
+   │
+   ▲
+Order Service
+   ▲
+Client</code></pre>
+
+    </div>
+
+    <p>
+
+        تقریباً تمام APIهایی که روزانه از آن‌ها استفاده می‌کنیم بر پایه همین الگو
+        طراحی شده‌اند.
+
+    </p>
+
+    <h2>روش‌های پیاده‌سازی ارتباط Synchronous</h2>
+
+    <p>
+
+        در معماری Microservices معمولاً از سه روش اصلی برای ارتباط همزمان استفاده
+        می‌شود.
+
+    </p>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>روش</th>
+
+                <th>پروتکل</th>
+
+                <th>کاربرد</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>REST API</td>
+
+                <td>HTTP / HTTPS</td>
+
+                <td>عمومی‌ترین روش ارتباط</td>
+
+            </tr>
+
+            <tr>
+
+                <td>gRPC</td>
+
+                <td>HTTP/2</td>
+
+                <td>ارتباط سریع بین سرویس‌ها</td>
+
+            </tr>
+
+            <tr>
+
+                <td>GraphQL</td>
+
+                <td>HTTP</td>
+
+                <td>انعطاف‌پذیری در دریافت داده</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+
+            در پروژه‌های ASP.NET Core معمولاً REST و gRPC پرکاربردترین روش‌های ارتباط
+            Synchronous هستند.
+
+        </div>
+    </div>
+
+    <h2>مزایای ارتباط Synchronous</h2>
+
+    <ul>
+
+        <li>پیاده‌سازی ساده و قابل فهم</li>
+
+        <li>دریافت پاسخ در همان لحظه</li>
+
+        <li>مناسب برای عملیات‌های کوتاه</li>
+
+        <li>دیباگ کردن آسان‌تر</li>
+
+        <li>مدیریت خطا ساده‌تر</li>
+
+        <li>عدم نیاز به Message Broker</li>
+
+    </ul>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">ℹ️</span>
+        <div class="callout-content">
+
+            اگر نتیجه عملیات بلافاصله مورد نیاز باشد، ارتباط Synchronous بهترین انتخاب
+            است.
+
+        </div>
+    </div>
+
+    <h2>معایب ارتباط Synchronous</h2>
+
+    <p>
+
+        با وجود سادگی، این نوع ارتباط مشکلات مهمی نیز دارد.
+
+    </p>
+
+    <h3>۱- وابستگی زمانی (Temporal Coupling)</h3>
+
+    <p>
+
+        هر دو سرویس باید همزمان در دسترس باشند. اگر سرویس مقصد Down باشد، سرویس
+        ارسال‌کننده نیز قادر به ادامه پردازش نخواهد بود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Service Down</span>
+        </div>
+
+        <pre><code>Order Service
+
+      │
+
+      ▼
+
+Payment Service
+
+      ✖
+
+Service Unavailable
+
+      ▲
+
+Order Failed</code></pre>
+
+    </div>
+
+    <h3>۲- افزایش زمان پاسخ</h3>
+
+    <p>
+
+        هر سرویس باید منتظر پایان اجرای سرویس بعدی بماند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Latency</span>
+        </div>
+
+        <pre><code>Order Service
+
+    │
+
+    ▼
+
+Inventory
+
+200 ms
+
+    │
+
+    ▼
+
+Payment
+
+350 ms
+
+    │
+
+    ▼
+
+Notification
+
+500 ms
+
+Total Response ≈ 1050 ms</code></pre>
+
+    </div>
+
+    <p>
+
+        هرچه تعداد سرویس‌های درگیر بیشتر باشد، زمان پاسخ نیز افزایش پیدا می‌کند.
+
+    </p>
+
+    <h3>۳- احتمال ایجاد Cascading Failure</h3>
+
+    <p>
+
+        اگر یکی از سرویس‌ها کند یا از دسترس خارج شود، سایر سرویس‌هایی که به آن وابسته
+        هستند نیز دچار مشکل خواهند شد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Cascade Failure</span>
+        </div>
+
+        <pre><code>Gateway
+
+   │
+
+   ▼
+
+Order
+
+   │
+
+   ▼
+
+Payment
+
+   │
+
+   ▼
+
+Inventory
+
+   ✖
+
+Timeout
+
+   ▲
+
+Payment Timeout
+
+   ▲
+
+Order Timeout
+
+   ▲
+
+Gateway Timeout</code></pre>
+
+    </div>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            یکی از مهم‌ترین دلایل استفاده از Message Brokerها، کاهش همین وابستگی زمانی
+            بین سرویس‌ها است.
+
+        </div>
+    </div>
+
+    <h2>مثال واقعی</h2>
+
+    <p>
+
+        فرض کنید کاربر دکمه ثبت سفارش را فشار می‌دهد.
+
+    </p>
+
+    <p>
+
+        سرویس Order برای ثبت سفارش باید مراحل زیر را انجام دهد.
+
+    </p>
+
+    <ol>
+
+        <li>بررسی موجودی کالا</li>
+
+        <li>دریافت مبلغ از درگاه پرداخت</li>
+
+        <li>ثبت سفارش</li>
+
+        <li>ارسال پاسخ به کاربر</li>
+
+    </ol>
+
+    <p>
+
+        در این سناریو کاربر باید نتیجه پرداخت را همان لحظه مشاهده کند؛ بنابراین
+        ارتباط همزمان (Synchronous) بهترین انتخاب خواهد بود.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-content">
+
+            هر زمان کاربر نیاز داشته باشد نتیجه عملیات را بلافاصله مشاهده کند، معمولاً
+            از ارتباط‌های Synchronous استفاده می‌شود.
+
+        </div>
+    </div>
+
+    <h2>Asynchronous Communication</h2>
+
+    <p>
+
+        در ارتباط <strong>Asynchronous</strong>، سرویس ارسال‌کننده پس از ارسال پیام،
+        منتظر پاسخ نمی‌ماند و اجرای برنامه را ادامه می‌دهد. سرویس مقصد نیز هر زمان
+        که آماده باشد پیام را دریافت و پردازش می‌کند.
+
+    </p>
+
+    <p>
+
+        برخلاف ارتباط‌های Synchronous، دو سرویس لازم نیست هم‌زمان در دسترس باشند.
+        پیام ابتدا در یک <strong>Message Broker</strong> ذخیره می‌شود و سپس توسط
+        Consumer دریافت خواهد شد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Asynchronous Request</span>
+        </div>
+
+        <pre><code>Producer
+
+    │
+
+    │ Publish Message
+
+    ▼
+
+Message Broker
+
+    │
+
+    │ Queue
+
+    ▼
+
+Consumer
+
+    │
+
+    ▼
+
+Process Message</code></pre>
+
+    </div>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            در ارتباط Asynchronous، سرویس ارسال‌کننده منتظر پایان پردازش سرویس مقصد
+            نمی‌ماند و بلافاصله به ادامه اجرای برنامه می‌پردازد.
+
+        </div>
+    </div>
+
+    <h2>چرا Asynchronous Communication؟</h2>
+
+    <p>
+
+        با بزرگ‌تر شدن سیستم، استفاده از ارتباط‌های Sync برای تمام عملیات‌ها باعث
+        کاهش Performance و افزایش وابستگی بین سرویس‌ها می‌شود.
+
+    </p>
+
+    <p>
+
+        فرض کنید پس از ثبت سفارش، عملیات‌های زیر باید انجام شوند.
+
+    </p>
+
+    <ul>
+
+        <li>ارسال ایمیل</li>
+
+        <li>ارسال پیامک</li>
+
+        <li>به‌روزرسانی انبار</li>
+
+        <li>ثبت لاگ</li>
+
+        <li>ثبت اطلاعات در سیستم گزارش‌گیری</li>
+
+        <li>ارسال Notification</li>
+
+        <li>محاسبه امتیاز باشگاه مشتریان</li>
+
+    </ul>
+
+    <p>
+
+        اگر تمام این عملیات‌ها به صورت Sync انجام شوند، کاربر باید تا پایان اجرای
+        همه آن‌ها منتظر بماند؛ در حالی که بیشتر این عملیات‌ها برای نمایش نتیجه به
+        کاربر ضروری نیستند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Without Message Broker</span>
+        </div>
+
+        <pre><code>Order Service
+
+      │
+
+      ├────► Payment
+
+      │
+
+      ├────► Inventory
+
+      │
+
+      ├────► Email
+
+      │
+
+      ├────► SMS
+
+      │
+
+      ├────► Notification
+
+      │
+
+      └────► Reporting
+
+User waits until all services finish.</code></pre>
+
+    </div>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            هرچه تعداد سرویس‌های Sync بیشتر شود، احتمال Timeout، کاهش Performance و
+            Cascading Failure نیز بیشتر خواهد شد.
+
+        </div>
+    </div>
+
+    <h2>استفاده از Message Broker</h2>
+
+    <p>
+
+        در معماری‌های مدرن، معمولاً سرویس Order تنها پیام "Order Created" را در
+        Message Broker منتشر می‌کند.
+
+    </p>
+
+    <p>
+
+        سپس سایر سرویس‌ها بدون وابستگی مستقیم، پیام را دریافت و عملیات مربوط به
+        خود را انجام می‌دهند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Using Message Broker</span>
+        </div>
+
+        <pre><code>             Order Service
+
+                    │
+
+          Publish OrderCreated
+
+                    │
+
+                    ▼
+
+          RabbitMQ / Kafka
+
+      ┌────────┼────────┬─────────┐
+
+      ▼        ▼        ▼         ▼
+
+ Inventory   Email     SMS   Notification
+
+      │        │        │         │
+
+      ▼        ▼        ▼         ▼
+
+ Process  Process  Process  Process</code></pre>
+
+    </div>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+
+            سرویس Order تنها مسئول انتشار پیام است و از نحوه پردازش سایر سرویس‌ها
+            اطلاعی ندارد.
+
+        </div>
+    </div>
+
+    <h2>مزایای ارتباط Asynchronous</h2>
+
+    <ul>
+
+        <li>کاهش وابستگی بین سرویس‌ها</li>
+
+        <li>افزایش سرعت پاسخ به کاربر</li>
+
+        <li>مقیاس‌پذیری بهتر</li>
+
+        <li>امکان پردازش موازی پیام‌ها</li>
+
+        <li>افزایش تحمل خطا (Fault Tolerance)</li>
+
+        <li>امکان Retry خودکار</li>
+
+        <li>امکان استفاده از Dead Letter Queue</li>
+
+        <li>امکان پردازش در زمان‌های مختلف</li>
+
+    </ul>
+
+    <h2>معایب ارتباط Asynchronous</h2>
+
+    <ul>
+
+        <li>پیچیدگی بیشتر نسبت به REST</li>
+
+        <li>اشکال‌زدایی دشوارتر</li>
+
+        <li>عدم دریافت پاسخ فوری</li>
+
+        <li>نیاز به Message Broker</li>
+
+        <li>مدیریت Duplicate Message</li>
+
+        <li>مدیریت Ordering پیام‌ها</li>
+
+        <li>نیاز به الگوهایی مانند Outbox و Inbox</li>
+
+    </ul>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            استفاده از Message Broker تمام مشکلات را حل نمی‌کند؛ بلکه نوع مشکلات را
+            تغییر می‌دهد. در سیستم‌های Event Driven باید موضوعاتی مانند Duplicate،
+            Ordering، Retry، Idempotency و Eventually Consistent نیز مدیریت شوند.
+
+        </div>
+    </div>
+
+    <h2>Event Driven Architecture</h2>
+
+    <p>
+
+        در معماری <strong>Event Driven</strong>، ارتباط بین سرویس‌ها بر اساس وقوع
+        یک رویداد (Event) انجام می‌شود.
+
+    </p>
+
+    <p>
+
+        به جای اینکه یک سرویس مستقیماً سرویس دیگری را فراخوانی کند، تنها وقوع یک
+        رویداد را اعلام می‌کند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Event Driven</span>
+        </div>
+
+        <pre><code>Customer places order
+
+          │
+
+          ▼
+
+Order Service
+
+          │
+
+Publish OrderCreated Event
+
+          │
+
+          ▼
+
+RabbitMQ / Kafka
+
+      ┌────────┼────────┬─────────┐
+
+      ▼        ▼        ▼         ▼
+
+Inventory  Payment  Notification  Analytics</code></pre>
+
+    </div>
+
+    <p>
+
+        در این مدل، سرویس Order هیچ اطلاعی از سرویس‌های دریافت‌کننده ندارد. تنها
+        یک Event منتشر می‌کند و هر سرویسی که به آن علاقه‌مند باشد، می‌تواند آن را
+        مصرف کند.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">📌</span>
+        <div class="callout-content">
+
+            اصل مهم در معماری Event Driven این است که Publisher نباید Consumerهای خود
+            را بشناسد.
+
+        </div>
+    </div>
+
+    <h2>Message Driven Architecture</h2>
+
+    <p>
+
+        در معماری Message Driven، تمرکز روی تبادل پیام بین سرویس‌ها است. این پیام
+        ممکن است یک Command، یک Event یا حتی یک Response باشد.
+
+    </p>
+
+    <p>
+
+        برخلاف Event Driven که مفهوم اصلی آن «اتفاق افتادن یک رویداد» است، در
+        Message Driven هر نوع پیامی می‌تواند بین سرویس‌ها رد و بدل شود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Message Driven</span>
+        </div>
+
+        <pre><code>Producer
+
+     │
+
+     ▼
+
+Send Message
+
+     │
+
+     ▼
+
+RabbitMQ
+
+     │
+
+     ▼
+
+Consumer</code></pre>
+
+    </div>
+
+    <h2>تفاوت Event و Message</h2>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>ویژگی</th>
+
+                <th>Event</th>
+
+                <th>Message</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>هدف</td>
+
+                <td>اعلام وقوع یک اتفاق</td>
+
+                <td>انتقال اطلاعات</td>
+
+            </tr>
+
+            <tr>
+
+                <td>نوع ارتباط</td>
+
+                <td>Publish / Subscribe</td>
+
+                <td>Send / Receive</td>
+
+            </tr>
+
+            <tr>
+
+                <td>شناخت گیرنده</td>
+
+                <td>Publisher اطلاعی ندارد</td>
+
+                <td>معمولاً گیرنده مشخص است</td>
+
+            </tr>
+
+            <tr>
+
+                <td>نمونه</td>
+
+                <td>OrderCreated</td>
+
+                <td>CreateInvoiceCommand</td>
+
+            </tr>
+
+            <tr>
+
+                <td>کاربرد</td>
+
+                <td>اطلاع‌رسانی</td>
+
+                <td>اجرای عملیات</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-content">
+
+            در ادامه این مستند ابتدا با Message Brokerها آشنا می‌شویم، سپس RabbitMQ،
+            Kafka و در نهایت MassTransit را بررسی خواهیم کرد تا بتوانیم ارتباط‌های
+            Asynchronous را به‌صورت اصولی در پروژه‌های ASP.NET Core پیاده‌سازی کنیم.
+
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+
+    <div class="nav-footer">
+
+        <a class="nav-card prev" href="#">
+            <span class="nav-card-arrow">›</span>
+            <div>
+                <div class="nav-card-label">قبلی</div>
+                <div class="nav-card-title">1.1 Monolith vs Microservices</div>
+            </div>
+        </a>
+
+        <a class="nav-card next" href="#">
+            <span class="nav-card-arrow">‹</span>
+            <div>
+                <div class="nav-card-label">بعدی</div>
+                <div class="nav-card-title">1.3 CAP Theorem</div>
+            </div>
+        </a>
+
+    </div>
+
+</div>

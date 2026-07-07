@@ -61,6 +61,8 @@ async function showChapter(chapterId) {
 
         content.innerHTML = html;
 
+        localStorage.setItem("currentChapter", chapterId);
+
         window.scrollTo({
             top: 0,
             behavior: "smooth"
@@ -83,16 +85,16 @@ async function showChapter(chapterId) {
 // نمایش خودکار فصل اول هنگام باز شدن سایت
 document.addEventListener("DOMContentLoaded", () => {
 
-    showChapter("ch1");
+    const chapter = localStorage.getItem("currentChapter") || "ch1";
 
-    // فعال کردن آیتم منو
-    const firstItem = document.querySelector('.chapter-list a[data-target="ch1"]');
+    showChapter(chapter);
 
-    if (firstItem) {
-        setActive(firstItem);
+    const item = document.querySelector(`.chapter-list a[data-target="${chapter}"]`);
 
-        // اگر چپتر داخل یک بخش بسته است، آن را باز کن
-        const list = firstItem.closest(".chapter-items");
+    if (item) {
+        setActive(item);
+
+        const list = item.closest(".chapter-items");
         if (list) {
             list.classList.add("open");
 
