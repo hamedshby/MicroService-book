@@ -79,3 +79,28 @@ async function showChapter(chapterId) {
     }
 
 }
+
+// نمایش خودکار فصل اول هنگام باز شدن سایت
+document.addEventListener("DOMContentLoaded", () => {
+
+    showChapter("ch1");
+
+    // فعال کردن آیتم منو
+    const firstItem = document.querySelector('.chapter-list a[data-target="ch1"]');
+
+    if (firstItem) {
+        setActive(firstItem);
+
+        // اگر چپتر داخل یک بخش بسته است، آن را باز کن
+        const list = firstItem.closest(".chapter-items");
+        if (list) {
+            list.classList.add("open");
+
+            const header = list.previousElementSibling;
+            if (header) {
+                header.classList.add("open");
+            }
+        }
+    }
+
+});
