@@ -1,0 +1,1346 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="microservices">ارتباط بین Microserviceها</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">CAP Theorem</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">⚖️ سیستم‌های توزیع‌شده</div>
+
+    <h1>1.3 CAP Theorem</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: ۱۴۰۵/۰۴/۱۶</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۱۵ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Article Content -->
+<div class="content">
+
+    <p>
+
+        یکی از مهم‌ترین مفاهیمی که هر توسعه‌دهنده Microservices باید به‌خوبی آن را
+        درک کند، <strong>CAP Theorem</strong> است.
+
+    </p>
+
+    <p>
+
+        تقریباً تمام تصمیماتی که در طراحی سیستم‌های توزیع‌شده (Distributed Systems)
+        گرفته می‌شوند، به نوعی تحت تأثیر CAP Theorem هستند. انتخاب بین استفاده از
+        RabbitMQ، Kafka، طراحی Databaseها، انتخاب معماری Event Driven و حتی طراحی
+        Outbox Pattern، همگی ارتباط مستقیمی با این نظریه دارند.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            اگر مفهوم CAP Theorem را درک نکنید، بسیاری از تصمیمات معماری در Microservices
+            برای شما صرفاً مجموعه‌ای از قوانین حفظی خواهند بود.
+
+        </div>
+    </div>
+
+    <h2>CAP Theorem چیست؟</h2>
+
+    <p>
+
+        CAP Theorem که با نام
+        <strong>Brewer's Theorem</strong>
+        نیز شناخته می‌شود، یکی از مهم‌ترین نظریه‌های سیستم‌های توزیع‌شده است.
+
+    </p>
+
+    <p>
+
+        این نظریه بیان می‌کند که در یک سیستم توزیع‌شده، هنگام وقوع
+        <strong>Partition</strong>
+        (قطع ارتباط بین نودها)، نمی‌توان به صورت همزمان هر سه ویژگی زیر را تضمین کرد.
+
+    </p>
+
+    <ul>
+
+        <li><strong>C - Consistency</strong></li>
+
+        <li><strong>A - Availability</strong></li>
+
+        <li><strong>P - Partition Tolerance</strong></li>
+
+    </ul>
+
+    <p>
+
+        به بیان ساده، زمانی که ارتباط بین بخش‌های مختلف سیستم دچار مشکل شود، مجبور
+        خواهیم بود بین Consistency و Availability یکی را انتخاب کنیم.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">CAP Theorem</span>
+        </div>
+
+        <pre><code>
+              CAP
+
+               ▲
+
+      Consistency
+
+         /     \
+
+        /       \
+
+Availability --- Partition
+              Tolerance
+</code></pre>
+
+    </div>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            هیچ سیستم توزیع‌شده‌ای نمی‌تواند هنگام وقوع Partition، همزمان Consistency و
+            Availability را به صورت کامل تضمین کند.
+
+        </div>
+    </div>
+
+    <h2>تاریخچه CAP Theorem</h2>
+
+    <p>
+
+        در سال ۲۰۰۰ میلادی،
+        <strong>Eric Brewer</strong>
+        در کنفرانس
+        <strong>PODS (Principles of Distributed Computing)</strong>
+        این نظریه را مطرح کرد.
+
+    </p>
+
+    <p>
+
+        دو سال بعد، در سال ۲۰۰۲،
+        <strong>Seth Gilbert</strong>
+        و
+        <strong>Nancy Lynch</strong>
+        به صورت رسمی این نظریه را اثبات کردند و از آن زمان تاکنون CAP Theorem
+        به یکی از پایه‌ای‌ترین مفاهیم طراحی سیستم‌های توزیع‌شده تبدیل شده است.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">📚</span>
+        <div class="callout-content">
+
+            تقریباً تمام Databaseهای مدرن، Message Brokerها و سیستم‌های Cloud هنگام
+            طراحی، یکی از انتخاب‌های CAP را انجام داده‌اند.
+
+        </div>
+    </div>
+
+    <h2>چرا CAP Theorem اهمیت دارد؟</h2>
+
+    <p>
+
+        در یک برنامه Monolith معمولاً همه ماژول‌ها داخل یک Process اجرا می‌شوند و
+        مشکل قطع ارتباط شبکه وجود ندارد.
+
+    </p>
+
+    <p>
+
+        اما در معماری Microservices، هر سرویس ممکن است روی یک ماشین، Container یا
+        حتی یک دیتاسنتر متفاوت اجرا شود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Distributed System</span>
+        </div>
+
+        <pre><code>
++----------------+
+
+ Order Service
+
++----------------+
+
+        │
+
+        │ Network
+
+        ▼
+
++----------------+
+
+ Payment Service
+
++----------------+
+
+        │
+
+        │ Network
+
+        ▼
+
++----------------+
+
+ Inventory Service
+
++----------------+
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در چنین شرایطی همواره احتمال وقوع مشکلات زیر وجود دارد.
+
+    </p>
+
+    <ul>
+
+        <li>قطع ارتباط شبکه</li>
+
+        <li>کندی ارتباط</li>
+
+        <li>از دست رفتن Packetها</li>
+
+        <li>خرابی یک سرور</li>
+
+        <li>خاموش شدن یک دیتاسنتر</li>
+
+        <li>مشکلات DNS</li>
+
+    </ul>
+
+    <p>
+
+        CAP Theorem به ما کمک می‌کند بدانیم در چنین شرایطی سیستم باید چه رفتاری
+        داشته باشد.
+
+    </p>
+
+    <h2>سه ضلع CAP</h2>
+
+    <p>
+
+        CAP از سه ویژگی اصلی تشکیل شده است که هر سیستم توزیع‌شده تلاش می‌کند آن‌ها
+        را حفظ کند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Three Properties</span>
+        </div>
+
+        <pre><code>
+                CAP
+
+                 │
+
+      ┌──────────┼──────────┐
+
+      ▼          ▼          ▼
+
+Consistency  Availability  Partition
+                             Tolerance
+</code></pre>
+
+    </div>
+
+    <h3>Consistency (سازگاری داده‌ها)</h3>
+
+    <p>
+
+        تمام کاربران باید همیشه آخرین نسخه داده را مشاهده کنند. پس از انجام یک
+        عملیات نوشتن، هیچ کاربری نباید داده قدیمی را دریافت کند.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">📝</span>
+        <div class="callout-content">
+
+            اگر موجودی یک کالا از ۱۰ به ۹ تغییر کند، همه کاربران باید عدد ۹ را مشاهده
+            کنند.
+
+        </div>
+    </div>
+
+    <h3>Availability (در دسترس بودن)</h3>
+
+    <p>
+
+        سیستم باید تا حد امکان همیشه در دسترس باشد و به درخواست کاربران پاسخ دهد،
+        حتی اگر برخی از نودها دچار مشکل شده باشند.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">🌐</span>
+        <div class="callout-content">
+
+            ممکن است پاسخ شامل جدیدترین اطلاعات نباشد، اما سیستم نباید از دسترس خارج شود.
+
+        </div>
+    </div>
+
+    <h3>Partition Tolerance (تحمل قطع ارتباط)</h3>
+
+    <p>
+
+        سیستم باید بتواند حتی در صورت قطع ارتباط بین نودها یا دیتاسنترها به فعالیت
+        خود ادامه دهد.
+
+    </p>
+
+    <p>
+
+        از آنجا که هیچ شبکه‌ای کاملاً پایدار نیست، Partition در سیستم‌های توزیع‌شده
+        یک اتفاق طبیعی محسوب می‌شود و نه یک استثنا.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            در سیستم‌های توزیع‌شده، Partition دیر یا زود رخ خواهد داد؛ بنابراین تقریباً
+            تمام معماری‌های مدرن مجبور هستند ویژگی Partition Tolerance را بپذیرند.
+
+        </div>
+    </div>
+
+    <h2>نگاهی کلی</h2>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>ویژگی</th>
+
+                <th>هدف</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>Consistency</td>
+
+                <td>همه کاربران داده یکسان مشاهده کنند.</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Availability</td>
+
+                <td>سیستم همیشه پاسخگو باشد.</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Partition Tolerance</td>
+
+                <td>سیستم در صورت قطع ارتباط شبکه همچنان کار کند.</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-content">
+
+            در بخش بعد، هر یک از سه ویژگی CAP را با مثال‌های واقعی، سناریوهای معماری،
+            دیاگرام‌های عملی و ارتباط آن‌ها با Databaseها، RabbitMQ و Kafka به صورت
+            عمیق بررسی خواهیم کرد.
+
+        </div>
+    </div>
+    <h2>Consistency (سازگاری داده‌ها)</h2>
+
+    <p>
+
+        اولین ضلع CAP، ویژگی <strong>Consistency</strong> است.
+
+    </p>
+
+    <p>
+
+        Consistency به این معناست که پس از انجام یک عملیات نوشتن (Write)، تمام کاربران
+        و تمام سرویس‌ها باید آخرین نسخه داده را مشاهده کنند. هیچ کاربری نباید داده
+        قدیمی (Stale Data) دریافت کند.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            به زبان ساده، تمام Replicaها باید همیشه داده‌ای یکسان داشته باشند.
+
+        </div>
+    </div>
+
+    <h3>مثال</h3>
+
+    <p>
+
+        فرض کنید موجودی یک کالا برابر با ۱۰ عدد است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Before Update</span>
+        </div>
+
+        <pre><code>Product
+
+Stock = 10</code></pre>
+
+    </div>
+
+    <p>
+
+        کاربری یک سفارش ثبت می‌کند و موجودی کالا به ۹ کاهش پیدا می‌کند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Consistency</span>
+        </div>
+
+        <pre><code>Client A
+
+Stock = 9
+
+──────────────
+
+Client B
+
+Stock = 9
+
+──────────────
+
+Client C
+
+Stock = 9</code></pre>
+
+    </div>
+
+    <p>
+
+        در یک سیستم Consistent، تمام کاربران مقدار ۹ را مشاهده خواهند کرد.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+
+            Consistency تضمین می‌کند که هیچ کاربری داده قدیمی مشاهده نکند.
+
+        </div>
+    </div>
+
+    <h3>مشکل عدم Consistency</h3>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Inconsistent Data</span>
+        </div>
+
+        <pre><code>Client A → Stock = 9
+
+Client B → Stock = 10
+
+Client C → Stock = 9</code></pre>
+
+    </div>
+
+    <p>
+
+        در این حالت داده‌ها بین Replicaها یکسان نیستند و سیستم دچار ناسازگاری شده است.
+
+    </p>
+
+    <hr>
+
+    <h2>Availability (در دسترس بودن)</h2>
+
+    <p>
+
+        ویژگی دوم CAP، <strong>Availability</strong> است.
+
+    </p>
+
+    <p>
+
+        Availability به این معناست که سیستم باید همیشه به درخواست کاربران پاسخ دهد،
+        حتی اگر برخی از سرورها یا Replicaها از دسترس خارج شده باشند.
+
+    </p>
+
+    <p>
+
+        در این حالت ممکن است پاسخ شامل جدیدترین داده نباشد، اما سیستم همچنان قابل
+        استفاده خواهد بود.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">🌐</span>
+        <div class="callout-content">
+
+            Availability یعنی «همیشه پاسخ بده»، حتی اگر پاسخ کاملاً جدید نباشد.
+
+        </div>
+    </div>
+
+    <h3>مثال</h3>
+
+    <p>
+
+        فرض کنید سیستم دارای سه Replica است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Replica Cluster</span>
+        </div>
+
+        <pre><code>         Client
+
+            │
+
+            ▼
+
+     Load Balancer
+
+      │    │    │
+
+      ▼    ▼    ▼
+
+ Node1 Node2 Node3</code></pre>
+
+    </div>
+
+    <p>
+
+        اگر یکی از Nodeها از دسترس خارج شود، درخواست کاربران به سایر Nodeها ارسال
+        خواهد شد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Node Failure</span>
+        </div>
+
+        <pre><code>Node1   ✔
+
+Node2   ✖
+
+Node3   ✔
+
+System is still available.</code></pre>
+
+    </div>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+
+            کاربر حتی متوجه خرابی یکی از سرورها نخواهد شد.
+
+        </div>
+    </div>
+
+    <h3>مشکل Availability</h3>
+
+    <p>
+
+        اگر سیستم تنها روی یک سرور اجرا شود، با خرابی همان سرور کل سرویس از دسترس
+        خارج خواهد شد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Single Node</span>
+        </div>
+
+        <pre><code>Client
+
+   │
+
+   ▼
+
+Server
+
+   ✖
+
+Service Unavailable</code></pre>
+
+    </div>
+
+    <hr>
+
+    <h2>Partition Tolerance (تحمل قطع ارتباط)</h2>
+
+    <p>
+
+        سومین ضلع CAP، مهم‌ترین ویژگی سیستم‌های توزیع‌شده است.
+
+    </p>
+
+    <p>
+
+        Partition به معنای قطع یا اختلال ارتباط بین بخش‌های مختلف سیستم است.
+
+    </p>
+
+    <p>
+
+        این اختلال می‌تواند بین دو سرور، دو دیتاسنتر یا حتی دو کشور رخ دهد.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            در سیستم‌های توزیع‌شده باید فرض کنیم که شبکه دیر یا زود دچار مشکل خواهد شد.
+
+        </div>
+    </div>
+
+    <h3>مثال</h3>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Network Partition</span>
+        </div>
+
+        <pre><code>Data Center A
+
+      │
+
+      │ Network
+
+      ✖
+
+      │
+
+Data Center B</code></pre>
+
+    </div>
+
+    <p>
+
+        در این شرایط ارتباط بین دو دیتاسنتر قطع شده است.
+
+    </p>
+
+    <p>
+
+        اکنون سیستم باید تصمیم بگیرد که کدام ویژگی مهم‌تر است.
+
+    </p>
+
+    <ul>
+
+        <li>آیا پاسخ صحیح ارائه شود؟ (Consistency)</li>
+
+        <li>یا سیستم همچنان پاسخگو باقی بماند؟ (Availability)</li>
+
+    </ul>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">📌</span>
+        <div class="callout-content">
+
+            همین تصمیم، اساس CAP Theorem را تشکیل می‌دهد.
+
+        </div>
+    </div>
+
+    <h3>مثال واقعی</h3>
+
+    <p>
+
+        فرض کنید یک بانک دارای دو دیتاسنتر است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Bank System</span>
+        </div>
+
+        <pre><code>Customer
+
+      │
+
+      ▼
+
+Data Center Tehran
+
+      │
+
+      ✖
+
+Network Failure
+
+      │
+
+      ▼
+
+Data Center Tabriz</code></pre>
+
+    </div>
+
+    <p>
+
+        اگر ارتباط بین دو دیتاسنتر قطع شود، آیا بانک باید همچنان تراکنش انجام دهد؟
+
+    </p>
+
+    <p>
+
+        اگر پاسخ «بله» باشد، ممکن است موجودی حساب‌ها ناسازگار شود.
+
+    </p>
+
+    <p>
+
+        اگر پاسخ «خیر» باشد، کاربران دیگر قادر به انجام تراکنش نخواهند بود.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            در زمان وقوع Partition، نمی‌توان همزمان Consistency و Availability را به طور
+            کامل حفظ کرد.
+
+        </div>
+    </div>
+
+    <h2>مقایسه سه ویژگی CAP</h2>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>ویژگی</th>
+
+                <th>توضیح</th>
+
+                <th>مثال</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>Consistency</td>
+
+                <td>همه کاربران آخرین داده را مشاهده کنند.</td>
+
+                <td>موجودی کالا همیشه یکسان باشد.</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Availability</td>
+
+                <td>سیستم همیشه پاسخگو باشد.</td>
+
+                <td>وب‌سایت حتی هنگام خرابی یک سرور در دسترس باشد.</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Partition Tolerance</td>
+
+                <td>سیستم در زمان قطع ارتباط شبکه همچنان کار کند.</td>
+
+                <td>دو دیتاسنتر پس از قطع ارتباط همچنان فعال باشند.</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-content">
+
+            اکنون با هر سه ضلع CAP آشنا شدیم. در بخش بعد بررسی می‌کنیم چرا در زمان وقوع
+            Partition مجبور هستیم بین <strong>Consistency</strong> و
+            <strong>Availability</strong> یکی را انتخاب کنیم و سیستم‌های معروفی مانند
+            SQL Server، MongoDB، Cassandra، RabbitMQ و Kafka در کدام دسته قرار می‌گیرند.
+
+        </div>
+    </div>
+    <h2>انتخاب بین C و A هنگام وقوع Partition</h2>
+
+    <p>
+
+        اکنون که با سه ویژگی اصلی CAP آشنا شدیم، سؤال مهم این است:
+
+    </p>
+
+    <p>
+
+        <strong>اگر ارتباط بین نودهای سیستم قطع شود (Partition)، چه اتفاقی می‌افتد؟</strong>
+
+    </p>
+
+    <p>
+
+        در چنین شرایطی سیستم تنها دو انتخاب دارد:
+
+    </p>
+
+    <ul>
+
+        <li>داده کاملاً صحیح باشد (Consistency)</li>
+
+        <li>سیستم همچنان پاسخگو باقی بماند (Availability)</li>
+
+    </ul>
+
+    <p>
+
+        اما امکان حفظ هر دو ویژگی به صورت همزمان وجود ندارد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">CAP Decision</span>
+        </div>
+
+        <pre><code>
+              Partition
+
+                  │
+
+        ┌─────────┴─────────┐
+
+        ▼                   ▼
+
+Consistency          Availability
+
+(Reject Request)     (Accept Request)
+</code></pre>
+
+    </div>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            وجود Partition در سیستم‌های توزیع‌شده اجتناب‌ناپذیر است؛ بنابراین تقریباً
+            تمام معماری‌های مدرن باید بین Consistency و Availability تصمیم بگیرند.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>CA Systems</h2>
+
+    <p>
+
+        سیستم‌های <strong>CA (Consistency + Availability)</strong> همواره داده صحیح
+        برمی‌گردانند و همیشه نیز پاسخگو هستند.
+
+    </p>
+
+    <p>
+
+        اما این ویژگی تنها زمانی امکان‌پذیر است که Partition وجود نداشته باشد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">CA</span>
+        </div>
+
+        <pre><code>
+Consistency      ✔
+
+Availability     ✔
+
+Partition        ✖
+</code></pre>
+
+    </div>
+
+    <p>
+
+        به همین دلیل، CA بیشتر در سیستم‌های Monolith یا سیستم‌هایی که روی یک سرور
+        اجرا می‌شوند مشاهده می‌شود.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            در دنیای واقعی تقریباً هیچ سیستم توزیع‌شده‌ای را نمی‌توان کاملاً CA دانست،
+            زیرا همیشه احتمال قطع ارتباط شبکه وجود دارد.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>CP Systems</h2>
+
+    <p>
+
+        در سیستم‌های <strong>CP (Consistency + Partition Tolerance)</strong>،
+        در صورت وقوع Partition، سیستم حاضر است برخی درخواست‌ها را رد کند تا
+        داده اشتباه در اختیار کاربران قرار نگیرد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">CP</span>
+        </div>
+
+        <pre><code>
+Consistency      ✔
+
+Availability     ✖
+
+Partition        ✔
+</code></pre>
+
+    </div>
+
+    <p>
+
+        فرض کنید موجودی حساب بانکی شما ۱۰۰ میلیون تومان است.
+
+    </p>
+
+    <p>
+
+        اگر ارتباط بین دو دیتاسنتر قطع شود، بانک ترجیح می‌دهد تراکنش انجام نشود،
+        تا اینکه موجودی اشتباه ثبت شود.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">🏦</span>
+        <div class="callout-content">
+
+            در سیستم‌های مالی، صحت داده بسیار مهم‌تر از پاسخگو بودن سیستم است؛ بنابراین
+            بسیاری از بانک‌ها رویکرد CP را انتخاب می‌کنند.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>AP Systems</h2>
+
+    <p>
+
+        در سیستم‌های <strong>AP (Availability + Partition Tolerance)</strong>،
+        در زمان وقوع Partition، سیستم همچنان به درخواست‌ها پاسخ می‌دهد؛ حتی اگر
+        پاسخ شامل آخرین داده نباشد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">AP</span>
+        </div>
+
+        <pre><code>
+Consistency      ✖
+
+Availability     ✔
+
+Partition        ✔
+</code></pre>
+
+    </div>
+
+    <p>
+
+        به عنوان مثال، در یک شبکه اجتماعی اگر تعداد لایک‌ها چند ثانیه دیرتر به‌روز
+        شود، معمولاً مشکل مهمی ایجاد نمی‌کند.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">🌐</span>
+        <div class="callout-content">
+
+            در بسیاری از سیستم‌های اینترنتی، پاسخ سریع اهمیت بیشتری نسبت به نمایش
+            جدیدترین داده دارد.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>نمونه سیستم‌های معروف</h2>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>سیستم</th>
+
+                <th>دسته‌بندی تقریبی</th>
+
+                <th>دلیل</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>SQL Server</td>
+
+                <td>CP</td>
+
+                <td>اولویت با صحت داده‌ها</td>
+
+            </tr>
+
+            <tr>
+
+                <td>PostgreSQL</td>
+
+                <td>CP</td>
+
+                <td>رعایت کامل ACID</td>
+
+            </tr>
+
+            <tr>
+
+                <td>MongoDB</td>
+
+                <td>CP (قابل تنظیم)</td>
+
+                <td>قابل انتخاب بودن Write Concern و Read Concern</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Cassandra</td>
+
+                <td>AP</td>
+
+                <td>اولویت با Availability</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Amazon DynamoDB</td>
+
+                <td>AP / قابل تنظیم</td>
+
+                <td>پشتیبانی از Eventually Consistent و Strongly Consistent Read</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Redis Cluster</td>
+
+                <td>AP (در بسیاری از سناریوها)</td>
+
+                <td>اولویت با پاسخ‌گویی سریع</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            دسته‌بندی برخی Databaseها کاملاً ثابت نیست و به تنظیمات Replication،
+            Quorum، Read Concern و Write Concern بستگی دارد.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>ارتباط CAP با RabbitMQ و Kafka</h2>
+
+    <p>
+
+        Message Brokerها نیز هنگام طراحی مجبور به انتخاب بین Consistency و
+        Availability هستند.
+
+    </p>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>Message Broker</th>
+
+                <th>تمرکز اصلی</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>RabbitMQ</td>
+
+                <td>قابلیت اطمینان پیام (Reliability)</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Kafka</td>
+
+                <td>Availability و Throughput بسیار بالا</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <p>
+
+        در فصل‌های RabbitMQ و Kafka به صورت مفصل بررسی خواهیم کرد که هر کدام چگونه
+        Replication، Leader Election و Fault Tolerance را پیاده‌سازی می‌کنند و این
+        تصمیم‌ها چه ارتباطی با CAP دارند.
+
+    </p>
+
+    <hr>
+
+    <h2>ارتباط CAP با Microservices</h2>
+
+    <p>
+
+        در معماری Microservices، تقریباً تمام ارتباط‌ها از طریق شبکه انجام می‌شوند.
+        بنابراین احتمال وقوع Partition همیشه وجود دارد.
+
+    </p>
+
+    <p>
+
+        به همین دلیل مفاهیمی مانند:
+
+    </p>
+
+    <ul>
+
+        <li>Retry</li>
+
+        <li>Circuit Breaker</li>
+
+        <li>Outbox Pattern</li>
+
+        <li>Inbox Pattern</li>
+
+        <li>Saga Pattern</li>
+
+        <li>Eventual Consistency</li>
+
+    </ul>
+
+    <p>
+
+        برای مدیریت محدودیت‌های CAP طراحی شده‌اند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Distributed Architecture</span>
+        </div>
+
+        <pre><code>
+Order Service
+
+      │
+
+      ▼
+
+RabbitMQ
+
+      │
+
+      ▼
+
+Inventory
+
+      │
+
+      ▼
+
+Payment
+
+      │
+
+      ▼
+
+Notification
+</code></pre>
+
+    </div>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">📌</span>
+        <div class="callout-content">
+
+            به همین دلیل در معماری Microservices معمولاً به جای Strong Consistency از
+            <strong>Eventual Consistency</strong> استفاده می‌شود که در فصل‌های آینده
+            به طور کامل بررسی خواهد شد.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>جمع‌بندی</h2>
+
+    <p>
+
+        CAP Theorem یکی از مهم‌ترین مباحث طراحی سیستم‌های توزیع‌شده است و به ما
+        یادآوری می‌کند که هنگام وقوع Partition، نمی‌توان هم‌زمان هم Consistency و
+        هم Availability را به طور کامل تضمین کرد.
+
+    </p>
+
+    <p>
+
+        انتخاب بین این دو ویژگی به نیازهای کسب‌وکار بستگی دارد. سیستم‌های مالی معمولاً
+        Consistency را ترجیح می‌دهند، در حالی که بسیاری از سرویس‌های اینترنتی و
+        شبکه‌های اجتماعی Availability را در اولویت قرار می‌دهند.
+
+    </p>
+
+    <p>
+
+        در ادامه این مستند، خواهیم دید که الگوهایی مانند Eventual Consistency،
+        Outbox، Inbox، Saga و Message Brokerها چگونه به طراحی سیستم‌هایی مقاوم،
+        مقیاس‌پذیر و قابل اعتماد کمک می‌کنند.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-content">
+
+            بعد از مطالعه این فصل، باید بتوانید تشخیص دهید که چرا در معماری
+            Microservices رسیدن به Consistency مطلق همیشه امکان‌پذیر نیست و چرا مفاهیمی
+            مانند Eventual Consistency، RabbitMQ، Kafka و Saga اهمیت زیادی پیدا می‌کنند.
+
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+
+    <div class="nav-footer">
+
+        <a class="nav-card prev" href="#">
+            <span class="nav-card-arrow">›</span>
+            <div>
+                <div class="nav-card-label">قبلی</div>
+                <div class="nav-card-title">Consistency، Availability و Partition Tolerance</div>
+            </div>
+        </a>
+
+        <a class="nav-card next" href="#">
+            <span class="nav-card-arrow">‹</span>
+            <div>
+                <div class="nav-card-label">بعدی</div>
+                <div class="nav-card-title">1.4 Distributed System Challenges</div>
+            </div>
+        </a>
+
+    </div>
+
+</div>
