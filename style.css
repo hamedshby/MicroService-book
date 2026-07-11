@@ -164,7 +164,8 @@
             transition: background 0.2s;
             border-radius: 0 8px 8px 0;
             margin-left: 0.5rem;
-            background-color: darkgreen;
+            /* background-color: darkgreen; */
+            background-color: #4C1D95;
         }
 
         .chapter-header:hover {

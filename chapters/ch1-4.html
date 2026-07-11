@@ -1,0 +1,2487 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="microservices">ارتباط بین Microserviceها</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Distributed System Challenges</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">🌐 سیستم‌های توزیع‌شده</div>
+
+    <h1>1.4 Distributed System Challenges</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: ۱۴۰۵/۰۴/۱۶</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۱۸ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Article Content -->
+<div class="content">
+
+    <p>
+
+        یکی از بزرگ‌ترین تفاوت‌های یک برنامه Monolith با یک سیستم Microservices،
+        پیچیدگی‌هایی است که در اثر توزیع شدن سیستم به وجود می‌آید.
+
+    </p>
+
+    <p>
+
+        در معماری Monolith تقریباً تمام بخش‌های برنامه داخل یک Process اجرا می‌شوند
+        و ارتباط بین آن‌ها از طریق فراخوانی متدها انجام می‌شود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Monolith</span>
+        </div>
+
+        <pre><code>
+OrderService
+
+      │
+
+      ▼
+
+PaymentService.Pay()
+
+      │
+
+      ▼
+
+InventoryService.Reserve()
+</code></pre>
+
+    </div>
+
+    <p>
+
+        اما در معماری Microservices، هر سرویس معمولاً روی یک Container، یک ماشین
+        مجازی یا حتی یک دیتاسنتر مستقل اجرا می‌شود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Microservices</span>
+        </div>
+
+        <pre><code>
+Order Service
+
+      │
+
+      ▼
+
+Network
+
+      │
+
+      ▼
+
+Payment Service
+
+      │
+
+      ▼
+
+Network
+
+      │
+
+      ▼
+
+Inventory Service
+</code></pre>
+
+    </div>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            هر ارتباط بین دو Microservice یک ارتباط شبکه‌ای است و هر ارتباط شبکه‌ای
+            می‌تواند با خطا مواجه شود.
+
+        </div>
+    </div>
+
+    <h2>چرا سیستم‌های توزیع‌شده پیچیده هستند؟</h2>
+
+    <p>
+
+        اولین اشتباه بسیاری از توسعه‌دهندگان این است که تصور می‌کنند انتقال یک
+        Monolith به چند Microservice تنها به معنی جدا کردن پروژه‌ها است.
+
+    </p>
+
+    <p>
+
+        در واقع، با توزیع شدن سیستم، مجموعه‌ای از مشکلات جدید ایجاد می‌شود که در
+        برنامه‌های Monolith تقریباً وجود ندارند.
+
+    </p>
+
+    <ul>
+
+        <li>قطع ارتباط شبکه</li>
+
+        <li>کندی ارتباط</li>
+
+        <li>خرابی بخشی از سیستم</li>
+
+        <li>از دست رفتن پیام‌ها</li>
+
+        <li>دریافت چندباره پیام</li>
+
+        <li>جابجا شدن ترتیب پیام‌ها</li>
+
+        <li>ناسازگاری داده‌ها</li>
+
+        <li>همزمانی عملیات‌ها</li>
+
+    </ul>
+
+    <p>
+
+        به همین دلیل گفته می‌شود:
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            در سیستم‌های توزیع‌شده، مهم‌ترین بخش توسعه، نوشتن Business Logic نیست؛
+            بلکه مدیریت خطاهای شبکه و حفظ سازگاری سیستم است.
+
+        </div>
+    </div>
+
+    <h2>Network Failure</h2>
+
+    <p>
+
+        هیچ شبکه‌ای صددرصد پایدار نیست.
+
+    </p>
+
+    <p>
+
+        حتی اگر تمام سرویس‌ها بدون مشکل کار کنند، ارتباط بین آن‌ها ممکن است به دلایل
+        مختلفی قطع شود.
+
+    </p>
+
+    <ul>
+
+        <li>خرابی Router</li>
+
+        <li>مشکل در Switch</li>
+
+        <li>قطع اینترنت</li>
+
+        <li>مشکل DNS</li>
+
+        <li>Firewall</li>
+
+        <li>اختلال Cloud Provider</li>
+
+        <li>قطع ارتباط بین دیتاسنترها</li>
+
+    </ul>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Network Failure</span>
+        </div>
+
+        <pre><code>
+Order Service
+
+      │
+
+      │ HTTP
+
+      ▼
+
+──────────────
+
+ Network Down
+
+──────────────
+
+      ▲
+
+      │
+
+Payment Service
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در چنین شرایطی، سرویس Order نمی‌تواند با سرویس Payment ارتباط برقرار کند.
+
+    </p>
+
+    <p>
+
+        نکته مهم این است که ممکن است سرویس Payment کاملاً سالم باشد، اما تنها مسیر
+        شبکه دچار مشکل شده باشد.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            در سیستم‌های توزیع‌شده همیشه فرض کنید که شبکه ممکن است در هر لحظه قطع شود.
+
+        </div>
+    </div>
+
+    <h3>نمونه واقعی</h3>
+
+    <p>
+
+        فرض کنید کاربر سفارش خود را ثبت کرده است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Scenario</span>
+        </div>
+
+        <pre><code>
+Client
+
+   │
+
+   ▼
+
+Order Service
+
+   │
+
+   │ Charge Card
+
+   ▼
+
+Payment Service
+</code></pre>
+
+    </div>
+
+    <p>
+
+        اگر در لحظه ارسال درخواست ارتباط شبکه قطع شود، سرویس Order هیچ اطلاعی ندارد
+        که آیا Payment درخواست را دریافت کرده یا خیر.
+
+    </p>
+
+    <p>
+
+        اکنون سه احتمال وجود دارد:
+
+    </p>
+
+    <ul>
+
+        <li>درخواست اصلاً ارسال نشده است.</li>
+
+        <li>درخواست ارسال شده اما پاسخ برنگشته است.</li>
+
+        <li>پرداخت انجام شده ولی پاسخ در شبکه گم شده است.</li>
+
+    </ul>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">📌</span>
+        <div class="callout-content">
+
+            همین مسئله یکی از مهم‌ترین دلایل استفاده از Retry، Idempotency و Outbox
+            Pattern است که در فصل‌های آینده بررسی خواهند شد.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Partial Failure</h2>
+
+    <p>
+
+        در برنامه‌های Monolith معمولاً اگر سیستم دچار مشکل شود، کل برنامه از کار
+        می‌افتد.
+
+    </p>
+
+    <p>
+
+        اما در معماری Microservices ممکن است تنها یکی از سرویس‌ها دچار مشکل شود و
+        سایر سرویس‌ها همچنان به فعالیت خود ادامه دهند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Partial Failure</span>
+        </div>
+
+        <pre><code>
+Gateway
+
+   │
+
+   ▼
+
+Order Service ✔
+
+   │
+
+   ▼
+
+Payment Service ✖
+
+   │
+
+   ▼
+
+Inventory Service ✔
+
+   │
+
+   ▼
+
+Notification ✔
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در این مثال تنها سرویس Payment از دسترس خارج شده است، اما سایر سرویس‌ها
+        کاملاً سالم هستند.
+
+    </p>
+
+    <p>
+
+        اکنون سؤال این است:
+
+    </p>
+
+    <ul>
+
+        <li>آیا باید کل سفارش لغو شود؟</li>
+
+        <li>آیا سفارش ذخیره شود و پرداخت بعداً انجام شود؟</li>
+
+        <li>آیا درخواست مجدداً ارسال شود؟</li>
+
+        <li>آیا باید از Circuit Breaker استفاده کنیم؟</li>
+
+    </ul>
+
+    <p>
+
+        پاسخ این سؤال‌ها به طراحی معماری سیستم بستگی دارد.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+
+            یکی از مهم‌ترین اهداف معماری Microservices این است که خرابی یک سرویس باعث
+            از کار افتادن کل سیستم نشود.
+
+        </div>
+    </div>
+
+    <h3>مثال واقعی</h3>
+
+    <p>
+
+        فرض کنید یک فروشگاه اینترنتی شامل سرویس‌های زیر است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">E-Commerce</span>
+        </div>
+
+        <pre><code>
+Gateway
+
+   │
+
+   ├────────► User Service ✔
+
+   ├────────► Product Service ✔
+
+   ├────────► Inventory ✔
+
+   ├────────► Payment ✖
+
+   └────────► Notification ✔
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در چنین شرایطی کاربران همچنان می‌توانند محصولات را مشاهده کنند، وارد حساب
+        کاربری شوند یا جستجو انجام دهند؛ تنها عملیات پرداخت با مشکل مواجه خواهد شد.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            یکی از اشتباهات رایج در طراحی Microservices این است که خرابی یک سرویس،
+            باعث توقف تمام سرویس‌های دیگر شود. طراحی صحیح باید Fault Isolation را
+            رعایت کند تا هر سرویس تا حد امکان مستقل عمل کند.
+
+        </div>
+    </div>
+
+    <h2>Latency</h2>
+
+    <p>
+
+        یکی از مهم‌ترین چالش‌های سیستم‌های توزیع‌شده، <strong>Latency</strong> یا
+        تأخیر در انتقال داده بین سرویس‌ها است.
+
+    </p>
+
+    <p>
+
+        در معماری Monolith، فراخوانی متدها در حافظه (Memory) انجام می‌شود و معمولاً
+        چند میکروثانیه یا چند نانوثانیه زمان نیاز دارد.
+
+    </p>
+
+    <p>
+
+        اما در معماری Microservices هر درخواست باید از شبکه عبور کند و همین موضوع
+        باعث افزایش زمان پاسخ می‌شود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Monolith vs Microservices</span>
+        </div>
+
+        <pre><code>
+Monolith
+
+OrderService
+
+      │
+
+      ▼
+
+PaymentService()
+
+≈ 0.01 ms
+
+
+──────────────────────────
+
+
+Microservices
+
+Order Service
+
+      │
+
+HTTP / gRPC
+
+      ▼
+
+Payment Service
+
+≈ 20 ~ 200 ms
+</code></pre>
+
+    </div>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            در معماری Microservices حتی اگر تمام سرویس‌ها بسیار سریع باشند، خود شبکه
+            می‌تواند بخش قابل توجهی از زمان پاسخ را مصرف کند.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Latency چیست؟</h2>
+
+    <p>
+
+        Latency مدت زمانی است که از ارسال یک درخواست تا دریافت پاسخ سپری می‌شود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Latency</span>
+        </div>
+
+        <pre><code>
+Client
+
+   │
+
+Request
+
+   │
+
+   ▼
+
+Server
+
+   │
+
+Processing
+
+   │
+
+Response
+
+   ▼
+
+Client
+
+
+Latency =
+Network +
+Processing +
+Network
+</code></pre>
+
+    </div>
+
+    <p>
+
+        به عبارت دیگر، Latency تنها به سرعت اجرای کد وابسته نیست؛ بلکه سرعت شبکه،
+        نوع پروتکل، فاصله سرورها و حتی حجم داده نیز در آن تأثیر دارند.
+
+    </p>
+
+    <hr>
+
+    <h2>انواع Latency</h2>
+
+    <p>
+
+        در سیستم‌های توزیع‌شده، Latency می‌تواند از بخش‌های مختلفی ایجاد شود.
+
+    </p>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>نوع Latency</th>
+
+                <th>توضیح</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>Network Latency</td>
+
+                <td>زمان انتقال داده در شبکه</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Processing Latency</td>
+
+                <td>زمان اجرای منطق برنامه</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Disk Latency</td>
+
+                <td>زمان خواندن یا نوشتن روی دیسک</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Database Latency</td>
+
+                <td>زمان اجرای Query</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Serialization Latency</td>
+
+                <td>زمان تبدیل Object به JSON یا Protobuf</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Queue Latency</td>
+
+                <td>زمان انتظار پیام در Message Broker</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">📌</span>
+        <div class="callout-content">
+
+            در بسیاری از پروژه‌ها، مشکل اصلی سرعت کد نیست؛ بلکه مجموع تأخیرهای شبکه،
+            Database و Message Broker است.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>تجمع Latency در زنجیره سرویس‌ها</h2>
+
+    <p>
+
+        یکی از اشتباهات رایج این است که تصور کنیم هر سرویس فقط چند میلی‌ثانیه زمان
+        نیاز دارد؛ اما زمانی که چندین سرویس پشت سر هم فراخوانی شوند، این زمان‌ها
+        روی هم جمع می‌شوند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Latency Accumulation</span>
+        </div>
+
+        <pre><code>
+Gateway
+
+      │
+
+      ▼
+
+Order Service
+
+ 40 ms
+
+      │
+
+      ▼
+
+Inventory
+
+ 60 ms
+
+      │
+
+      ▼
+
+Payment
+
+120 ms
+
+      │
+
+      ▼
+
+Notification
+
+80 ms
+
+
+Total ≈ 300 ms
+</code></pre>
+
+    </div>
+
+    <p>
+
+        هرچه تعداد فراخوانی‌های Sync بیشتر باشد، زمان پاسخ نهایی نیز افزایش پیدا
+        خواهد کرد.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            یکی از اهداف استفاده از RabbitMQ و Kafka کاهش همین زنجیره طولانی درخواست‌های
+            همزمان است.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Timeout</h2>
+
+    <p>
+
+        گاهی سرویس مقصد آن‌قدر دیر پاسخ می‌دهد که سرویس درخواست‌دهنده دیگر حاضر
+        نیست منتظر بماند.
+
+    </p>
+
+    <p>
+
+        در این شرایط ارتباط با خطای <strong>Timeout</strong> مواجه می‌شود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Timeout</span>
+        </div>
+
+        <pre><code>
+Order Service
+
+      │
+
+      ▼
+
+Payment Service
+
+      │
+
+      │
+
+      │
+
+      │
+
+(No Response)
+
+      │
+
+      ▼
+
+Timeout
+</code></pre>
+
+    </div>
+
+    <p>
+
+        Timeout به این معنا نیست که سرویس مقصد خراب شده است؛ ممکن است درخواست هنوز
+        در حال پردازش باشد، اما از دید سرویس ارسال‌کننده مدت انتظار بیش از حد مجاز
+        طول کشیده است.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            Timeout یکی از رایج‌ترین خطاها در ارتباط‌های REST و gRPC است.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>نمونه واقعی Timeout</h2>
+
+    <p>
+
+        فرض کنید Timeout برابر با ۵ ثانیه تنظیم شده است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Example</span>
+        </div>
+
+        <pre><code>
+Order Service
+
+      │
+
+Request
+
+      ▼
+
+Payment Service
+
+      │
+
+Processing...
+
+6 Seconds
+
+      │
+
+      ▼
+
+Timeout
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در این مثال Payment پس از ۶ ثانیه پاسخ می‌دهد، اما Order Service پس از
+        ۵ ثانیه ارتباط را قطع کرده است.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            پس از وقوع Timeout، ممکن است عملیات در سرویس مقصد انجام شده باشد، اما
+            سرویس درخواست‌دهنده از آن اطلاعی نداشته باشد. همین موضوع می‌تواند باعث
+            ارسال مجدد درخواست و ایجاد Duplicate Message شود.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Slow Network</h2>
+
+    <p>
+
+        همیشه علت افزایش زمان پاسخ، کند بودن برنامه نیست.
+
+    </p>
+
+    <p>
+
+        گاهی تنها مشکل، کندی شبکه بین دو سرویس است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Slow Network</span>
+        </div>
+
+        <pre><code>
+Order Service
+
+      │
+
+──────────────
+
+Slow Network
+
+250 ms
+
+──────────────
+
+      │
+
+      ▼
+
+Payment Service
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در این حالت ممکن است Payment تنها در ۲۰ میلی‌ثانیه عملیات را انجام دهد،
+        اما انتقال داده در شبکه ۲۵۰ میلی‌ثانیه زمان ببرد.
+
+    </p>
+
+    <hr>
+
+    <h2>مثال واقعی</h2>
+
+    <p>
+
+        فرض کنید کاربر سفارش خود را ثبت می‌کند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Real Scenario</span>
+        </div>
+
+        <pre><code>
+Gateway
+
+     │
+
+     ▼
+
+Order Service
+
+     │
+
+REST
+
+     ▼
+
+Inventory
+
+40 ms
+
+     │
+
+REST
+
+     ▼
+
+Payment
+
+120 ms
+
+     │
+
+REST
+
+     ▼
+
+Shipping
+
+90 ms
+
+     │
+
+REST
+
+     ▼
+
+Notification
+
+60 ms
+
+
+Total ≈ 310 ms
+</code></pre>
+
+    </div>
+
+    <p>
+
+        اگر هر سرویس تنها ۵۰ تا ۱۰۰ میلی‌ثانیه زمان مصرف کند، مجموع زمان پاسخ به
+        چند صد میلی‌ثانیه خواهد رسید.
+
+    </p>
+
+    <p>
+
+        به همین دلیل بسیاری از عملیات‌هایی مانند ارسال ایمیل، پیامک، ثبت لاگ،
+        گزارش‌گیری و ارسال Notification به صورت Asynchronous انجام می‌شوند.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+
+            بهترین راه کاهش Latency این نیست که همیشه کد سریع‌تر نوشته شود؛ بلکه باید
+            تعداد فراخوانی‌های شبکه را کاهش داد و عملیات‌های غیرضروری را از مسیر اصلی
+            درخواست خارج کرد. استفاده از Cache، gRPC، Message Broker و الگوهای
+            Asynchronous از مهم‌ترین راهکارهای کاهش Latency در سیستم‌های Microservices
+            هستند.
+
+        </div>
+    </div>
+
+    <h2>Duplicate Message</h2>
+
+    <p>
+
+        یکی از رایج‌ترین مشکلات سیستم‌های مبتنی بر Message Broker، دریافت چندباره
+        یک پیام (Duplicate Message) است.
+
+    </p>
+
+    <p>
+
+        بسیاری از توسعه‌دهندگان تصور می‌کنند هر پیام تنها یک بار پردازش می‌شود، اما
+        در دنیای واقعی چنین تضمینی وجود ندارد.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            در معماری‌های توزیع‌شده باید همیشه فرض کنید که هر پیام ممکن است بیش از یک
+            بار به Consumer تحویل داده شود.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h3>چرا Duplicate Message ایجاد می‌شود؟</h3>
+
+    <ul>
+
+        <li>Timeout هنگام دریافت ACK</li>
+
+        <li>Crash شدن Consumer</li>
+
+        <li>قطع ارتباط شبکه</li>
+
+        <li>Retry شدن پیام</li>
+
+        <li>Restart شدن Broker</li>
+
+        <li>Failover بین Replicaها</li>
+
+    </ul>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Duplicate Scenario</span>
+        </div>
+
+        <pre><code>
+Producer
+
+    │
+
+Publish
+
+    ▼
+
+RabbitMQ
+
+    │
+
+Deliver
+
+    ▼
+
+Consumer
+
+    │
+
+Processing...
+
+    │
+
+ACK Lost
+
+    │
+
+RabbitMQ thinks:
+
+"No ACK"
+
+    │
+
+Deliver Again
+
+    ▼
+
+Consumer
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در این مثال Consumer پیام را پردازش کرده است، اما ACK به Broker نرسیده است.
+
+        Broker تصور می‌کند پیام پردازش نشده و دوباره آن را ارسال می‌کند.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            به همین دلیل تمام Consumerها باید Idempotent طراحی شوند.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Ordering</h2>
+
+    <p>
+
+        Ordering به ترتیب پردازش پیام‌ها اشاره دارد.
+
+    </p>
+
+    <p>
+
+        در بسیاری از سیستم‌ها ترتیب اجرای پیام‌ها اهمیت بسیار زیادی دارد.
+
+    </p>
+
+    <h3>مثال</h3>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Correct Order</span>
+        </div>
+
+        <pre><code>
+1. Create Order
+
+↓
+
+2. Pay Order
+
+↓
+
+3. Ship Order
+</code></pre>
+
+    </div>
+
+    <p>
+
+        اگر ترتیب پیام‌ها تغییر کند، سیستم دچار مشکل خواهد شد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Wrong Order</span>
+        </div>
+
+        <pre><code>
+Ship Order
+
+↓
+
+Create Order
+
+↓
+
+Pay Order
+</code></pre>
+
+    </div>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            در بسیاری از Business Processها، ترتیب اجرای پیام‌ها به اندازه خود پیام
+            اهمیت دارد.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Message Reordering</h2>
+
+    <p>
+
+        گاهی پیام‌ها دقیقاً به همان ترتیبی که ارسال شده‌اند، دریافت نمی‌شوند.
+
+    </p>
+
+    <p>
+
+        این اتفاق ممکن است به دلایل مختلفی رخ دهد.
+
+    </p>
+
+    <ul>
+
+        <li>پردازش موازی Consumerها</li>
+
+        <li>Retry شدن یک پیام</li>
+
+        <li>Network Delay</li>
+
+        <li>Replication</li>
+
+    </ul>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Reordering</span>
+        </div>
+
+        <pre><code>
+Publish
+
+Message 1
+
+Message 2
+
+Message 3
+
+
+Receive
+
+Message 2
+
+Message 1
+
+Message 3
+</code></pre>
+
+    </div>
+
+    <p>
+
+        بنابراین نباید همیشه فرض کنیم ترتیب ارسال و ترتیب دریافت یکسان خواهد بود.
+
+    </p>
+
+    <hr>
+
+    <h2>Delivery Guarantee</h2>
+
+    <p>
+
+        تقریباً تمام Message Brokerها یکی از سه مدل تحویل پیام را ارائه می‌کنند.
+
+    </p>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>مدل</th>
+
+                <th>توضیح</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>At Most Once</td>
+
+                <td>پیام حداکثر یک بار ارسال می‌شود.</td>
+
+            </tr>
+
+            <tr>
+
+                <td>At Least Once</td>
+
+                <td>پیام حداقل یک بار تحویل داده می‌شود.</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Exactly Once</td>
+
+                <td>پیام دقیقاً یک بار پردازش می‌شود.</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <hr>
+
+    <h2>At Most Once</h2>
+
+    <p>
+
+        در این مدل Broker هیچ تلاشی برای ارسال مجدد پیام انجام نمی‌دهد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">At Most Once</span>
+        </div>
+
+        <pre><code>
+Producer
+
+      │
+
+      ▼
+
+Broker
+
+      │
+
+Network Failure
+
+      ✖
+
+Message Lost
+</code></pre>
+
+    </div>
+
+    <p>
+
+        اگر پیام از بین برود، دیگر بازیابی نخواهد شد.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            این مدل سریع است اما قابلیت اطمینان پایینی دارد.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>At Least Once</h2>
+
+    <p>
+
+        در این مدل، Broker تا زمانی که ACK دریافت نکند، پیام را مجدداً ارسال خواهد کرد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">At Least Once</span>
+        </div>
+
+        <pre><code>
+Producer
+
+    │
+
+Publish
+
+    ▼
+
+Broker
+
+    │
+
+Deliver
+
+    ▼
+
+Consumer
+
+    │
+
+No ACK
+
+    │
+
+Retry
+
+    ▼
+
+Consumer
+</code></pre>
+
+    </div>
+
+    <p>
+
+        این روش باعث افزایش قابلیت اطمینان می‌شود اما احتمال Duplicate Message وجود دارد.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+
+            RabbitMQ در اکثر سناریوها از مدل At Least Once استفاده می‌کند.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Exactly Once</h2>
+
+    <p>
+
+        در این مدل هر پیام دقیقاً یک بار پردازش می‌شود.
+
+    </p>
+
+    <p>
+
+        رسیدن به Exactly Once در سیستم‌های توزیع‌شده بسیار دشوار است و معمولاً نیازمند
+        ترکیبی از Broker، Producer، Consumer و Database است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Exactly Once</span>
+        </div>
+
+        <pre><code>
+Producer
+
+     │
+
+Publish
+
+     ▼
+
+Broker
+
+     │
+
+Deliver
+
+     ▼
+
+Consumer
+
+     │
+
+Process Only Once
+
+     ▼
+
+Database
+</code></pre>
+
+    </div>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">📌</span>
+        <div class="callout-content">
+
+            Exactly Once معمولاً تنها با همکاری Broker و برنامه کاربردی قابل دستیابی است
+            و صرفاً یک ویژگی Broker نیست.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>RabbitMQ و Delivery Guarantee</h2>
+
+    <p>
+
+        RabbitMQ با استفاده از ACK، NACK و Manual Acknowledgement تلاش می‌کند
+        پیام‌ها را با قابلیت اطمینان بالا تحویل دهد.
+
+    </p>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>ویژگی</th>
+
+                <th>RabbitMQ</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>ACK</td>
+
+                <td>✔</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Retry</td>
+
+                <td>✔</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Dead Letter Queue</td>
+
+                <td>✔</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Duplicate ممکن است؟</td>
+
+                <td>بله</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Exactly Once</td>
+
+                <td>به تنهایی خیر</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">RabbitMQ Flow</span>
+        </div>
+
+        <pre><code>
+Producer
+
+    │
+
+Publish
+
+    ▼
+
+Exchange
+
+    │
+
+Queue
+
+    │
+
+Consumer
+
+    │
+
+ACK
+
+    ▼
+
+Message Removed
+</code></pre>
+
+    </div>
+
+    <hr>
+
+    <h2>Kafka و Delivery Guarantee</h2>
+
+    <p>
+
+        Kafka نیز از مدل‌های مختلف Delivery پشتیبانی می‌کند، اما معماری آن با
+        RabbitMQ تفاوت دارد.
+
+    </p>
+
+    <p>
+
+        در Kafka پیام‌ها در Topic ذخیره می‌شوند و Consumerها با استفاده از Offset
+        مشخص می‌کنند تا کدام پیام را پردازش کرده‌اند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Kafka Flow</span>
+        </div>
+
+        <pre><code>
+Producer
+
+     │
+
+     ▼
+
+Topic
+
+     │
+
+Offset
+
+     ▼
+
+Consumer Group
+</code></pre>
+
+    </div>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>ویژگی</th>
+
+                <th>Kafka</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>Offset</td>
+
+                <td>✔</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Replay Message</td>
+
+                <td>✔</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Ordering داخل Partition</td>
+
+                <td>✔</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Exactly Once Semantics</td>
+
+                <td>✔ (با تنظیمات خاص)</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            Kafka با استفاده از Transactional Producer و Idempotent Producer می‌تواند
+            Exactly Once Semantics را در برخی سناریوها فراهم کند. با این حال، این ویژگی
+            به تنظیمات Producer، Consumer و نحوه مدیریت Offsetها وابسته است و به‌تنهایی
+            تمام منطق کسب‌وکار را از پردازش تکراری محافظت نمی‌کند.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>مقایسه مدل‌های تحویل پیام</h2>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>ویژگی</th>
+
+                <th>At Most Once</th>
+
+                <th>At Least Once</th>
+
+                <th>Exactly Once</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>احتمال از دست رفتن پیام</td>
+
+                <td>زیاد</td>
+
+                <td>کم</td>
+
+                <td>بسیار کم</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Duplicate Message</td>
+
+                <td>خیر</td>
+
+                <td>بله</td>
+
+                <td>خیر (در محدوده تضمین)</td>
+
+            </tr>
+
+            <tr>
+
+                <td>پیچیدگی</td>
+
+                <td>کم</td>
+
+                <td>متوسط</td>
+
+                <td>زیاد</td>
+
+            </tr>
+
+            <tr>
+
+                <td>کاربرد</td>
+
+                <td>Cache، Logging</td>
+
+                <td>اکثر سیستم‌های Enterprise</td>
+
+                <td>پرداخت، تراکنش‌های حساس</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-content">
+
+            در عمل، بسیاری از سیستم‌های Enterprise از مدل <strong>At Least Once</strong>
+            استفاده می‌کنند و با پیاده‌سازی <strong>Idempotency</strong> و الگوهایی مانند
+            <strong>Inbox Pattern</strong> از پردازش تکراری جلوگیری می‌کنند. این رویکرد
+            معمولاً ساده‌تر و قابل‌اعتمادتر از تلاش برای دستیابی به Exactly Once در کل
+            سیستم است.
+
+        </div>
+    </div>
+    <h2>Retry</h2>
+
+    <p>
+
+        در سیستم‌های توزیع‌شده، شکست یک درخواست همیشه به معنی وجود یک خطای دائمی نیست.
+
+    </p>
+
+    <p>
+
+        گاهی یک درخواست به دلیل مشکلات موقتی مانند کندی شبکه، Restart شدن سرویس،
+        یا افزایش بار سیستم با خطا مواجه می‌شود. در چنین شرایطی ارسال مجدد درخواست
+        (Retry) می‌تواند مشکل را برطرف کند.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            Retry باید فقط برای خطاهای موقتی (Transient Faults) استفاده شود، نه برای
+            خطاهای منطقی یا دائمی.
+
+        </div>
+    </div>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Retry Flow</span>
+        </div>
+
+        <pre><code>
+Order Service
+
+      │
+
+      ▼
+
+Payment Service
+
+      │
+
+Timeout
+
+      ▼
+
+Retry
+
+      │
+
+Success
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در ASP.NET Core معمولاً Retry توسط Polly، MassTransit یا خود Message Broker
+        پیاده‌سازی می‌شود.
+
+    </p>
+
+    <hr>
+
+    <h2>چه زمانی Retry مناسب است؟</h2>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>خطا</th>
+
+                <th>Retry؟</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>Timeout</td>
+
+                <td>✔ بله</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Connection Lost</td>
+
+                <td>✔ بله</td>
+
+            </tr>
+
+            <tr>
+
+                <td>HTTP 503</td>
+
+                <td>✔ بله</td>
+
+            </tr>
+
+            <tr>
+
+                <td>HTTP 500 (موقت)</td>
+
+                <td>✔ معمولاً</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Validation Error</td>
+
+                <td>✖ خیر</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Business Rule Error</td>
+
+                <td>✖ خیر</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Unauthorized (401)</td>
+
+                <td>✖ خیر</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            Retry روی خطاهای منطقی فقط باعث افزایش بار سیستم خواهد شد.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Exponential Backoff</h2>
+
+    <p>
+
+        یکی از بزرگ‌ترین اشتباهات، ارسال Retry پشت سر هم و بدون فاصله است.
+
+    </p>
+
+    <p>
+
+        در روش <strong>Exponential Backoff</strong>، فاصله بین هر Retry به تدریج
+        افزایش پیدا می‌کند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Exponential Backoff</span>
+        </div>
+
+        <pre><code>
+Attempt 1
+
+↓
+
+Wait 1 Second
+
+↓
+
+Attempt 2
+
+↓
+
+Wait 2 Seconds
+
+↓
+
+Attempt 3
+
+↓
+
+Wait 4 Seconds
+
+↓
+
+Attempt 4
+
+↓
+
+Wait 8 Seconds
+</code></pre>
+
+    </div>
+
+    <p>
+
+        این روش باعث می‌شود در زمان بروز مشکل، فشار زیادی به سرویس مقصد وارد نشود.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+
+            تقریباً تمام Frameworkهای مدرن مانند Polly، MassTransit و بسیاری از
+            Cloud Providerها از Exponential Backoff استفاده می‌کنند.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Retry Storm</h2>
+
+    <p>
+
+        اگر هزاران Client به صورت همزمان Retry انجام دهند، ممکن است وضعیت سیستم
+        از قبل نیز بدتر شود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Retry Storm</span>
+        </div>
+
+        <pre><code>
+1000 Clients
+
+      │
+
+      ▼
+
+Payment Service
+
+      ✖
+
+Timeout
+
+      ▲
+
+Retry
+
+Retry
+
+Retry
+
+Retry
+
+Retry
+
+Retry
+
+Retry...
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در این حالت، سرویس مقصد هنوز در حال بازیابی است اما هزاران درخواست Retry
+        به آن ارسال می‌شود و فرصت بازیابی از بین می‌رود.
+
+    </p>
+
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+
+            Retry بدون محدودیت می‌تواند از خود خطا خطرناک‌تر باشد.
+
+        </div>
+    </div>
+
+    <h3>راهکارهای جلوگیری از Retry Storm</h3>
+
+    <ul>
+
+        <li>Exponential Backoff</li>
+
+        <li>Random Jitter</li>
+
+        <li>Circuit Breaker</li>
+
+        <li>Rate Limiting</li>
+
+        <li>Maximum Retry Count</li>
+
+    </ul>
+
+    <hr>
+
+    <h2>Idempotency</h2>
+
+    <p>
+
+        یکی از مهم‌ترین مفاهیم معماری Microservices، <strong>Idempotency</strong> است.
+
+    </p>
+
+    <p>
+
+        یک عملیات زمانی Idempotent است که اجرای چندباره آن، نتیجه‌ای مشابه اجرای
+        یک‌باره داشته باشد.
+
+    </p>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">📌</span>
+        <div class="callout-content">
+
+            ممکن است یک پیام چندین بار دریافت شود، اما نتیجه عملیات باید فقط یک بار
+            اعمال شود.
+
+        </div>
+    </div>
+
+    <h3>مثال</h3>
+
+    <p>
+
+        فرض کنید پیام زیر دوبار دریافت شود.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Payment Message</span>
+        </div>
+
+        <pre><code>
+Charge Customer
+
+OrderId = 1054
+
+Amount = 120$
+</code></pre>
+
+    </div>
+
+    <p>
+
+        اگر سیستم Idempotent نباشد، کارت مشتری دوبار شارژ خواهد شد.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Without Idempotency</span>
+        </div>
+
+        <pre><code>
+Receive Message
+
+↓
+
+Charge Card
+
+↓
+
+Receive Again
+
+↓
+
+Charge Card Again ❌
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در یک سیستم Idempotent ابتدا بررسی می‌شود که این پیام قبلاً پردازش شده است
+        یا خیر.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">With Idempotency</span>
+        </div>
+
+        <pre><code>
+Receive Message
+
+↓
+
+Message Already Processed?
+
+↓
+
+Yes
+
+↓
+
+Ignore
+</code></pre>
+
+    </div>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-content">
+
+            Idempotency مهم‌ترین راهکار جلوگیری از اثرات Duplicate Message است.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Best Practices</h2>
+
+    <ul>
+
+        <li>Retry را فقط برای خطاهای موقتی انجام دهید.</li>
+
+        <li>از Exponential Backoff به جای Retry فوری استفاده کنید.</li>
+
+        <li>تعداد Retryها را محدود کنید.</li>
+
+        <li>برای جلوگیری از Retry Storm از Jitter استفاده کنید.</li>
+
+        <li>Consumerها را همیشه Idempotent طراحی کنید.</li>
+
+        <li>از Correlation ID برای ردیابی درخواست‌ها استفاده کنید.</li>
+
+        <li>برای پیام‌های حساس از Dead Letter Queue استفاده کنید.</li>
+
+        <li>خطاهای دائمی را Retry نکنید.</li>
+
+        <li>Timeout مناسب برای هر سرویس تعریف کنید.</li>
+
+        <li>قبل از Retry علت خطا را بررسی کنید.</li>
+
+    </ul>
+
+    <hr>
+
+    <h2>جدول خلاصه</h2>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>چالش</th>
+
+                <th>راهکار</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>Network Failure</td>
+
+                <td>Retry + Circuit Breaker</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Timeout</td>
+
+                <td>Retry + Backoff</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Duplicate Message</td>
+
+                <td>Idempotency + Inbox</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Lost Message</td>
+
+                <td>Outbox Pattern</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Ordering</td>
+
+                <td>Partition / Sequence</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Retry Storm</td>
+
+                <td>Backoff + Jitter</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Poison Message</td>
+
+                <td>Dead Letter Queue</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <hr>
+
+    <h2>ارتباط این مفاهیم با Outbox، Inbox و Saga</h2>
+
+    <p>
+
+        چالش‌هایی که در این فصل بررسی شدند، دلیل اصلی ایجاد بسیاری از الگوهای
+        معماری در سیستم‌های توزیع‌شده هستند.
+
+    </p>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>الگو</th>
+
+                <th>چه مشکلی را حل می‌کند؟</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>Outbox Pattern</td>
+
+                <td>جلوگیری از از دست رفتن پیام (Dual Write Problem)</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Inbox Pattern</td>
+
+                <td>جلوگیری از پردازش تکراری پیام‌ها</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Saga Pattern</td>
+
+                <td>مدیریت تراکنش بین چند Microservice</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Retry Pattern</td>
+
+                <td>مدیریت خطاهای موقتی</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Circuit Breaker</td>
+
+                <td>جلوگیری از Cascading Failure</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-info">
+        <span class="callout-icon">💡</span>
+        <div class="callout-content">
+
+            در فصل‌های آینده خواهیم دید که الگوهای Outbox، Inbox و Saga در عمل چگونه
+            برای حل این چالش‌ها استفاده می‌شوند و چرا در پروژه‌های Enterprise تقریباً
+            همیشه در کنار Message Brokerها به کار می‌روند.
+
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>جمع‌بندی</h2>
+
+    <p>
+
+        سیستم‌های توزیع‌شده ذاتاً با چالش‌هایی مانند قطع ارتباط شبکه، تأخیر، پیام‌های
+        تکراری، تغییر ترتیب پیام‌ها و شکست‌های موقتی مواجه هستند. طراحی یک معماری
+        موفق به معنای حذف این مشکلات نیست، بلکه به معنای پیش‌بینی آن‌ها و استفاده از
+        الگوهای مناسب برای مدیریت آن‌ها است.
+
+    </p>
+
+    <div class="callout callout-success">
+        <span class="callout-icon">🎯</span>
+        <div class="callout-content">
+
+            اکنون با مهم‌ترین چالش‌های سیستم‌های توزیع‌شده آشنا شده‌اید. این مفاهیم
+            پیش‌نیاز فصل‌های Message Broker، RabbitMQ، Kafka، MassTransit، Outbox،
+            Inbox و Saga هستند و درک آن‌ها برای طراحی Microserviceهای قابل‌اعتماد
+            ضروری است.
+
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+
+    <div class="nav-footer">
+
+        <a class="nav-card prev" href="#">
+            <span class="nav-card-arrow">›</span>
+            <div>
+                <div class="nav-card-label">قبلی</div>
+                <div class="nav-card-title">Duplicate Message، Ordering و Delivery Guarantees</div>
+            </div>
+        </a>
+
+        <a class="nav-card next" href="#">
+            <span class="nav-card-arrow">‹</span>
+            <div>
+                <div class="nav-card-label">بعدی</div>
+                <div class="nav-card-title">2.1 Synchronous Communication (REST)</div>
+            </div>
+        </a>
+
+    </div>
+
+</div>
