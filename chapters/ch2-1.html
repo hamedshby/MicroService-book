@@ -2098,17 +2098,21 @@ var response =
 
 <h2>Polly Integration</h2>
 
+<hr>
+
+<h2>بررسی Retry Policy با Polly</h2>
+
 <p>
 
-    یکی از مزایای IHttpClientFactory، امکان اتصال مستقیم Policyهای
-    <strong>Polly</strong> است.
+    یکی از قابلیت‌های مهم <strong>Polly</strong>، پیاده‌سازی Retry برای خطاهای
+    موقتی (Transient Faults) است.
 
 </p>
 
 <p>
 
-    با Polly می‌توان رفتارهایی مانند Retry، Circuit Breaker، Timeout، Fallback و
-    Bulkhead Isolation را به سادگی به HttpClient اضافه کرد.
+    در مثال زیر، برای HttpClient یک Retry Policy تعریف شده است که در صورت بروز
+    خطا، درخواست را حداکثر سه بار مجدداً ارسال می‌کند.
 
 </p>
 
@@ -2122,7 +2126,8 @@ var response =
     <pre><code>builder.Services
     .AddHttpClient("Payment")
     .AddTransientHttpErrorPolicy(policy =>
-        policy.WaitAndRetryAsync(3,
+        policy.WaitAndRetryAsync(
+            3,
             retryAttempt =>
                 TimeSpan.FromSeconds(
                     Math.Pow(2, retryAttempt))));</code></pre>
@@ -2131,18 +2136,664 @@ var response =
 
 <hr>
 
-<h2>Retry + Circuit Breaker</h2>
+<h2>توضیح خط به خط کد</h2>
+
+<h3>۱- AddHttpClient</h3>
 
 <p>
 
-    Retry برای خطاهای موقتی مناسب است، اما اگر سرویس مقصد برای مدت طولانی در دسترس
-    نباشد، ارسال مداوم درخواست باعث افزایش بار سیستم می‌شود.
+    ابتدا یک Named Client با نام <strong>Payment</strong> ثبت می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Named Client</span>
+    </div>
+
+    <pre><code>.AddHttpClient("Payment")</code></pre>
+
+</div>
+
+<p>
+
+    از این به بعد هر زمان بنویسیم:
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Usage</span>
+    </div>
+
+    <pre><code>factory.CreateClient("Payment");</code></pre>
+
+</div>
+
+<p>
+
+    همین تنظیمات روی HttpClient اعمال خواهد شد.
+
+</p>
+
+<hr>
+
+<h3>۲- AddTransientHttpErrorPolicy</h3>
+
+<p>
+
+    این متد یک Retry Policy را فقط برای خطاهای موقتی (Transient Errors) فعال
+    می‌کند.
 
 </p>
 
 <p>
 
-    در چنین شرایطی از <strong>Circuit Breaker</strong> استفاده می‌شود.
+    منظور از خطاهای موقتی، خطاهایی هستند که احتمال دارد چند لحظه بعد برطرف شوند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>خطا</th>
+
+            <th>Retry می‌شود؟</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>HTTP 5xx</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>HTTP 408 (Request Timeout)</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Network Error</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Socket Exception</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>HTTP 404</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>HTTP 400</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Validation Error</td>
+
+            <td>✖</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        Retry فقط برای خطاهایی انجام می‌شود که احتمال رفع شدن آن‌ها در مدت کوتاه وجود دارد.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h3>۳- WaitAndRetryAsync</h3>
+
+<p>
+
+    این متد مشخص می‌کند که در صورت وقوع خطا، چند بار درخواست تکرار شود و بین هر
+    Retry چه مدت صبر شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Retry Count</span>
+    </div>
+
+    <pre><code>WaitAndRetryAsync(3, ...)</code></pre>
+
+</div>
+
+<p>
+
+    عدد <strong>۳</strong> به این معناست که اگر درخواست اولیه شکست بخورد،
+    حداکثر سه بار دیگر تلاش خواهد شد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Retry Attempts</span>
+    </div>
+
+    <pre><code>
+Request
+
+↓
+
+Fail
+
+↓
+
+Retry 1
+
+↓
+
+Retry 2
+
+↓
+
+Retry 3
+
+↓
+
+Stop
+</code></pre>
+
+</div>
+
+<hr>
+
+<h3>۴- retryAttempt</h3>
+
+<p>
+
+    متغیر <strong>retryAttempt</strong> شماره تلاش فعلی را مشخص می‌کند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Retry</th>
+
+            <th>retryAttempt</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>اول</td>
+
+            <td>1</td>
+
+        </tr>
+
+        <tr>
+
+            <td>دوم</td>
+
+            <td>2</td>
+
+        </tr>
+
+        <tr>
+
+            <td>سوم</td>
+
+            <td>3</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h3>۵- Math.Pow(2, retryAttempt)</h3>
+
+<p>
+
+    این قسمت زمان انتظار بین Retryها را با استفاده از الگوریتم
+    <strong>Exponential Backoff</strong>
+    محاسبه می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Delay Calculation</span>
+    </div>
+
+    <pre><code>Math.Pow(2, retryAttempt)</code></pre>
+
+</div>
+
+<p>
+
+    خروجی این تابع به صورت زیر خواهد بود.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Retry</th>
+
+            <th>فرمول</th>
+
+            <th>زمان انتظار</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Retry 1</td>
+
+            <td>2¹</td>
+
+            <td>2 ثانیه</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Retry 2</td>
+
+            <td>2²</td>
+
+            <td>4 ثانیه</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Retry 3</td>
+
+            <td>2³</td>
+
+            <td>8 ثانیه</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Retry Timeline</span>
+    </div>
+
+    <pre><code>
+Request
+
+↓
+
+Fail
+
+↓
+
+Wait 2s
+
+↓
+
+Retry 1
+
+↓
+
+Wait 4s
+
+↓
+
+Retry 2
+
+↓
+
+Wait 8s
+
+↓
+
+Retry 3
+</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        افزایش تدریجی زمان انتظار باعث می‌شود فشار زیادی به سرویس مقصد وارد نشود و
+        احتمال موفقیت Retryهای بعدی افزایش یابد.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>چرا Exponential Backoff؟</h2>
+
+<p>
+
+    اگر هزاران Client بلافاصله پس از وقوع خطا دوباره درخواست ارسال کنند، ممکن
+    است سرویس مقصد هیچ فرصتی برای بازیابی نداشته باشد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Without Backoff</span>
+    </div>
+
+    <pre><code>
+1000 Clients
+
+      │
+
+Retry
+
+Retry
+
+Retry
+
+Retry
+
+Retry
+
+      ▼
+
+Payment API
+
+      ✖
+
+Overloaded
+</code></pre>
+
+</div>
+
+<p>
+
+    اما با استفاده از Exponential Backoff، درخواست‌ها با فاصله زمانی بیشتری
+    ارسال می‌شوند و فشار روی سرویس کاهش می‌یابد.
+
+</p>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        در سیستم‌های Production معمولاً علاوه بر Exponential Backoff از
+        <strong>Jitter</strong> نیز استفاده می‌شود تا همه Clientها دقیقاً در یک
+        زمان Retry انجام ندهند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Best Practice</h2>
+
+<ul>
+
+    <li>Retry را فقط برای خطاهای موقتی انجام دهید.</li>
+
+    <li>از Exponential Backoff به جای Retry فوری استفاده کنید.</li>
+
+    <li>تعداد Retryها را محدود نگه دارید.</li>
+
+    <li>برای جلوگیری از Retry Storm از Jitter استفاده کنید.</li>
+
+    <li>Retry را با Circuit Breaker ترکیب کنید.</li>
+
+    <li>برای عملیات‌های حساس، Consumerها را Idempotent طراحی کنید.</li>
+
+</ul>
+
+
+<hr>
+
+<h2>Retry + Circuit Breaker</h2>
+
+<p>
+
+    یکی از رایج‌ترین الگوهای مقاوم‌سازی (Resilience Patterns) در معماری
+    Microservices، استفاده همزمان از
+    <strong>Retry</strong>
+    و
+    <strong>Circuit Breaker</strong>
+    است.
+
+</p>
+
+<p>
+
+    این دو الگو مکمل یکدیگر هستند.
+
+    Retry تلاش می‌کند خطاهای موقتی را برطرف کند، در حالی که Circuit Breaker
+    از ارسال درخواست‌های بی‌فایده به سرویس‌های از کار افتاده جلوگیری می‌کند.
+
+</p>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        Retry برای خطاهای موقتی مناسب است، اما اگر سرویس مقصد واقعاً Down باشد،
+        Retry به تنهایی فقط باعث افزایش بار سیستم خواهد شد.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Retry چگونه کار می‌کند؟</h2>
+
+<p>
+
+    فرض کنید سرویس Payment به دلیل یک مشکل موقتی پاسخ نمی‌دهد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Retry Flow</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+Request
+
+      ▼
+
+Payment API
+
+      ✖
+
+Timeout
+
+      ▲
+
+Retry #1
+
+      ▲
+
+Retry #2
+
+      ▲
+
+Retry #3
+
+      ▼
+
+Success
+</code></pre>
+
+</div>
+
+<p>
+
+    اگر مشکل موقتی باشد، معمولاً یکی از Retryها موفق خواهد شد.
+
+</p>
+
+<hr>
+
+<h2>اما اگر سرویس Down باشد چه اتفاقی می‌افتد؟</h2>
+
+<p>
+
+    حال فرض کنید سرویس Payment به طور کامل از دسترس خارج شده است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Without Circuit Breaker</span>
+    </div>
+
+    <pre><code>
+1000 Clients
+
+      │
+
+Retry
+
+Retry
+
+Retry
+
+Retry
+
+Retry
+
+Retry
+
+Retry
+
+      ▼
+
+Payment API
+
+      ✖
+
+Still Down
+</code></pre>
+
+</div>
+
+<p>
+
+    در این شرایط تمام Clientها به ارسال Retry ادامه می‌دهند.
+
+</p>
+
+<p>
+
+    نتیجه این کار، افزایش شدید بار شبکه و CPU خواهد بود.
+
+</p>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        Retry بدون Circuit Breaker ممکن است باعث ایجاد
+        <strong>Retry Storm</strong>
+        شود.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Circuit Breaker چیست؟</h2>
+
+<p>
+
+    Circuit Breaker دقیقاً مانند فیوز برق عمل می‌کند.
+
+</p>
+
+<p>
+
+    اگر تعداد خطاها از یک حد مشخص بیشتر شود، ارتباط با سرویس مقصد را برای مدتی
+    قطع می‌کند.
 
 </p>
 
@@ -2153,68 +2804,509 @@ var response =
     </div>
 
     <pre><code>
-Request
+Client
 
-   │
+    │
 
-   ▼
+    ▼
+
+Circuit Breaker
+
+    │
+
+    ▼
+
+Payment API
+</code></pre>
+
+</div>
+
+<p>
+
+    بنابراین دیگر تمام درخواست‌ها مستقیماً به سرویس معیوب ارسال نمی‌شوند.
+
+</p>
+
+<hr>
+
+<h2>سه حالت Circuit Breaker</h2>
+
+<p>
+
+    Circuit Breaker دارای سه وضعیت اصلی است.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>حالت</th>
+
+            <th>توضیح</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Closed</td>
+
+            <td>تمام درخواست‌ها ارسال می‌شوند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Open</td>
+
+            <td>هیچ درخواستی ارسال نمی‌شود.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Half Open</td>
+
+            <td>چند درخواست آزمایشی ارسال می‌شود.</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Closed State</h2>
+
+<p>
+
+    در حالت Closed، سیستم کاملاً طبیعی کار می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Closed</span>
+    </div>
+
+    <pre><code>
+Client
+
+    │
+
+    ▼
+
+Circuit Breaker
+
+    │
+
+    ▼
 
 Payment API
 
-   ✖
+✔ Success
+</code></pre>
 
-Failure
+</div>
 
-   │
+<hr>
 
-Retry
+<h2>Open State</h2>
 
-   │
+<p>
 
-Failure
+    اگر تعداد خطاها از حد تعیین‌شده بیشتر شود، Circuit باز می‌شود.
 
-   │
+</p>
 
-Failure
+<div class="code-block">
 
-   ▼
+    <div class="code-header">
+        <span class="code-lang">Open</span>
+    </div>
 
-Circuit Opens
+    <pre><code>
+Client
 
-   │
+    │
 
-No Requests
+    ▼
 
-   │
+Circuit Breaker
 
-Recovery
+    ✖
 
-   ▼
+Request Rejected
 
-Half Open
+Payment API
 
-   │
+(Not Called)
+</code></pre>
+
+</div>
+
+<p>
+
+    در این حالت حتی درخواستی به Payment ارسال نمی‌شود.
+
+</p>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        این کار باعث می‌شود سرویس معیوب فرصت بازیابی پیدا کند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Half Open State</h2>
+
+<p>
+
+    پس از گذشت مدت مشخص، Circuit اجازه می‌دهد چند درخواست آزمایشی ارسال شوند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Half Open</span>
+    </div>
+
+    <pre><code>
+Client
+
+    │
+
+    ▼
+
+Circuit Breaker
+
+    │
+
+One Test Request
+
+    ▼
+
+Payment API
+
+    │
 
 Success
 
-   ▼
+    ▼
+
+Closed Again
+</code></pre>
+
+</div>
+
+<p>
+
+    اگر درخواست موفق باشد، Circuit دوباره بسته می‌شود.
+
+    در غیر این صورت دوباره وارد حالت Open خواهد شد.
+
+</p>
+
+<hr>
+
+<h2>نمونه پیاده‌سازی با Polly</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Retry + Circuit Breaker</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>builder.Services
+    .AddHttpClient("Payment")
+    .AddTransientHttpErrorPolicy(policy =>
+        policy.WaitAndRetryAsync(
+            3,
+            retryAttempt =>
+                TimeSpan.FromSeconds(
+                    Math.Pow(2, retryAttempt))))
+    .AddTransientHttpErrorPolicy(policy =>
+        policy.CircuitBreakerAsync(
+            handledEventsAllowedBeforeBreaking: 5,
+            durationOfBreak: TimeSpan.FromSeconds(30)));</code></pre>
+
+</div>
+
+<hr>
+
+<h2>توضیح پارامترها</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>پارامتر</th>
+
+            <th>توضیح</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>handledEventsAllowedBeforeBreaking</td>
+
+            <td>تعداد خطاهای مجاز قبل از باز شدن Circuit</td>
+
+        </tr>
+
+        <tr>
+
+            <td>durationOfBreak</td>
+
+            <td>مدت زمانی که Circuit باز می‌ماند.</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<p>
+
+    در مثال بالا:
+
+</p>
+
+<ul>
+
+    <li>اگر ۵ درخواست متوالی با خطا مواجه شوند...</li>
+
+    <li>Circuit به مدت ۳۰ ثانیه باز خواهد شد.</li>
+
+    <li>در این مدت هیچ درخواستی به Payment ارسال نمی‌شود.</li>
+
+    <li>پس از ۳۰ ثانیه چند درخواست آزمایشی ارسال خواهد شد.</li>
+
+</ul>
+
+<hr>
+
+<h2>جریان کامل</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Complete Flow</span>
+    </div>
+
+    <pre><code>
+Client
+
+      │
+
+      ▼
+
+Retry
+
+      │
+
+Failure
+
+      │
+
+Retry
+
+      │
+
+Failure
+
+      │
+
+Retry
+
+      │
+
+Failure
+
+      ▼
+
+Circuit Opens
+
+      │
+
+30 Seconds
+
+      ▼
+
+Half Open
+
+      │
+
+Success
+
+      ▼
 
 Closed
 </code></pre>
 
 </div>
 
-<div class="callout callout-warning">
-    <span class="callout-icon">⚠️</span>
+<hr>
+
+<h2>چه زمانی از Retry استفاده کنیم؟</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>وضعیت</th>
+
+            <th>Retry</th>
+
+            <th>Circuit Breaker</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Timeout</td>
+
+            <td>✔</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Connection Lost</td>
+
+            <td>✔</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>HTTP 503</td>
+
+            <td>✔</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>HTTP 500 موقت</td>
+
+            <td>✔</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Validation Error</td>
+
+            <td>✖</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>HTTP 404</td>
+
+            <td>✖</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Unauthorized</td>
+
+            <td>✖</td>
+
+            <td>✖</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul>
+
+    <li>Retry را فقط برای خطاهای موقتی انجام دهید.</li>
+
+    <li>همیشه از Exponential Backoff استفاده کنید.</li>
+
+    <li>Retry را با Circuit Breaker ترکیب کنید.</li>
+
+    <li>برای جلوگیری از Retry Storm از Jitter استفاده کنید.</li>
+
+    <li>Timeout مناسب تعریف کنید.</li>
+
+    <li>برای عملیات‌های مالی، Idempotency را فراموش نکنید.</li>
+
+    <li>از Logging و Monitoring برای بررسی وضعیت Circuit استفاده کنید.</li>
+
+    <li>در صورت امکان، پاسخ‌های مناسب مانند Fallback یا Cached Data ارائه دهید.</li>
+
+</ul>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">🎯</span>
+
     <div class="callout-content">
 
-        Circuit Breaker از ارسال درخواست‌های بی‌فایده به سرویس‌های از کار افتاده
-        جلوگیری می‌کند و مانع ایجاد Cascading Failure در کل سیستم می‌شود.
+        Retry و Circuit Breaker از مهم‌ترین الگوهای Resilience در معماری Microservices
+        هستند. Retry خطاهای موقتی را مدیریت می‌کند و Circuit Breaker از گسترش
+        خرابی (Cascading Failure) جلوگیری می‌کند. در پروژه‌های ASP.NET Core، معمولاً
+        این دو الگو همراه با IHttpClientFactory و Polly یا راهکارهای جدید Resilience
+        Framework استفاده می‌شوند.
 
     </div>
+
 </div>
 
 <hr>
+
 
 <h2>مقایسه روش‌های استفاده از HttpClient</h2>
 
