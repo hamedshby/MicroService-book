@@ -1,0 +1,2368 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="microservices">ارتباط بین Microserviceها</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">HTTP REST</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">🌐 ارتباط همزمان (Synchronous)</div>
+
+    <h1>2.1 HTTP REST</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: ۱۴۰۵/۰۴/۱۶</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۲۰ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Article Content -->
+
+<div class="content">
+
+    <p>
+
+        بعد از آشنایی با معماری Microservices و چالش‌های سیستم‌های توزیع‌شده،
+        اولین روش ارتباط بین سرویس‌ها که باید یاد بگیریم،
+        <strong>HTTP REST</strong>
+        است.
+
+    </p>
+
+    <p>
+
+        امروزه REST پرکاربردترین روش ارتباط بین Clientها و APIها و همچنین یکی از
+        رایج‌ترین روش‌های ارتباط همزمان (Synchronous Communication) بین Microserviceها
+        است.
+
+    </p>
+
+    <p>
+
+        تقریباً تمام برنامه‌هایی که روزانه از آن‌ها استفاده می‌کنیم، از جمله
+        فروشگاه‌های اینترنتی، بانکداری آنلاین، اپلیکیشن‌های موبایل و سیستم‌های
+        سازمانی، حداقل بخشی از ارتباطات خود را از طریق REST انجام می‌دهند.
+
+    </p>
+
+    <div class="callout callout-info">
+
+        <span class="callout-icon">💡</span>
+
+        <div class="callout-content">
+
+            REST ساده‌ترین و رایج‌ترین روش ارتباط بین سرویس‌ها است، اما همیشه بهترین
+            انتخاب نیست. در فصل‌های بعد خواهیم دید که در برخی سناریوها gRPC یا Message
+            Broker گزینه مناسب‌تری هستند.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>REST چیست؟</h2>
+
+    <p>
+
+        REST مخفف عبارت
+
+        <strong>Representational State Transfer</strong>
+
+        است.
+
+    </p>
+
+    <p>
+
+        REST یک <strong>سبک معماری (Architectural Style)</strong> برای طراحی API است،
+        نه یک پروتکل و نه یک کتابخانه.
+
+    </p>
+
+    <p>
+
+        در REST معمولاً ارتباط از طریق پروتکل HTTP انجام می‌شود و منابع سیستم
+        (Resources) با استفاده از URLها در اختیار Client قرار می‌گیرند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">REST Example</span>
+            <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+        </div>
+
+        <pre><code>GET /api/products
+
+GET /api/orders/105
+
+POST /api/orders
+
+PUT /api/products/12
+
+DELETE /api/products/12</code></pre>
+
+    </div>
+
+    <div class="callout callout-success">
+
+        <span class="callout-icon">✅</span>
+
+        <div class="callout-content">
+
+            در REST هر URL معمولاً نماینده یک Resource است؛ مانند Product، Order یا Customer.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>Request / Response</h2>
+
+    <p>
+
+        REST بر پایه الگوی
+        <strong>Request / Response</strong>
+        کار می‌کند.
+
+    </p>
+
+    <p>
+
+        ابتدا Client یک درخواست (Request) برای Server ارسال می‌کند و سپس تا دریافت
+        پاسخ (Response) منتظر می‌ماند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Request / Response</span>
+        </div>
+
+        <pre><code>
+Client
+
+   │
+
+HTTP Request
+
+   ▼
+
+API
+
+   │
+
+Business Logic
+
+   │
+
+Database
+
+   ▲
+
+HTTP Response
+
+   │
+
+Client
+</code></pre>
+
+    </div>
+
+    <p>
+
+        به همین دلیل REST یک روش ارتباط
+        <strong>Synchronous</strong>
+        محسوب می‌شود؛ زیرا Client بدون دریافت پاسخ قادر به ادامه عملیات نیست.
+
+    </p>
+
+    <div class="callout callout-warning">
+
+        <span class="callout-icon">⚠️</span>
+
+        <div class="callout-content">
+
+            اگر Server پاسخ ندهد یا Timeout رخ دهد، Client نیز متوقف خواهد شد.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>ساختار HTTP Request</h2>
+
+    <p>
+
+        هر درخواست HTTP از چند بخش اصلی تشکیل شده است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">HTTP Request</span>
+            <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+        </div>
+
+        <pre><code>POST /api/orders HTTP/1.1
+
+Host: api.shop.com
+
+Authorization: Bearer eyJhb...
+
+Content-Type: application/json
+
+Accept: application/json
+
+{
+    "customerId":15,
+    "productId":22,
+    "count":2
+}</code></pre>
+
+    </div>
+
+    <h3>بخش‌های اصلی Request</h3>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>بخش</th>
+
+                <th>توضیح</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>Method</td>
+
+                <td>نوع عملیات مانند GET یا POST</td>
+
+            </tr>
+
+            <tr>
+
+                <td>URL</td>
+
+                <td>آدرس Resource</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Headers</td>
+
+                <td>اطلاعات اضافی مانند Token و Content-Type</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Body</td>
+
+                <td>داده ارسالی (معمولاً JSON)</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-info">
+
+        <span class="callout-icon">📌</span>
+
+        <div class="callout-content">
+
+            در درخواست‌های GET معمولاً Body وجود ندارد، اما در POST و PUT اغلب اطلاعات
+            در Body ارسال می‌شوند.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>ساختار HTTP Response</h2>
+
+    <p>
+
+        پس از پردازش درخواست، Server یک Response به Client ارسال می‌کند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">HTTP Response</span>
+            <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+        </div>
+
+        <pre><code>HTTP/1.1 200 OK
+
+Content-Type: application/json
+
+Content-Length: 145
+
+{
+    "id":105,
+    "status":"Success",
+    "message":"Order Created"
+}</code></pre>
+
+    </div>
+
+    <p>
+
+        پاسخ HTTP نیز از چند قسمت تشکیل شده است.
+
+    </p>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>بخش</th>
+
+                <th>توضیح</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>Status Code</td>
+
+                <td>نتیجه پردازش درخواست</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Headers</td>
+
+                <td>اطلاعات تکمیلی پاسخ</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Body</td>
+
+                <td>داده بازگشتی از Server</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Communication Flow</span>
+        </div>
+
+        <pre><code>
+Client
+
+    │
+
+POST /orders
+
+    ▼
+
+Order API
+
+    │
+
+Create Order
+
+    │
+
+200 OK
+
+    ▲
+
+Client
+</code></pre>
+
+    </div>
+
+    <hr>
+
+    <h2>مزایای REST</h2>
+
+    <ul>
+
+        <li>سادگی در طراحی و پیاده‌سازی</li>
+
+        <li>پشتیبانی توسط تمام زبان‌های برنامه‌نویسی</li>
+
+        <li>مستقل از Platform</li>
+
+        <li>قابلیت تست آسان با Postman و Swagger</li>
+
+        <li>استفاده از استاندارد HTTP</li>
+
+        <li>پشتیبانی مناسب توسط مرورگرها</li>
+
+        <li>مستندات گسترده و جامعه کاربری بزرگ</li>
+
+        <li>مناسب برای ارتباط Client با Server</li>
+
+    </ul>
+
+    <div class="callout callout-success">
+
+        <span class="callout-icon">✅</span>
+
+        <div class="callout-content">
+
+            اگر سرعت بسیار بالا یا Streaming مورد نیاز نباشد، REST معمولاً اولین انتخاب
+            برای طراحی APIهای عمومی است.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>معایب REST</h2>
+
+    <ul>
+
+        <li>Overhead بیشتر نسبت به gRPC</li>
+
+        <li>ارسال داده به صورت متنی (JSON)</li>
+
+        <li>Latency بالاتر نسبت به ارتباط‌های Binary</li>
+
+        <li>عدم پشتیبانی ذاتی از Streaming دوطرفه</li>
+
+        <li>مناسب نبودن برای ارتباط‌های بسیار پرتعداد بین سرویس‌ها</li>
+
+        <li>وابستگی به HTTP Request/Response</li>
+
+        <li>نیاز به برقراری ارتباط شبکه برای هر درخواست</li>
+
+    </ul>
+
+    <div class="callout callout-warning">
+
+        <span class="callout-icon">⚠️</span>
+
+        <div class="callout-content">
+
+            REST انتخاب بسیار خوبی برای APIهای عمومی و ارتباط با Clientها است، اما
+            برای ارتباط‌های پرتعداد بین Microserviceها معمولاً gRPC یا Message Brokerها
+            کارایی و بهره‌وری بیشتری دارند.
+
+        </div>
+
+    </div>
+
+    <div class="callout callout-info">
+
+        <span class="callout-icon">🎯</span>
+
+        <div class="callout-content">
+
+            در بخش بعد با متدهای HTTP (GET، POST، PUT، PATCH و DELETE)، مفهوم Safe و
+            Idempotent Methods و همچنین Status Codeهای مهم HTTP آشنا خواهیم شد.
+
+        </div>
+
+    </div>
+
+</div>
+
+<h2>HTTP Methods</h2>
+
+<p>
+
+    در REST، هر درخواست HTTP با یک <strong>HTTP Method</strong> آغاز می‌شود.
+    این Method مشخص می‌کند که Client قصد انجام چه عملیاتی روی یک Resource را دارد.
+
+</p>
+
+<p>
+
+    به عنوان مثال، ممکن است بخواهیم اطلاعات یک محصول را دریافت کنیم، سفارش جدیدی
+    ثبت کنیم یا اطلاعات یک مشتری را ویرایش کنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">HTTP Methods</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>GET     /api/products
+
+POST    /api/orders
+
+PUT     /api/products/15
+
+PATCH   /api/users/8
+
+DELETE  /api/products/15</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        انتخاب صحیح HTTP Method باعث خوانایی بهتر API و رعایت استاندارد REST خواهد شد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>GET</h2>
+
+<p>
+
+    متد <strong>GET</strong> برای دریافت اطلاعات استفاده می‌شود و نباید باعث تغییر
+    داده‌های سیستم شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Example</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>GET /api/products
+
+GET /api/orders/105</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        GET فقط داده را برمی‌گرداند و نباید عملیات Create، Update یا Delete انجام دهد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>POST</h2>
+
+<p>
+
+    متد <strong>POST</strong> برای ایجاد Resource جدید یا اجرای عملیاتی استفاده
+    می‌شود که باعث تغییر وضعیت سیستم خواهد شد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Example</span>
+    </div>
+
+    <pre><code>POST /api/orders
+
+{
+    "customerId":15,
+    "productId":20,
+    "count":2
+}</code></pre>
+
+</div>
+
+<p>
+
+    هر بار ارسال POST ممکن است نتیجه متفاوتی ایجاد کند.
+
+</p>
+
+<hr>
+
+<h2>PUT</h2>
+
+<p>
+
+    متد <strong>PUT</strong> برای جایگزین کردن کامل یک Resource استفاده می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Example</span>
+    </div>
+
+    <pre><code>PUT /api/products/15
+
+{
+    "name":"Laptop",
+    "price":950,
+    "stock":8
+}</code></pre>
+
+</div>
+
+<p>
+
+    در PUT معمولاً تمام اطلاعات Resource ارسال می‌شود.
+
+</p>
+
+<hr>
+
+<h2>PATCH</h2>
+
+<p>
+
+    اگر فقط بخشی از اطلاعات نیاز به تغییر داشته باشد، از
+    <strong>PATCH</strong>
+    استفاده می‌کنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Example</span>
+    </div>
+
+    <pre><code>PATCH /api/products/15
+
+{
+    "price":1100
+}</code></pre>
+
+</div>
+
+<p>
+
+    PATCH تنها فیلدهای ارسال‌شده را تغییر می‌دهد.
+
+</p>
+
+<hr>
+
+<h2>DELETE</h2>
+
+<p>
+
+    متد <strong>DELETE</strong> برای حذف یک Resource استفاده می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Example</span>
+    </div>
+
+    <pre><code>DELETE /api/products/15</code></pre>
+
+</div>
+
+<hr>
+
+<h2>مقایسه HTTP Methods</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Method</th>
+
+            <th>کاربرد</th>
+
+            <th>Body</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>GET</td>
+
+            <td>دریافت اطلاعات</td>
+
+            <td>معمولاً ندارد</td>
+
+        </tr>
+
+        <tr>
+
+            <td>POST</td>
+
+            <td>ایجاد Resource</td>
+
+            <td>دارد</td>
+
+        </tr>
+
+        <tr>
+
+            <td>PUT</td>
+
+            <td>جایگزینی کامل Resource</td>
+
+            <td>دارد</td>
+
+        </tr>
+
+        <tr>
+
+            <td>PATCH</td>
+
+            <td>ویرایش بخشی از Resource</td>
+
+            <td>دارد</td>
+
+        </tr>
+
+        <tr>
+
+            <td>DELETE</td>
+
+            <td>حذف Resource</td>
+
+            <td>معمولاً ندارد</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Safe Methods</h2>
+
+<p>
+
+    متدهای Safe هیچ تغییری در وضعیت سیستم ایجاد نمی‌کنند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Method</th>
+
+            <th>Safe؟</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>GET</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>HEAD</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>OPTIONS</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>POST</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>PUT</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>PATCH</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>DELETE</td>
+
+            <td>✖</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        Safe بودن به معنی عدم تغییر وضعیت سیستم است، نه اینکه عملیات سریع یا بدون
+        هزینه باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Idempotent Methods</h2>
+
+<p>
+
+    یک متد زمانی <strong>Idempotent</strong> است که اجرای چندباره آن، نتیجه‌ای
+    مشابه اجرای یک‌باره داشته باشد.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Method</th>
+
+            <th>Idempotent؟</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>GET</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>PUT</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>DELETE</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>HEAD</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>OPTIONS</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>PATCH</td>
+
+            <td>بستگی به پیاده‌سازی دارد</td>
+
+        </tr>
+
+        <tr>
+
+            <td>POST</td>
+
+            <td>✖</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<h3>مثال</h3>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">PUT</span>
+    </div>
+
+    <pre><code>PUT /api/products/10
+
+{
+    "price":500
+}</code></pre>
+
+</div>
+
+<p>
+
+    اگر این درخواست ده بار ارسال شود، قیمت همچنان ۵۰۰ خواهد بود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">POST</span>
+    </div>
+
+    <pre><code>POST /api/orders</code></pre>
+
+</div>
+
+<p>
+
+    اگر این درخواست ده بار ارسال شود، احتمالاً ده سفارش جدید ایجاد خواهد شد.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        در طراحی REST API، استفاده از Method مناسب نقش مهمی در جلوگیری از خطاهای
+        تکراری و Retryهای ناخواسته دارد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>HTTP Status Codes</h2>
+
+<p>
+
+    Status Code نتیجه پردازش درخواست را مشخص می‌کند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>کد</th>
+
+            <th>نام</th>
+
+            <th>توضیح</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>200</td>
+
+            <td>OK</td>
+
+            <td>درخواست با موفقیت انجام شد.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>201</td>
+
+            <td>Created</td>
+
+            <td>Resource جدید ایجاد شد.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>204</td>
+
+            <td>No Content</td>
+
+            <td>عملیات موفق بود اما داده‌ای برنمی‌گردد.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>400</td>
+
+            <td>Bad Request</td>
+
+            <td>درخواست نامعتبر است.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>401</td>
+
+            <td>Unauthorized</td>
+
+            <td>کاربر احراز هویت نشده است.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>403</td>
+
+            <td>Forbidden</td>
+
+            <td>کاربر مجوز دسترسی ندارد.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>404</td>
+
+            <td>Not Found</td>
+
+            <td>Resource پیدا نشد.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>409</td>
+
+            <td>Conflict</td>
+
+            <td>تداخل با وضعیت فعلی سیستم.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>422</td>
+
+            <td>Unprocessable Entity</td>
+
+            <td>داده معتبر است اما از نظر قوانین کسب‌وکار قابل پردازش نیست.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>500</td>
+
+            <td>Internal Server Error</td>
+
+            <td>خطای داخلی سرور.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>503</td>
+
+            <td>Service Unavailable</td>
+
+            <td>سرویس موقتاً در دسترس نیست.</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>نمونه جریان کامل یک درخواست</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">REST Flow</span>
+    </div>
+
+    <pre><code>
+Client
+
+   │
+
+POST /api/orders
+
+   ▼
+
+Order API
+
+   │
+
+Validation
+
+   │
+
+Business Logic
+
+   │
+
+Database
+
+   │
+
+201 Created
+
+   ▲
+
+Client
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul>
+
+    <li>برای دریافت اطلاعات همیشه از GET استفاده کنید.</li>
+
+    <li>برای ایجاد Resource جدید از POST استفاده کنید.</li>
+
+    <li>برای جایگزینی کامل Resource از PUT استفاده کنید.</li>
+
+    <li>برای تغییر بخشی از Resource از PATCH استفاده کنید.</li>
+
+    <li>برای حذف Resource از DELETE استفاده کنید.</li>
+
+    <li>از Status Code مناسب استفاده کنید و همیشه 200 برنگردانید.</li>
+
+    <li>پیام‌های خطا را با ساختار یکسان (مانند ProblemDetails در ASP.NET Core) برگردانید.</li>
+
+    <li>APIها را تا حد امکان Stateless طراحی کنید.</li>
+
+    <li>از URLهای مبتنی بر Resource استفاده کنید، نه نام عملیات (مانند <code>/products</code> به‌جای
+        <code>/getProducts</code>).
+    </li>
+
+    <li>برای عملیات‌های حساس که ممکن است Retry شوند، مکانیزم Idempotency را در نظر بگیرید.</li>
+
+</ul>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        انتخاب صحیح HTTP Method و Status Code باعث می‌شود API قابل پیش‌بینی‌تر،
+        استانداردتر و سازگارتر با ابزارها و Frameworkهای مختلف باشد. این موضوع در
+        طراحی Microserviceها اهمیت زیادی دارد، زیرا سرویس‌های دیگر نیز بر اساس همین
+        قراردادها با API شما تعامل خواهند کرد.
+
+    </div>
+</div>
+
+<h2>HttpClient</h2>
+
+<p>
+
+    در پروژه‌های ASP.NET Core، متداول‌ترین راه برای ارسال درخواست HTTP به سایر
+    APIها، استفاده از کلاس <strong>HttpClient</strong> است.
+
+</p>
+
+<p>
+
+    تقریباً تمام ارتباط‌های REST بین Microserviceها در .NET توسط HttpClient انجام
+    می‌شوند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Simple Example</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>var client = new HttpClient();
+
+var response = await client.GetAsync(
+    "https://api.payment.com/api/payments/10");
+
+response.EnsureSuccessStatusCode();
+
+var json = await response.Content.ReadAsStringAsync();</code></pre>
+
+</div>
+
+<p>
+
+    در نگاه اول استفاده از HttpClient بسیار ساده به نظر می‌رسد، اما استفاده
+    اشتباه از آن می‌تواند باعث مشکلات جدی در سیستم‌های Production شود.
+
+</p>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        یکی از رایج‌ترین اشتباهات برنامه‌نویسان .NET، ساختن HttpClient جدید برای هر
+        درخواست است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>چرخه عمر HttpClient</h2>
+
+<p>
+
+    هر HttpClient دارای Connection Pool مخصوص به خود است.
+
+</p>
+
+<p>
+
+    وقتی یک HttpClient ساخته می‌شود، ارتباط‌های TCP را مدیریت می‌کند و در صورت
+    امکان آن‌ها را مجدداً استفاده (Reuse) می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Connection Pool</span>
+    </div>
+
+    <pre><code>
+HttpClient
+
+      │
+
+      ▼
+
+Sockets
+
+      │
+
+      ▼
+
+Connection Pool
+
+      │
+
+      ▼
+
+Payment API
+</code></pre>
+
+</div>
+
+<p>
+
+    اگر برای هر درخواست یک HttpClient جدید ساخته شود، Connection Pool نیز
+    دوباره ساخته خواهد شد.
+
+</p>
+
+<hr>
+
+<h2>استفاده اشتباه از HttpClient</h2>
+
+<p>
+
+    کد زیر یکی از رایج‌ترین اشتباهات در پروژه‌های .NET است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Bad Practice</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>public async Task&lt;string&gt; GetProducts()
+{
+    using var client = new HttpClient();
+
+    return await client.GetStringAsync(
+        "https://api.shop.com/products");
+}</code></pre>
+
+</div>
+
+<p>
+
+    در این مثال برای هر درخواست، یک HttpClient جدید ایجاد و بلافاصله Dispose
+    می‌شود.
+
+</p>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        Dispose شدن HttpClient به معنی بسته شدن فوری Connectionهای TCP نیست و همین
+        موضوع می‌تواند باعث مشکلات شبکه شود.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Socket Exhaustion</h2>
+
+<p>
+
+    یکی از معروف‌ترین مشکلات HttpClient، خطای
+    <strong>Socket Exhaustion</strong>
+    است.
+
+</p>
+
+<p>
+
+    هر بار که HttpClient جدید ساخته می‌شود، یک یا چند Socket جدید ایجاد می‌شود.
+
+</p>
+
+<p>
+
+    پس از پایان درخواست، این Socketها بلافاصله آزاد نمی‌شوند و برای مدتی در
+    حالت <strong>TIME_WAIT</strong> باقی می‌مانند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Socket Exhaustion</span>
+    </div>
+
+    <pre><code>
+Request 1
+
+↓
+
+New HttpClient
+
+↓
+
+Socket #1
+
+↓
+
+TIME_WAIT
+
+
+────────────
+
+
+Request 2
+
+↓
+
+New HttpClient
+
+↓
+
+Socket #2
+
+↓
+
+TIME_WAIT
+
+
+────────────
+
+
+Request 5000
+
+↓
+
+No Free Socket
+
+↓
+
+Socket Exhaustion
+</code></pre>
+
+</div>
+
+<p>
+
+    اگر سیستم هزاران درخواست ارسال کند، تمام Socketهای سیستم اشغال خواهند شد.
+
+</p>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        Socket Exhaustion یکی از رایج‌ترین دلایل کاهش Performance و خطاهای ارتباطی
+        در سیستم‌های پرترافیک است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>DNS Issue</h2>
+
+<p>
+
+    فرض کنید API مقصد پشت Load Balancer قرار دارد.
+
+</p>
+
+<p>
+
+    ممکن است IP سرور تغییر کند، اما HttpClient همچنان از Connection قدیمی
+    استفاده کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">DNS Change</span>
+    </div>
+
+    <pre><code>
+Payment API
+
+Old IP
+
+10.1.1.10
+
+↓
+
+DNS Updated
+
+↓
+
+10.1.1.25
+
+↓
+
+HttpClient
+
+Still Uses
+
+10.1.1.10
+</code></pre>
+
+</div>
+
+<p>
+
+    در این شرایط ممکن است درخواست‌ها به سروری ارسال شوند که دیگر وجود ندارد.
+
+</p>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">📌</span>
+
+    <div class="callout-content">
+
+        این مشکل یکی از مهم‌ترین دلایل معرفی
+        <strong>IHttpClientFactory</strong>
+        در ASP.NET Core است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>نمونه صحیح استفاده (Singleton)</h2>
+
+<p>
+
+    در نسخه‌های قدیمی .NET پیشنهاد می‌شد که HttpClient به صورت Singleton ایجاد
+    شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Singleton</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>public class PaymentClient
+{
+    private static readonly HttpClient client =
+        new HttpClient();
+
+    public async Task&lt;string&gt; GetAsync()
+    {
+        return await client.GetStringAsync(
+            "https://api.payment.com");
+    }
+}</code></pre>
+
+</div>
+
+<p>
+
+    این روش مشکل Socket Exhaustion را تا حد زیادی برطرف می‌کند، اما همچنان
+    مشکل به‌روزرسانی DNS را حل نمی‌کند.
+
+</p>
+
+<hr>
+
+<h2>نمونه استفاده در .NET</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">GET Request</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>using var client = new HttpClient();
+
+var response = await client.GetAsync(
+    "https://api.shop.com/products");
+
+if (response.IsSuccessStatusCode)
+{
+    var json =
+        await response.Content.ReadAsStringAsync();
+
+    Console.WriteLine(json);
+}</code></pre>
+
+</div>
+
+<hr>
+
+<h2>ارسال درخواست POST</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">POST Request</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>var client = new HttpClient();
+
+var order = new
+{
+    CustomerId = 5,
+    ProductId = 12,
+    Count = 2
+};
+
+var response = await client.PostAsJsonAsync(
+    "https://api.shop.com/orders",
+    order);
+
+response.EnsureSuccessStatusCode();</code></pre>
+
+</div>
+
+<hr>
+
+<h2>ارسال Authorization Header</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Bearer Token</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>client.DefaultRequestHeaders.Authorization =
+    new AuthenticationHeaderValue(
+        "Bearer",
+        token);</code></pre>
+
+</div>
+
+<hr>
+
+<h2>مشکلات HttpClient به صورت خلاصه</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>مشکل</th>
+
+            <th>توضیح</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Socket Exhaustion</td>
+
+            <td>ایجاد HttpClient جدید برای هر درخواست</td>
+
+        </tr>
+
+        <tr>
+
+            <td>DNS Issue</td>
+
+            <td>استفاده از IP قدیمی</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Connection Leak</td>
+
+            <td>مدیریت نادرست Connectionها</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Latency</td>
+
+            <td>عدم استفاده از Connection Pool</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Performance</td>
+
+            <td>ساخت مداوم HttpClient</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul>
+
+    <li>برای هر درخواست HttpClient جدید ایجاد نکنید.</li>
+
+    <li>از <strong>IHttpClientFactory</strong> در ASP.NET Core استفاده کنید.</li>
+
+    <li>Timeout مناسب برای هر Client تنظیم کنید.</li>
+
+    <li>از <strong>CancellationToken</strong> برای لغو درخواست‌های غیرضروری استفاده کنید.</li>
+
+    <li>از <strong>EnsureSuccessStatusCode()</strong> یا بررسی Status Code استفاده کنید.</li>
+
+    <li>از Connection Pool استفاده کنید.</li>
+
+    <li>برای Retry از Polly یا IHttpClientFactory استفاده کنید، نه حلقه‌های دستی.</li>
+
+    <li>Authorization Header را فقط در صورت نیاز ارسال کنید.</li>
+
+    <li>برای جلوگیری از بن‌بست (Deadlock)، در کتابخانه‌ها از فراخوانی‌های همگام مانند <code>.Result</code> یا
+        <code>.Wait()</code> روی متدهای async خودداری کنید.
+    </li>
+
+    <li>در سرویس‌های Production، درخواست‌ها و پاسخ‌ها را با رعایت ملاحظات امنیتی لاگ کنید و از ثبت اطلاعات حساس مانند
+        Token یا رمز عبور خودداری کنید.</li>
+
+</ul>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">🎯</span>
+
+    <div class="callout-content">
+
+        اگرچه HttpClient کلاس اصلی ارسال درخواست HTTP در .NET است، اما در پروژه‌های
+        ASP.NET Core امروزی، استفاده مستقیم از آن برای بیشتر سناریوها توصیه نمی‌شود.
+        بهترین روش، استفاده از <strong>IHttpClientFactory</strong> است که مشکلات
+        Socket Exhaustion، مدیریت Connection و به‌روزرسانی DNS را به شکل استاندارد
+        حل می‌کند. در بخش بعد، IHttpClientFactory، Named Client و Typed Client را
+        به‌صورت کامل بررسی خواهیم کرد.
+
+    </div>
+
+</div>
+
+
+<h2>IHttpClientFactory</h2>
+
+<p>
+
+    از نسخه ASP.NET Core 2.1 به بعد، مایکروسافت کلاس
+    <strong>IHttpClientFactory</strong>
+    را برای مدیریت استاندارد HttpClient معرفی کرد.
+
+</p>
+
+<p>
+
+    هدف اصلی این Factory، حل مشکلاتی مانند <strong>Socket Exhaustion</strong>،
+    <strong>DNS Refresh</strong>، مدیریت Connection Pool و یکپارچه‌سازی Policyهایی
+    مانند Retry و Circuit Breaker است.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        در پروژه‌های ASP.NET Core، تقریباً همیشه استفاده از
+        <strong>IHttpClientFactory</strong>
+        به جای ساخت مستقیم HttpClient توصیه می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>معماری IHttpClientFactory</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Architecture</span>
+    </div>
+
+    <pre><code>
+Controller
+
+      │
+
+      ▼
+
+IHttpClientFactory
+
+      │
+
+      ▼
+
+HttpClient
+
+      │
+
+      ▼
+
+HttpMessageHandler Pool
+
+      │
+
+      ▼
+
+Remote API
+</code></pre>
+
+</div>
+
+<p>
+
+    IHttpClientFactory به جای ساخت مداوم Connection، از Pool داخلی
+    <strong>HttpMessageHandler</strong> استفاده می‌کند و در زمان مناسب Handlerها را
+    بازیافت (Recycle) می‌کند تا هم مشکل Socket Exhaustion برطرف شود و هم تغییرات DNS
+    اعمال شوند.
+
+</p>
+
+<hr>
+
+<h2>ثبت IHttpClientFactory</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Program.cs</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>builder.Services.AddHttpClient();</code></pre>
+
+</div>
+
+<hr>
+
+<h2>استفاده از IHttpClientFactory</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Example</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>public class ProductService
+{
+    private readonly IHttpClientFactory _factory;
+
+    public ProductService(IHttpClientFactory factory)
+    {
+        _factory = factory;
+    }
+
+    public async Task&lt;string&gt; GetProductsAsync()
+    {
+        var client = _factory.CreateClient();
+
+        return await client.GetStringAsync(
+            "https://api.shop.com/products");
+    }
+}</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Named Client</h2>
+
+<p>
+
+    اگر چند API مختلف داشته باشیم، می‌توانیم برای هر کدام یک Client با تنظیمات
+    اختصاصی ایجاد کنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Registration</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>builder.Services.AddHttpClient(
+    "Payment",
+    client =>
+    {
+        client.BaseAddress =
+            new Uri("https://payment-api.com");
+
+        client.Timeout =
+            TimeSpan.FromSeconds(10);
+    });</code></pre>
+
+</div>
+
+<p>
+
+    استفاده از Named Client:
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Usage</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>var client =
+    factory.CreateClient("Payment");
+
+var response =
+    await client.GetAsync("/api/payments");</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        Named Client زمانی مناسب است که چند سرویس مختلف با تنظیمات متفاوت (مانند
+        BaseAddress، Timeout یا Headerها) داشته باشید.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Typed Client</h2>
+
+<p>
+
+    در پروژه‌های Enterprise معمولاً منطق ارتباط با هر سرویس در یک کلاس مجزا قرار
+    می‌گیرد.
+
+</p>
+
+<p>
+
+    به این روش <strong>Typed Client</strong> گفته می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Registration</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>builder.Services.AddHttpClient&lt;
+    PaymentClient&gt;(client =>
+{
+    client.BaseAddress =
+        new Uri("https://payment-api.com");
+});</code></pre>
+
+</div>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Typed Client</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>public class PaymentClient
+{
+    private readonly HttpClient _client;
+
+    public PaymentClient(HttpClient client)
+    {
+        _client = client;
+    }
+
+    public async Task&lt;PaymentDto&gt; GetAsync(int id)
+    {
+        return await _client
+            .GetFromJsonAsync&lt;PaymentDto&gt;(
+                $"api/payments/{id}");
+    }
+}</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        Typed Client بهترین گزینه برای پروژه‌های بزرگ است، زیرا تمام منطق ارتباط با
+        یک API در یک کلاس متمرکز می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Generated Client (Refit)</h2>
+
+<p>
+
+    نوشتن کدهای تکراری برای فراخوانی APIها می‌تواند خسته‌کننده باشد.
+
+</p>
+
+<p>
+
+    کتابخانه <strong>Refit</strong> با استفاده از Interfaceها، Client مورد نیاز را
+    به صورت خودکار تولید می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Interface</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>public interface IPaymentApi
+{
+    [Get("/api/payments/{id}")]
+    Task&lt;PaymentDto&gt; GetAsync(int id);
+}</code></pre>
+
+</div>
+
+ثبت سرویس:
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Registration</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>builder.Services
+    .AddRefitClient&lt;IPaymentApi&gt;()
+    .ConfigureHttpClient(c =>
+    {
+        c.BaseAddress =
+            new Uri("https://payment-api.com");
+    });</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        Refit باعث کاهش Boilerplate Code می‌شود و نگهداری Clientها را ساده‌تر می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Polly Integration</h2>
+
+<p>
+
+    یکی از مزایای IHttpClientFactory، امکان اتصال مستقیم Policyهای
+    <strong>Polly</strong> است.
+
+</p>
+
+<p>
+
+    با Polly می‌توان رفتارهایی مانند Retry، Circuit Breaker، Timeout، Fallback و
+    Bulkhead Isolation را به سادگی به HttpClient اضافه کرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Retry Policy</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>builder.Services
+    .AddHttpClient("Payment")
+    .AddTransientHttpErrorPolicy(policy =>
+        policy.WaitAndRetryAsync(3,
+            retryAttempt =>
+                TimeSpan.FromSeconds(
+                    Math.Pow(2, retryAttempt))));</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Retry + Circuit Breaker</h2>
+
+<p>
+
+    Retry برای خطاهای موقتی مناسب است، اما اگر سرویس مقصد برای مدت طولانی در دسترس
+    نباشد، ارسال مداوم درخواست باعث افزایش بار سیستم می‌شود.
+
+</p>
+
+<p>
+
+    در چنین شرایطی از <strong>Circuit Breaker</strong> استفاده می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Circuit Breaker</span>
+    </div>
+
+    <pre><code>
+Request
+
+   │
+
+   ▼
+
+Payment API
+
+   ✖
+
+Failure
+
+   │
+
+Retry
+
+   │
+
+Failure
+
+   │
+
+Failure
+
+   ▼
+
+Circuit Opens
+
+   │
+
+No Requests
+
+   │
+
+Recovery
+
+   ▼
+
+Half Open
+
+   │
+
+Success
+
+   ▼
+
+Closed
+</code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        Circuit Breaker از ارسال درخواست‌های بی‌فایده به سرویس‌های از کار افتاده
+        جلوگیری می‌کند و مانع ایجاد Cascading Failure در کل سیستم می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>مقایسه روش‌های استفاده از HttpClient</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>روش</th>
+
+            <th>کاربرد</th>
+
+            <th>مزایا</th>
+
+            <th>پیشنهاد</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>HttpClient مستقیم</td>
+
+            <td>نمونه‌های ساده</td>
+
+            <td>سادگی</td>
+
+            <td>❌ برای Production توصیه نمی‌شود</td>
+
+        </tr>
+
+        <tr>
+
+            <td>IHttpClientFactory</td>
+
+            <td>کاربرد عمومی</td>
+
+            <td>مدیریت Connection و DNS</td>
+
+            <td>⭐⭐⭐⭐⭐</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Named Client</td>
+
+            <td>چند API مختلف</td>
+
+            <td>تنظیمات اختصاصی</td>
+
+            <td>⭐⭐⭐⭐</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Typed Client</td>
+
+            <td>پروژه‌های Enterprise</td>
+
+            <td>ساختار تمیز و قابل تست</td>
+
+            <td>⭐⭐⭐⭐⭐</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Refit</td>
+
+            <td>APIهای بزرگ</td>
+
+            <td>کاهش Boilerplate Code</td>
+
+            <td>⭐⭐⭐⭐</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul>
+
+    <li>در ASP.NET Core همیشه از <strong>IHttpClientFactory</strong> استفاده کنید.</li>
+
+    <li>برای هر سرویس خارجی یک <strong>Typed Client</strong> یا <strong>Named Client</strong> در نظر بگیرید.</li>
+
+    <li>از <strong>BaseAddress</strong> و <strong>DefaultRequestHeaders</strong> در زمان ثبت Client استفاده کنید.</li>
+
+    <li>از <strong>Polly</strong> برای Retry، Timeout و Circuit Breaker بهره ببرید.</li>
+
+    <li>Timeoutها را متناسب با نیاز هر سرویس تنظیم کنید.</li>
+
+    <li>در Retry از <strong>Exponential Backoff</strong> استفاده کنید.</li>
+
+    <li>درخواست‌ها را با <strong>CancellationToken</strong> قابل لغو طراحی کنید.</li>
+
+    <li>منطق فراخوانی API را در Controllerها قرار ندهید و آن را در Clientهای اختصاصی یا سرویس‌های لایه Infrastructure
+        متمرکز کنید.</li>
+
+</ul>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">🎯</span>
+
+    <div class="callout-content">
+
+        در پروژه‌های Enterprise مبتنی بر ASP.NET Core، ترکیب
+        <strong>IHttpClientFactory + Typed Client + Polly</strong>
+        به‌عنوان یکی از بهترین الگوهای پیاده‌سازی ارتباط‌های REST شناخته می‌شود. این
+        ترکیب علاوه بر افزایش خوانایی کد، قابلیت اطمینان، کارایی و نگهداری سیستم را
+        بهبود می‌بخشد.
+
+    </div>
+
+</div>
+
+<!-- Navigation Footer -->
+
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">HttpClient و مشکلات آن</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">2.2 gRPC Communication</div>
+        </div>
+    </a>
+
+</div>
+
+</div>
