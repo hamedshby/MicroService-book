@@ -1,0 +1,5534 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="microservices">Synchronous Communication</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">gRPC</span>
+</div>
+
+<!-- Article Header -->
+
+<div class="article-header">
+
+    <div class="article-tag">⚡ ارتباط همزمان (High Performance)</div>
+
+    <h1>2.2 gRPC</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/21</div>
+        <div class="meta-item">⏱️ زمان مطالعه: 25 دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+
+</div>
+
+<div class="divider"></div>
+
+<div class="content">
+
+    <p>
+
+        پس از آشنایی با ارتباط REST، نوبت به یکی از سریع‌ترین روش‌های ارتباط بین
+        Microserviceها می‌رسد.
+
+    </p>
+
+    <p>
+
+        <strong>gRPC</strong>
+        یک فریمورک متن‌باز برای ایجاد ارتباط
+        <strong>Remote Procedure Call (RPC)</strong>
+        است که توسط Google توسعه داده شده و امروزه یکی از محبوب‌ترین روش‌های ارتباط
+        بین سرویس‌های داخلی (Internal Services) محسوب می‌شود.
+
+    </p>
+
+    <p>
+
+        در پروژه‌های Enterprise، به‌ویژه در معماری Microservices، زمانی که سرعت،
+        کارایی و مصرف کم پهنای باند اهمیت زیادی داشته باشد، gRPC معمولاً جایگزین
+        مناسبی برای REST خواهد بود.
+
+    </p>
+
+    <div class="callout callout-info">
+
+        <span class="callout-icon">💡</span>
+
+        <div class="callout-content">
+
+            REST برای ارتباط با Browser و Mobile بسیار مناسب است، اما برای ارتباط
+            Service به Service معمولاً gRPC انتخاب بهتری محسوب می‌شود.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>gRPC چیست؟</h2>
+
+    <p>
+
+        gRPC مخفف عبارت
+
+        <strong>Google Remote Procedure Call</strong>
+
+        است.
+
+    </p>
+
+    <p>
+
+        در gRPC به جای اینکه مستقیماً با URLها و Endpointها کار کنیم، متدهای یک
+        سرویس را مانند متدهای یک کلاس فراخوانی می‌کنیم.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Concept</span>
+        </div>
+
+        <pre><code>
+Order Service
+
+      │
+
+GetPayment()
+
+      ▼
+
+Payment Service
+</code></pre>
+
+    </div>
+
+    <p>
+
+        در ظاهر، فراخوانی یک متد انجام می‌شود، اما در پشت صحنه اطلاعات از طریق شبکه
+        منتقل می‌شوند.
+
+    </p>
+
+    <div class="callout callout-success">
+
+        <span class="callout-icon">✅</span>
+
+        <div class="callout-content">
+
+            gRPC پیچیدگی ارتباط شبکه را پنهان می‌کند و ارتباط بین سرویس‌ها را شبیه
+            فراخوانی یک متد محلی (Local Method Call) نشان می‌دهد.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>چرا gRPC؟</h2>
+
+    <p>
+
+        REST تقریباً در تمام زبان‌ها و Platformها پشتیبانی می‌شود، اما استفاده از
+        JSON و HTTP/1.1 باعث ایجاد سربار (Overhead) می‌شود.
+
+    </p>
+
+    <p>
+
+        در پروژه‌هایی که هزاران درخواست بین Microserviceها رد و بدل می‌شود، این
+        سربار می‌تواند Performance سیستم را کاهش دهد.
+
+    </p>
+
+    <p>
+
+        gRPC برای حل همین مشکل طراحی شده است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">REST vs gRPC</span>
+        </div>
+
+        <pre><code>
+REST
+
+JSON
+
+↓
+
+Text
+
+↓
+
+HTTP/1.1
+
+↓
+
+Higher Latency
+
+
+
+gRPC
+
+Protocol Buffers
+
+↓
+
+Binary
+
+↓
+
+HTTP/2
+
+↓
+
+Lower Latency
+</code></pre>
+
+    </div>
+
+    <p>
+
+        به همین دلیل بسیاری از شرکت‌های بزرگ مانند Google، Netflix، Microsoft،
+        Dropbox و VMware از gRPC برای ارتباط داخلی سرویس‌های خود استفاده می‌کنند.
+
+    </p>
+
+    <hr>
+
+    <h2>HTTP/2</h2>
+
+    <p>
+
+        یکی از مهم‌ترین دلایل سرعت بالای gRPC، استفاده از
+        <strong>HTTP/2</strong>
+        است.
+
+    </p>
+
+    <p>
+
+        برخلاف REST که معمولاً روی HTTP/1.1 اجرا می‌شود، gRPC به صورت پیش‌فرض از
+        HTTP/2 استفاده می‌کند.
+
+    </p>
+
+    <div class="callout callout-info">
+
+        <span class="callout-icon">📌</span>
+
+        <div class="callout-content">
+
+            بخش بزرگی از افزایش Performance در gRPC به دلیل قابلیت‌های HTTP/2 است، نه
+            فقط استفاده از Protocol Buffers.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>Multiplexing</h2>
+
+    <p>
+
+        در HTTP/1.1 معمولاً هر Connection فقط یک درخواست را همزمان پردازش می‌کند.
+
+    </p>
+
+    <p>
+
+        در HTTP/2 چندین درخواست می‌توانند همزمان روی یک Connection ارسال شوند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">HTTP/1.1</span>
+        </div>
+
+        <pre><code>
+Connection
+
+↓
+
+Request 1
+
+↓
+
+Response
+
+↓
+
+Request 2
+
+↓
+
+Response
+
+↓
+
+Request 3
+</code></pre>
+
+    </div>
+
+    <br>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">HTTP/2 Multiplexing</span>
+        </div>
+
+        <pre><code>
+Single Connection
+
+│
+
+├── Request 1
+
+├── Request 2
+
+├── Request 3
+
+├── Request 4
+
+└── Request 5
+</code></pre>
+
+    </div>
+
+    <p>
+
+        این ویژگی باعث کاهش تعداد Connectionها و افزایش سرعت ارتباط می‌شود.
+
+    </p>
+
+    <hr>
+
+    <h2>Binary Protocol</h2>
+
+    <p>
+
+        REST معمولاً داده‌ها را به صورت JSON ارسال می‌کند که یک فرمت متنی (Text) است.
+
+    </p>
+
+    <p>
+
+        اما gRPC از
+        <strong>Protocol Buffers (Protobuf)</strong>
+        استفاده می‌کند که یک فرمت Binary است.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Comparison</span>
+        </div>
+
+        <pre><code>
+REST
+
+Object
+
+↓
+
+JSON
+
+↓
+
+Text
+
+
+
+gRPC
+
+Object
+
+↓
+
+Protobuf
+
+↓
+
+Binary
+</code></pre>
+
+    </div>
+
+    <p>
+
+        داده‌های Binary حجم بسیار کمتری دارند و سریع‌تر Serialize و Deserialize
+        می‌شوند.
+
+    </p>
+
+    <div class="callout callout-success">
+
+        <span class="callout-icon">🚀</span>
+
+        <div class="callout-content">
+
+            استفاده از Protocol Buffers باعث کاهش حجم پیام‌ها و مصرف کمتر CPU نسبت به
+            JSON می‌شود.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>Header Compression</h2>
+
+    <p>
+
+        در HTTP/1.1 هدرهای HTTP در هر درخواست به صورت کامل ارسال می‌شوند.
+
+    </p>
+
+    <p>
+
+        HTTP/2 با استفاده از الگوریتم
+        <strong>HPACK</strong>
+        هدرها را فشرده می‌کند.
+
+    </p>
+
+    <div class="code-block">
+
+        <div class="code-header">
+            <span class="code-lang">Header Compression</span>
+        </div>
+
+        <pre><code>
+HTTP/1.1
+
+Authorization
+
+Content-Type
+
+Accept
+
+Host
+
+User-Agent
+
+(Repeated Every Request)
+
+
+
+HTTP/2
+
+Compressed Headers
+
+↓
+
+HPACK
+</code></pre>
+
+    </div>
+
+    <p>
+
+        این ویژگی به ویژه در سیستم‌هایی که هزاران درخواست در ثانیه ارسال می‌کنند،
+        باعث کاهش مصرف پهنای باند می‌شود.
+
+    </p>
+
+    <hr>
+
+    <h2>Performance</h2>
+
+    <p>
+
+        ترکیب HTTP/2 و Protocol Buffers باعث می‌شود gRPC نسبت به REST عملکرد بسیار
+        بهتری داشته باشد.
+
+    </p>
+
+    <table class="table">
+
+        <thead>
+
+            <tr>
+
+                <th>ویژگی</th>
+
+                <th>REST</th>
+
+                <th>gRPC</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr>
+
+                <td>Protocol</td>
+
+                <td>HTTP/1.1</td>
+
+                <td>HTTP/2</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Data Format</td>
+
+                <td>JSON</td>
+
+                <td>Protocol Buffers</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Serialization Speed</td>
+
+                <td>متوسط</td>
+
+                <td>بسیار سریع</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Network Size</td>
+
+                <td>بیشتر</td>
+
+                <td>کمتر</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Latency</td>
+
+                <td>بیشتر</td>
+
+                <td>کمتر</td>
+
+            </tr>
+
+            <tr>
+
+                <td>Streaming</td>
+
+                <td>محدود</td>
+
+                <td>بومی (Native)</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <div class="callout callout-warning">
+
+        <span class="callout-icon">⚠️</span>
+
+        <div class="callout-content">
+
+            اگر API شما توسط مرورگر یا سرویس‌های خارجی مصرف می‌شود، REST معمولاً انتخاب
+            بهتری است. اما برای ارتباط داخلی بین Microserviceها، gRPC اغلب کارایی و
+            مصرف منابع بهتری ارائه می‌دهد.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>مزایای gRPC</h2>
+
+    <ul>
+
+        <li>سرعت بسیار بالا</li>
+
+        <li>استفاده از HTTP/2</li>
+
+        <li>حجم بسیار کم پیام‌ها</li>
+
+        <li>Serialization سریع با Protocol Buffers</li>
+
+        <li>پشتیبانی بومی از Streaming</li>
+
+        <li>Code Generation خودکار</li>
+
+        <li>Type Safety بالا</li>
+
+        <li>مناسب برای ارتباط Service to Service</li>
+
+        <li>مصرف کمتر CPU و پهنای باند نسبت به JSON</li>
+
+    </ul>
+
+    <div class="callout callout-success">
+
+        <span class="callout-icon">✅</span>
+
+        <div class="callout-content">
+
+            در معماری‌های مبتنی بر Microservices، gRPC یکی از بهترین گزینه‌ها برای
+            ارتباط‌های همزمان (Synchronous Communication) با حجم بالای درخواست است.
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2>معایب gRPC</h2>
+
+    <ul>
+
+        <li>وابستگی به HTTP/2</li>
+
+        <li>خواندن داده‌های Binary دشوارتر از JSON است.</li>
+
+        <li>تست دستی با ابزارهایی مانند مرورگر ساده نیست.</li>
+
+        <li>نیاز به فایل Proto برای تعریف قرارداد سرویس</li>
+
+        <li>یادگیری اولیه نسبت به REST پیچیده‌تر است.</li>
+
+        <li>پشتیبانی محدودتر در برخی Gatewayها و مرورگرها</li>
+
+    </ul>
+
+    <div class="callout callout-warning">
+
+        <span class="callout-icon">⚠️</span>
+
+        <div class="callout-content">
+
+            gRPC جایگزین REST نیست؛ بلکه مکمل آن است. در بسیاری از سیستم‌های Enterprise،
+            REST برای APIهای عمومی و gRPC برای ارتباط داخلی بین Microserviceها به صورت
+            همزمان استفاده می‌شوند.
+
+        </div>
+
+    </div>
+
+    <div class="callout callout-info">
+
+        <span class="callout-icon">🎯</span>
+
+        <div class="callout-content">
+
+            در بخش بعد با <strong>Protocol Buffers (Proto File)</strong> آشنا خواهیم شد و
+            خواهیم دید چگونه تنها با نوشتن یک فایل <code>.proto</code>، کلاس‌های C#،
+            Serviceها و Clientهای gRPC به صورت خودکار تولید می‌شوند.
+
+        </div>
+
+    </div>
+
+</div>
+<hr>
+
+<h2>Protocol Buffers (Proto File)</h2>
+
+<p>
+
+    قلب gRPC فایل <strong>Proto</strong> است.
+
+</p>
+
+<p>
+
+    برخلاف REST که قرارداد ارتباطی معمولاً به صورت مستندات Swagger یا OpenAPI
+    تعریف می‌شود، در gRPC تمام قرارداد ارتباطی داخل فایل
+    <code>.proto</code>
+    قرار می‌گیرد.
+
+</p>
+
+<p>
+
+    این فایل مشخص می‌کند:
+
+</p>
+
+<ul>
+
+    <li>چه Serviceهایی وجود دارند.</li>
+
+    <li>هر Service چه متدهایی دارد.</li>
+
+    <li>ورودی هر متد چیست.</li>
+
+    <li>خروجی هر متد چیست.</li>
+
+    <li>چه Enumها و Messageهایی وجود دارند.</li>
+
+</ul>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        فایل Proto قرارداد (Contract) بین Client و Server است.
+        تا زمانی که این فایل یکسان باشد، هر دو طرف بدون توجه به زبان برنامه‌نویسی
+        می‌توانند با یکدیگر ارتباط برقرار کنند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>ساختار یک فایل Proto</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">payment.proto</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>syntax = "proto3";
+
+package payment;
+
+option csharp_namespace = "Payment.Grpc";
+
+message PaymentRequest
+{
+    int32 id = 1;
+}
+
+message PaymentResponse
+{
+    int32 id = 1;
+    string status = 2;
+    double amount = 3;
+}
+
+service PaymentService
+{
+    rpc GetPayment(PaymentRequest)
+        returns (PaymentResponse);
+}</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Syntax</h2>
+
+<p>
+
+    اولین خط هر فایل Proto نسخه سینتکس را مشخص می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Syntax</span>
+    </div>
+
+    <pre><code>syntax = "proto3";</code></pre>
+
+</div>
+
+<p>
+
+    نسخه
+    <strong>proto3</strong>
+
+    نسخه استاندارد و رایج در پروژه‌های جدید gRPC است.
+
+</p>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        تقریباً تمام پروژه‌های جدید .NET از proto3 استفاده می‌کنند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Package</h2>
+
+<p>
+
+    Package فضای نام فایل Proto را مشخص می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Package</span>
+    </div>
+
+    <pre><code>package payment;</code></pre>
+
+</div>
+
+<p>
+
+    وجود Package از تداخل نام Serviceها جلوگیری می‌کند.
+
+</p>
+
+<hr>
+
+<h2>csharp_namespace</h2>
+
+<p>
+
+    این گزینه تعیین می‌کند کلاس‌های تولید شده در چه Namespaceای قرار بگیرند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Namespace</span>
+    </div>
+
+    <pre><code>option csharp_namespace =
+    "Payment.Grpc";</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Message</h2>
+
+<p>
+
+    در gRPC تمام داده‌هایی که بین Client و Server رد و بدل می‌شوند داخل
+    <strong>Message</strong>
+    قرار می‌گیرند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Message</span>
+    </div>
+
+    <pre><code>message Product
+{
+    int32 id = 1;
+
+    string name = 2;
+
+    double price = 3;
+}</code></pre>
+
+</div>
+
+<p>
+
+    هر Property دارای یک شماره یکتا است.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Field</th>
+
+            <th>شماره</th>
+
+            <th>نوع</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>id</td>
+
+            <td>1</td>
+
+            <td>int32</td>
+
+        </tr>
+
+        <tr>
+
+            <td>name</td>
+
+            <td>2</td>
+
+            <td>string</td>
+
+        </tr>
+
+        <tr>
+
+            <td>price</td>
+
+            <td>3</td>
+
+            <td>double</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        شماره Fieldها نباید بعد از انتشار API تغییر کند، زیرا بخشی از قرارداد Binary
+        بین Client و Server هستند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Data Types</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Proto Type</th>
+
+            <th>C# Type</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>int32</td>
+
+            <td>int</td>
+
+        </tr>
+
+        <tr>
+
+            <td>int64</td>
+
+            <td>long</td>
+
+        </tr>
+
+        <tr>
+
+            <td>double</td>
+
+            <td>double</td>
+
+        </tr>
+
+        <tr>
+
+            <td>float</td>
+
+            <td>float</td>
+
+        </tr>
+
+        <tr>
+
+            <td>bool</td>
+
+            <td>bool</td>
+
+        </tr>
+
+        <tr>
+
+            <td>string</td>
+
+            <td>string</td>
+
+        </tr>
+
+        <tr>
+
+            <td>bytes</td>
+
+            <td>byte[]</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Enum</h2>
+
+<p>
+
+    Enumها درست مانند C# برای نمایش مجموعه‌ای از مقادیر ثابت استفاده می‌شوند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Enum</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>enum PaymentStatus
+{
+    Pending = 0;
+
+    Success = 1;
+
+    Failed = 2;
+
+    Cancelled = 3;
+}</code></pre>
+
+</div>
+
+<p>
+
+    سپس می‌توان از آن داخل Message استفاده کرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Usage</span>
+    </div>
+
+    <pre><code>message PaymentResponse
+{
+    int32 id = 1;
+
+    PaymentStatus status = 2;
+}</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Service</h2>
+
+<p>
+
+    Service مجموعه‌ای از متدهای قابل فراخوانی را مشخص می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Service</span>
+    </div>
+
+    <pre><code>service PaymentService
+{
+    rpc GetPayment(PaymentRequest)
+        returns (PaymentResponse);
+
+    rpc CreatePayment(CreatePaymentRequest)
+        returns (CreatePaymentResponse);
+}</code></pre>
+
+</div>
+
+<p>
+
+    هر Service تقریباً معادل یک Controller در REST است.
+
+</p>
+
+<hr>
+
+<h2>RPC Method</h2>
+
+<p>
+
+    هر متد داخل Service با کلمه
+    <strong>rpc</strong>
+    تعریف می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">RPC</span>
+    </div>
+
+    <pre><code>rpc GetProduct(ProductRequest)
+
+returns(ProductResponse);</code></pre>
+
+</div>
+
+<p>
+
+    در این مثال:
+
+</p>
+
+<ul>
+
+    <li>ورودی: ProductRequest</li>
+
+    <li>خروجی: ProductResponse</li>
+
+</ul>
+
+<hr>
+
+<h2>Code Generation</h2>
+
+<p>
+
+    یکی از مهم‌ترین قابلیت‌های gRPC تولید خودکار کد است.
+
+</p>
+
+<p>
+
+    هنگام Build پروژه، فایل Proto توسط کامپایلر gRPC پردازش می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Generation Flow</span>
+    </div>
+
+    <pre><code>
+payment.proto
+
+        │
+
+        ▼
+
+gRPC Code Generator
+
+        │
+
+        ▼
+
+PaymentGrpc.cs
+
+PaymentRequest.cs
+
+PaymentResponse.cs
+
+PaymentClient.cs
+</code></pre>
+
+</div>
+
+<p>
+
+    در نتیجه دیگر نیازی نیست DTOها یا Clientها را به صورت دستی بنویسیم.
+
+</p>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">🚀</span>
+
+    <div class="callout-content">
+
+        یکی از مزایای بزرگ gRPC این است که Client و Server هر دو از یک Contract
+        مشترک استفاده می‌کنند و احتمال ناسازگاری بسیار کاهش پیدا می‌کند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>معماری Proto</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Architecture</span>
+    </div>
+
+    <pre><code>
+          payment.proto
+
+                │
+
+      ┌─────────┴─────────┐
+
+      ▼                   ▼
+
+ Server Code        Client Code
+
+      │                   │
+
+      ▼                   ▼
+
+ PaymentService     PaymentClient
+
+      │                   │
+
+      └─────────┬─────────┘
+
+                ▼
+
+           HTTP/2
+
+                ▼
+
+        Remote Service
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul>
+
+    <li>همیشه از <strong>proto3</strong> استفاده کنید.</li>
+
+    <li>شماره Fieldها را بعد از انتشار API تغییر ندهید.</li>
+
+    <li>برای حذف یک Property، شماره آن را دوباره استفاده نکنید.</li>
+
+    <li>از Messageهای کوچک و مستقل استفاده کنید.</li>
+
+    <li>برای وضعیت‌ها از Enum استفاده کنید.</li>
+
+    <li>از Package و csharp_namespace مناسب استفاده کنید.</li>
+
+    <li>Proto را به عنوان Contract مشترک بین تیم‌ها نگهداری کنید.</li>
+
+    <li>فایل‌های Proto را Version Control کنید.</li>
+
+    <li>از نام‌گذاری واضح برای Service و Messageها استفاده کنید (مانند <code>PaymentService</code> و
+        <code>PaymentRequest</code>).
+    </li>
+
+    <li>در صورت نیاز به توسعه API، Fieldهای جدید را با شماره‌های جدید اضافه کنید و از تغییر یا حذف شماره‌های موجود
+        خودداری کنید تا سازگاری با نسخه‌های قبلی حفظ شود.</li>
+
+</ul>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">🎯</span>
+
+    <div class="callout-content">
+
+        در بخش بعد با چهار مدل اصلی ارتباط در gRPC یعنی
+        <strong>Unary</strong>،
+        <strong>Server Streaming</strong>،
+        <strong>Client Streaming</strong>
+        و
+        <strong>Bidirectional Streaming</strong>
+        آشنا خواهیم شد و خواهیم دید هر کدام در چه سناریوهایی استفاده می‌شوند.
+
+    </div>
+
+</div>
+<hr>
+
+<h2>انواع ارتباط در gRPC</h2>
+
+<p>
+
+    برخلاف REST که تنها بر پایه الگوی
+    <strong>Request / Response</strong>
+    کار می‌کند، gRPC چهار مدل مختلف ارتباط را در اختیار برنامه‌نویس قرار می‌دهد.
+
+</p>
+
+<p>
+
+    این موضوع یکی از مهم‌ترین مزیت‌های gRPC نسبت به REST است، زیرا برای هر
+    سناریو می‌توان مناسب‌ترین مدل ارتباطی را انتخاب کرد.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>نوع ارتباط</th>
+
+            <th>توضیح</th>
+
+            <th>REST معادل</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Unary RPC</td>
+
+            <td>یک درخواست، یک پاسخ</td>
+
+            <td>✔ مشابه REST</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Server Streaming</td>
+
+            <td>یک درخواست، چند پاسخ</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Client Streaming</td>
+
+            <td>چند درخواست، یک پاسخ</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Bidirectional Streaming</td>
+
+            <td>چند درخواست، چند پاسخ</td>
+
+            <td>✖</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        بیشتر پروژه‌های Enterprise حدود ۸۰ تا ۹۰ درصد از ارتباطات خود را با
+        <strong>Unary RPC</strong> پیاده‌سازی می‌کنند و تنها در سناریوهای خاص از
+        Streaming استفاده می‌شود.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Unary RPC چیست؟</h2>
+
+<p>
+
+    Unary ساده‌ترین و رایج‌ترین نوع ارتباط در gRPC است.
+
+</p>
+
+<p>
+
+    در این مدل، Client یک درخواست ارسال می‌کند و Server دقیقاً یک پاسخ برمی‌گرداند.
+
+</p>
+
+<p>
+
+    از نظر نحوه استفاده، Unary بسیار شبیه REST است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Unary RPC</span>
+    </div>
+
+    <pre><code>
+Client
+
+      │
+
+      │ Request
+
+      ▼
+
+gRPC Server
+
+      │
+
+Business Logic
+
+      │
+
+Database
+
+      │
+
+Response
+
+      ▲
+
+Client
+</code></pre>
+
+</div>
+
+<p>
+
+    پس از ارسال پاسخ، ارتباط پایان پیدا می‌کند.
+
+</p>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        Unary RPC دقیقاً مانند یک فراخوانی متد در C# عمل می‌کند؛ تنها تفاوت این است
+        که متد روی یک سرویس دیگر و از طریق شبکه اجرا می‌شود.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>نحوه عملکرد Unary RPC</h2>
+
+<p>
+
+    در Unary مراحل زیر انجام می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Flow</span>
+    </div>
+
+    <pre><code>
+1.
+
+Client
+
+      │
+
+      ▼
+
+Send Request
+
+
+2.
+
+Server
+
+      │
+
+Process Request
+
+
+3.
+
+Server
+
+      │
+
+Send Response
+
+
+4.
+
+Connection Closed
+</code></pre>
+
+</div>
+
+<p>
+
+    در نتیجه، هر درخواست تنها یک پاسخ خواهد داشت.
+
+</p>
+
+<hr>
+
+<h2>Diagram</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Unary Communication</span>
+    </div>
+
+    <pre><code>
+┌──────────────┐
+
+     Client
+
+└──────┬───────┘
+
+       │
+
+ Request
+
+       │
+
+       ▼
+
+┌──────────────┐
+
+ gRPC Service
+
+└──────┬───────┘
+
+       │
+
+Business Logic
+
+       │
+
+       ▼
+
+┌──────────────┐
+
+ Database
+
+└──────┬───────┘
+
+       ▲
+
+ Response
+
+       │
+
+┌──────┴───────┐
+
+     Client
+
+└──────────────┘
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>چه زمانی از Unary استفاده کنیم؟</h2>
+
+<p>
+
+    Unary بهترین گزینه برای عملیات‌هایی است که تنها به یک پاسخ نیاز دارند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>سناریو</th>
+
+            <th>مناسب برای Unary؟</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>دریافت اطلاعات مشتری</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>دریافت محصول</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>استعلام موجودی</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>ثبت سفارش</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>محاسبه قیمت</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>ارسال لحظه‌ای قیمت سهام</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>چت آنلاین</td>
+
+            <td>✖</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">📌</span>
+
+    <div class="callout-content">
+
+        اگر پاسخ فقط یک بار ارسال می‌شود، معمولاً Unary بهترین انتخاب است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>مزایای Unary RPC</h2>
+
+<ul>
+
+    <li>ساده‌ترین مدل ارتباط در gRPC</li>
+
+    <li>پیاده‌سازی آسان</li>
+
+    <li>شباهت زیاد به REST</li>
+
+    <li>Performance بالاتر نسبت به REST</li>
+
+    <li>استفاده از HTTP/2 و Protocol Buffers</li>
+
+    <li>مناسب برای اغلب عملیات CRUD</li>
+
+    <li>Code Generation خودکار</li>
+
+    <li>Type Safety بالا</li>
+
+    <li>Latency کمتر نسبت به REST</li>
+
+</ul>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">🚀</span>
+
+    <div class="callout-content">
+
+        اگر تنها به یک Request و یک Response نیاز دارید، Unary RPC تقریباً همیشه
+        اولین انتخاب در gRPC است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>معایب Unary RPC</h2>
+
+<ul>
+
+    <li>عدم پشتیبانی از ارسال چند پاسخ</li>
+
+    <li>برای داده‌های لحظه‌ای مناسب نیست.</li>
+
+    <li>برای Live Streaming کاربرد ندارد.</li>
+
+    <li>برای انتقال حجم زیاد داده به صورت تدریجی مناسب نیست.</li>
+
+    <li>برای ارتباط‌های بلادرنگ (Real-Time) گزینه ایده‌آلی نیست.</li>
+
+</ul>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        اگر لازم است Server چندین پیام را به مرور زمان برای Client ارسال کند،
+        به جای Unary باید از <strong>Server Streaming</strong> استفاده کنید که
+        در بخش بعد بررسی خواهیم کرد.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>مثال واقعی (OrderService → PaymentService)</h2>
+
+<p>
+
+    فرض کنید در یک سیستم فروشگاهی، کاربر سفارشی را ثبت می‌کند.
+
+</p>
+
+<p>
+
+    پس از ثبت سفارش، سرویس سفارش (Order Service) باید وضعیت پرداخت را از
+    <strong>Payment Service</strong>
+    استعلام بگیرد.
+
+</p>
+
+<p>
+
+    چون تنها به یک درخواست و یک پاسخ نیاز داریم، بهترین گزینه استفاده از
+    <strong>Unary RPC</strong> است.
+
+</p>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        اگر Payment Service فقط یک نتیجه برگرداند (مانند وضعیت پرداخت)، Unary RPC
+        ساده‌ترین و سریع‌ترین انتخاب است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>سناریو</h2>
+
+<p>
+
+    مراحل انجام عملیات به صورت زیر است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Scenario</span>
+    </div>
+
+    <pre><code>
+1.
+
+Customer
+
+↓
+
+Create Order
+
+
+2.
+
+Order Service
+
+↓
+
+GetPaymentStatus()
+
+
+3.
+
+Payment Service
+
+↓
+
+Database
+
+
+4.
+
+Payment Status
+
+↓
+
+Order Service
+
+
+5.
+
+Order Completed
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Diagram</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Unary RPC Example</span>
+    </div>
+
+    <pre><code>
++-------------+
+
+ Customer
+
++------+------+
+
+
+       │
+
+Create Order
+
+       │
+
+       ▼
+
++-------------+
+
+ Order Service
+
++------+------+
+
+
+       │
+
+ Unary RPC
+
+ GetPayment()
+
+       │
+
+       ▼
+
++-------------+
+
+Payment Service
+
++------+------+
+
+
+       │
+
+Business Logic
+
+       │
+
+       ▼
+
++-------------+
+
+ Payment DB
+
++------+------+
+
+
+       ▲
+
+ PaymentResult
+
+       │
+
+       │
+
++------+------+
+
+ Order Service
+
+       │
+
+Update Order
+
+       │
+
+       ▼
+
+ Customer
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>جریان اجرای درخواست</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>مرحله</th>
+
+            <th>عملیات</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>1</td>
+
+            <td>کاربر سفارش را ثبت می‌کند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>2</td>
+
+            <td>Order Service سفارش را ذخیره می‌کند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>3</td>
+
+            <td>از طریق Unary RPC وضعیت پرداخت را از Payment Service درخواست می‌کند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>4</td>
+
+            <td>Payment Service اطلاعات را از Database می‌خواند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>5</td>
+
+            <td>نتیجه پرداخت را برمی‌گرداند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>6</td>
+
+            <td>Order Service وضعیت سفارش را به‌روزرسانی می‌کند.</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>چرا Unary بهترین انتخاب است؟</h2>
+
+<p>
+
+    در این سناریو تنها به یک پاسخ نیاز داریم.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>نیاز</th>
+
+            <th>Unary</th>
+
+            <th>Streaming</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>یک درخواست</td>
+
+            <td>✔</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>یک پاسخ</td>
+
+            <td>✔</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>سرعت بالا</td>
+
+            <td>✔</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>پیاده‌سازی ساده</td>
+
+            <td>✔</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>مصرف منابع کمتر</td>
+
+            <td>✔</td>
+
+            <td>✖</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        در عملیات‌هایی مانند دریافت اطلاعات مشتری، استعلام موجودی، بررسی وضعیت
+        پرداخت، دریافت محصول و اکثر عملیات CRUD، استفاده از Unary RPC بهترین گزینه
+        است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>چه زمانی Unary مناسب نیست؟</h2>
+
+<p>
+
+    اگر Server مجبور باشد چندین پیام را در طول زمان برای Client ارسال کند،
+    Unary دیگر انتخاب مناسبی نیست.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>سناریو</th>
+
+            <th>Unary</th>
+
+            <th>Server Streaming</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>دریافت وضعیت سفارش</td>
+
+            <td>✔</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>استعلام موجودی</td>
+
+            <td>✔</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Live Stock Price</td>
+
+            <td>✖</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>ارسال Log لحظه‌ای</td>
+
+            <td>✖</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Realtime Dashboard</td>
+
+            <td>✖</td>
+
+            <td>✔</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        اگر پاسخ‌ها به صورت مداوم و لحظه‌ای ارسال می‌شوند، به جای Unary باید از
+        <strong>Server Streaming</strong> استفاده شود.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    Unary RPC رایج‌ترین و پرکاربردترین نوع ارتباط در gRPC است و از نظر مفهومی
+    شباهت زیادی به مدل Request/Response در REST دارد؛ با این تفاوت که از
+    HTTP/2 و Protocol Buffers استفاده می‌کند و معمولاً سرعت و کارایی بالاتری
+    ارائه می‌دهد.
+
+</p>
+
+<p>
+
+    در بیشتر پروژه‌های مبتنی بر Microservices، عملیات‌هایی مانند دریافت اطلاعات،
+    استعلام وضعیت، احراز هویت، ثبت سفارش و سایر درخواست‌هایی که تنها به یک پاسخ
+    نیاز دارند، با Unary RPC پیاده‌سازی می‌شوند.
+
+</p>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">🎯</span>
+
+    <div class="callout-content">
+
+        می‌توان Unary RPC را معادل gRPC برای الگوی Request/Response در REST در نظر
+        گرفت؛ با این تفاوت که ارتباط سریع‌تر، کم‌حجم‌تر و Type-Safe است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul>
+
+    <li>برای عملیات‌های Request/Response از Unary RPC استفاده کنید.</li>
+
+    <li>از Unary برای عملیات CRUD بین Microserviceها استفاده کنید.</li>
+
+    <li>برای پیام‌های کوچک و پاسخ‌های سریع، Unary بهترین انتخاب است.</li>
+
+    <li>در صورت نیاز به ارسال مداوم داده، به جای Unary از Streaming استفاده کنید.</li>
+
+    <li>برای هر RPC، Deadline و CancellationToken تعریف کنید تا از انتظار بی‌پایان جلوگیری شود.</li>
+
+    <li>در عملیات‌هایی که ممکن است Retry شوند، منطق سرویس را Idempotent طراحی کنید.</li>
+
+    <li>خطاهای gRPC را با Status Codeهای مناسب (مانند <code>NotFound</code>، <code>InvalidArgument</code> و
+        <code>Unavailable</code>) مدیریت کنید.
+    </li>
+
+    <li>برای ارتباط Service-to-Service در شبکه داخلی، Unary RPC معمولاً انتخاب پیش‌فرض و توصیه‌شده است.</li>
+
+</ul>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">🚀</span>
+
+    <div class="callout-content">
+
+        در بخش بعد با <strong>Server Streaming RPC</strong> آشنا خواهیم شد؛ مدلی که
+        در آن Client تنها یک درخواست ارسال می‌کند، اما Server می‌تواند چندین پاسخ
+        را به‌صورت پیوسته و Real-Time برای Client ارسال کند. این مدل برای سناریوهایی
+        مانند Live Price، Monitoring، Notification و Log Streaming بسیار مناسب است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Proto File</h2>
+
+<p>
+
+    در gRPC تمام قرارداد ارتباطی (Contract) بین Client و Server داخل فایل
+    <strong>.proto</strong>
+    تعریف می‌شود.
+
+</p>
+
+<p>
+
+    این فایل مشخص می‌کند:
+
+</p>
+
+<ul>
+
+    <li>چه Serviceهایی وجود دارند.</li>
+
+    <li>هر Service چه متدهایی دارد.</li>
+
+    <li>ورودی هر متد چیست.</li>
+
+    <li>خروجی هر متد چیست.</li>
+
+    <li>کلاس‌های C# چگونه تولید شوند.</li>
+
+</ul>
+
+<p>
+
+    فرض کنید می‌خواهیم Order Service وضعیت پرداخت را از Payment Service دریافت کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">payment.proto</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>syntax = "proto3";
+
+option csharp_namespace = "Payment.Grpc";
+
+package payment;
+
+service PaymentService
+{
+    rpc GetPaymentStatus (PaymentRequest)
+        returns (PaymentResponse);
+}
+
+message PaymentRequest
+{
+    int32 orderId = 1;
+}
+
+message PaymentResponse
+{
+    int32 orderId = 1;
+
+    bool success = 2;
+
+    string transactionId = 3;
+
+    double amount = 4;
+
+    PaymentStatus status = 5;
+}
+
+enum PaymentStatus
+{
+    Pending = 0;
+
+    Success = 1;
+
+    Failed = 2;
+
+    Cancelled = 3;
+}</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        فایل Proto تنها فایل مشترک بین Client و Server است و هر دو پروژه از روی همین
+        فایل کلاس‌های موردنیاز خود را تولید می‌کنند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>توضیح Message</h2>
+
+<p>
+
+    در gRPC داده‌ها داخل Messageها منتقل می‌شوند.
+
+</p>
+
+<p>
+
+    هر Message تقریباً معادل یک DTO در ASP.NET Core است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">PaymentRequest</span>
+    </div>
+
+    <pre><code>message PaymentRequest
+{
+    int32 orderId = 1;
+}</code></pre>
+
+</div>
+
+<p>
+
+    Client تنها شناسه سفارش را ارسال می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">PaymentResponse</span>
+    </div>
+
+    <pre><code>message PaymentResponse
+{
+    int32 orderId = 1;
+
+    bool success = 2;
+
+    string transactionId = 3;
+
+    double amount = 4;
+
+    PaymentStatus status = 5;
+}</code></pre>
+
+</div>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Field</th>
+
+            <th>نوع</th>
+
+            <th>توضیح</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>orderId</td>
+
+            <td>int32</td>
+
+            <td>شناسه سفارش</td>
+
+        </tr>
+
+        <tr>
+
+            <td>success</td>
+
+            <td>bool</td>
+
+            <td>موفق بودن پرداخت</td>
+
+        </tr>
+
+        <tr>
+
+            <td>transactionId</td>
+
+            <td>string</td>
+
+            <td>شماره تراکنش</td>
+
+        </tr>
+
+        <tr>
+
+            <td>amount</td>
+
+            <td>double</td>
+
+            <td>مبلغ پرداخت</td>
+
+        </tr>
+
+        <tr>
+
+            <td>status</td>
+
+            <td>Enum</td>
+
+            <td>وضعیت پرداخت</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        شماره Fieldها (مانند =1 و =2) بخشی از قرارداد Binary هستند و پس از انتشار API
+        نباید تغییر داده شوند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Service</h2>
+
+<p>
+
+    Service مجموعه‌ای از متدهای قابل فراخوانی توسط Client را مشخص می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">PaymentService</span>
+    </div>
+
+    <pre><code>service PaymentService
+{
+    rpc GetPaymentStatus(
+        PaymentRequest)
+        returns (PaymentResponse);
+}</code></pre>
+
+</div>
+
+<p>
+
+    از دید REST می‌توان Service را تقریباً معادل یک Controller در نظر گرفت.
+
+</p>
+
+<hr>
+
+<h2>RPC Method</h2>
+
+<p>
+
+    هر متد gRPC با کلمه
+    <strong>rpc</strong>
+    تعریف می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">RPC</span>
+    </div>
+
+    <pre><code>rpc GetPaymentStatus(
+    PaymentRequest)
+
+returns (PaymentResponse);</code></pre>
+
+</div>
+
+<p>
+
+    این متد بیان می‌کند:
+
+</p>
+
+<ul>
+
+    <li>ورودی از نوع <strong>PaymentRequest</strong> است.</li>
+
+    <li>خروجی از نوع <strong>PaymentResponse</strong> خواهد بود.</li>
+
+    <li>نوع ارتباط Unary RPC است، زیرا فقط یک Request و یک Response وجود دارد.</li>
+
+</ul>
+
+<hr>
+
+<h2>Code Generation</h2>
+
+<p>
+
+    هنگام Build پروژه، فایل Proto توسط ابزار gRPC پردازش می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Build Process</span>
+    </div>
+
+    <pre><code>
+payment.proto
+
+      │
+
+      ▼
+
+Grpc.Tools
+
+      │
+
+      ▼
+
+PaymentRequest.cs
+
+PaymentResponse.cs
+
+PaymentStatus.cs
+
+PaymentServiceGrpc.cs
+</code></pre>
+
+</div>
+
+<p>
+
+    کلاس‌های تولیدشده شامل مدل‌ها، Client و کلاس پایه Service هستند.
+
+</p>
+
+<hr>
+
+<h2>پیاده‌سازی Service در ASP.NET Core</h2>
+
+<p>
+
+    پس از Build پروژه، یک کلاس پایه به نام
+    <code>PaymentService.PaymentServiceBase</code>
+    تولید می‌شود.
+
+</p>
+
+<p>
+
+    برای پیاده‌سازی Service کافی است از این کلاس ارث‌بری کنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">PaymentGrpcService.cs</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>using Grpc.Core;
+
+namespace Payment.Api.Services;
+
+public class PaymentGrpcService
+    : PaymentService.PaymentServiceBase
+{
+    public override Task&lt;PaymentResponse&gt;
+        GetPaymentStatus(
+            PaymentRequest request,
+            ServerCallContext context)
+    {
+        var response = new PaymentResponse
+        {
+            OrderId = request.OrderId,
+            Success = true,
+            TransactionId = Guid.NewGuid().ToString(),
+            Amount = 250,
+            Status = PaymentStatus.Success
+        };
+
+        return Task.FromResult(response);
+    }
+}</code></pre>
+
+</div>
+
+<p>
+
+    در این مثال:
+
+</p>
+
+<ul>
+
+    <li>Client شناسه سفارش را ارسال می‌کند.</li>
+
+    <li>Service اطلاعات پرداخت را تولید می‌کند.</li>
+
+    <li>یک شیء PaymentResponse به Client برگردانده می‌شود.</li>
+
+</ul>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        در عمل، به‌جای داده‌های نمونه، این اطلاعات معمولاً از Database یا یک سرویس
+        دامنه (Domain Service) خوانده می‌شوند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>ثبت Service در Program.cs</h2>
+
+<p>
+
+    برای اینکه gRPC درخواست‌ها را به Service موردنظر هدایت کند، باید آن را در
+    Program.cs ثبت کنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Program.cs</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddGrpc();
+
+var app = builder.Build();
+
+app.MapGrpcService&lt;PaymentGrpcService&gt;();
+
+app.MapGet("/",
+    () => "Use a gRPC client.");
+
+app.Run();</code></pre>
+
+</div>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>کد</th>
+
+            <th>توضیح</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>AddGrpc()</td>
+
+            <td>فعال‌سازی سرویس‌های gRPC در DI Container</td>
+
+        </tr>
+
+        <tr>
+
+            <td>MapGrpcService()</td>
+
+            <td>ثبت Endpoint مربوط به Service</td>
+
+        </tr>
+
+        <tr>
+
+            <td>MapGet()</td>
+
+            <td>نمایش پیام برای درخواست‌های HTTP معمولی</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Run()</td>
+
+            <td>اجرای Web Application</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">🎯</span>
+
+    <div class="callout-content">
+
+        تا این مرحله، Service سمت سرور آماده است. در بخش بعد، نحوه ایجاد
+        <strong>gRPC Client</strong> در Order Service، ثبت آن در Dependency Injection
+        و فراخوانی متد <strong>GetPaymentStatus()</strong> را بررسی خواهیم کرد.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>پیاده‌سازی gRPC Client</h2>
+
+<p>
+
+    پس از آماده شدن <strong>Payment Service</strong>، نوبت به پیاده‌سازی Client در
+    <strong>Order Service</strong> می‌رسد.
+
+</p>
+
+<p>
+
+    در gRPC، Client نیز مانند Server از روی فایل
+    <code>.proto</code>
+    به صورت خودکار تولید می‌شود.
+
+</p>
+
+<p>
+
+    به همین دلیل دیگر نیازی به نوشتن کلاس‌های ارتباطی یا Serialization به صورت
+    دستی نیست.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Build Process</span>
+    </div>
+
+    <pre><code>
+payment.proto
+
+      │
+
+      ▼
+
+Grpc.Tools
+
+      │
+
+      ▼
+
+PaymentClient
+
+PaymentRequest
+
+PaymentResponse
+</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        هر زمان فایل Proto تغییر کند، Client و Server مجدداً از روی همان Contract
+        تولید خواهند شد.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>ثبت gRPC Client در Dependency Injection</h2>
+
+<p>
+
+    ابتدا باید Client را در Program.cs ثبت کنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Program.cs</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>using Payment.Grpc;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddGrpcClient&lt;
+    PaymentService.PaymentServiceClient&gt;(options =>
+{
+    options.Address =
+        new Uri("https://localhost:7002");
+});
+
+var app = builder.Build();
+
+app.Run();</code></pre>
+
+</div>
+
+<p>
+
+    در اینجا:
+
+</p>
+
+<ul>
+
+    <li>یک Client از نوع <code>PaymentServiceClient</code> ثبت می‌شود.</li>
+
+    <li>آدرس Payment Service مشخص می‌شود.</li>
+
+    <li>از این پس Client از طریق Dependency Injection قابل دریافت است.</li>
+
+</ul>
+
+<hr>
+
+<h2>تزریق Client</h2>
+
+<p>
+
+    اکنون می‌توان Client را در هر Service یا Controller دریافت کرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Constructor Injection</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>public class OrderService
+{
+    private readonly PaymentService
+        .PaymentServiceClient _paymentClient;
+
+    public OrderService(
+        PaymentService.PaymentServiceClient
+            paymentClient)
+    {
+        _paymentClient = paymentClient;
+    }
+}</code></pre>
+
+</div>
+
+<p>
+
+    این روش مشابه تزریق HttpClient توسط Dependency Injection در ASP.NET Core است.
+
+</p>
+
+<hr>
+
+<h2>فراخوانی RPC</h2>
+
+<p>
+
+    برای فراخوانی متد کافی است شیء Request را ایجاد کرده و متد gRPC را صدا بزنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Unary Call</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>var response =
+    await _paymentClient.GetPaymentStatusAsync(
+        new PaymentRequest
+        {
+            OrderId = order.Id
+        });
+
+if (response.Success)
+{
+    order.MarkAsPaid(
+        response.TransactionId);
+}</code></pre>
+
+</div>
+
+<p>
+
+    در پشت صحنه:
+
+</p>
+
+<ul>
+
+    <li>PaymentRequest به Protocol Buffers تبدیل می‌شود.</li>
+
+    <li>از طریق HTTP/2 ارسال می‌شود.</li>
+
+    <li>Server آن را پردازش می‌کند.</li>
+
+    <li>PaymentResponse برگردانده می‌شود.</li>
+
+</ul>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        از دید برنامه‌نویس، فراخوانی gRPC تقریباً مانند فراخوانی یک متد Async در C#
+        است و جزئیات ارتباط شبکه پنهان می‌شود.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>مثال واقعی (OrderService → PaymentService)</h2>
+
+<p>
+
+    فرض کنید کاربر سفارشی را ثبت کرده است.
+
+</p>
+
+<p>
+
+    قبل از نهایی شدن سفارش باید وضعیت پرداخت بررسی شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Business Flow</span>
+    </div>
+
+    <pre><code>Customer
+
+      │
+
+Create Order
+
+      ▼
+
+Order Service
+
+      │
+
+GetPaymentStatusAsync()
+
+      ▼
+
+Payment Service
+
+      │
+
+Database
+
+      │
+
+PaymentResponse
+
+      ▲
+
+Order Service
+
+      │
+
+Update Order
+
+      ▼
+
+Customer
+</code></pre>
+
+</div>
+
+<p>
+
+    اگر مقدار
+    <code>response.Success</code>
+
+    برابر True باشد، سفارش پرداخت شده تلقی خواهد شد.
+
+</p>
+
+<hr>
+
+<h2>Diagram</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Complete Communication</span>
+    </div>
+
+    <pre><code>
++----------------+
+
+ Order Service
+
++-------+--------+
+
+        │
+
+Dependency Injection
+
+        │
+
+        ▼
+
++----------------+
+
+ PaymentClient
+
++-------+--------+
+
+        │
+
+ Unary RPC
+
+ HTTP/2
+
+        │
+
+        ▼
+
++----------------+
+
+ Payment Service
+
++-------+--------+
+
+        │
+
+ Business Logic
+
+        │
+
+        ▼
+
++----------------+
+
+ Payment Database
+
++----------------+
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>مزیت Dependency Injection</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>بدون DI</th>
+
+            <th>با DI</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>ایجاد دستی Client</td>
+
+            <td>تزریق خودکار</td>
+
+        </tr>
+
+        <tr>
+
+            <td>سخت‌تر برای تست</td>
+
+            <td>قابل Mock شدن</td>
+
+        </tr>
+
+        <tr>
+
+            <td>وابستگی زیاد</td>
+
+            <td>Loose Coupling</td>
+
+        </tr>
+
+        <tr>
+
+            <td>مدیریت دشوار</td>
+
+            <td>مدیریت مرکزی</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        ثبت Client در Dependency Injection باعث می‌شود مدیریت Connectionها، تنظیمات
+        و تست واحد (Unit Test) بسیار ساده‌تر شود.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul>
+
+    <li>Client را همیشه با <code>AddGrpcClient()</code> ثبت کنید و از ایجاد دستی Channel در هر درخواست خودداری کنید.
+    </li>
+
+    <li>آدرس سرویس را در فایل‌های پیکربندی (<code>appsettings.json</code>) نگهداری کنید، نه به‌صورت Hard Code.</li>
+
+    <li>از Dependency Injection برای دریافت Client استفاده کنید.</li>
+
+    <li>برای تمام فراخوانی‌ها <strong>CancellationToken</strong> و <strong>Deadline</strong> تعریف کنید تا درخواست‌ها
+        بی‌نهایت منتظر نمانند.</li>
+
+    <li>خطاهای gRPC را با <code>RpcException</code> مدیریت کنید و بر اساس <code>StatusCode</code> تصمیم‌گیری کنید.</li>
+
+    <li>در صورت نیاز به احراز هویت، Metadata یا Bearer Token را همراه درخواست ارسال کنید.</li>
+
+    <li>منطق فراخوانی gRPC را در لایه Infrastructure یا Clientهای اختصاصی قرار دهید و Controllerها را ساده نگه دارید.
+    </li>
+
+    <li>برای ارتباط‌های داخلی بین Microserviceها از TLS و HTTP/2 استفاده کنید.</li>
+
+    <li>برای عملیات‌هایی که ممکن است Retry شوند، منطق سرویس را Idempotent طراحی کنید.</li>
+
+</ul>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">🎯</span>
+
+    <div class="callout-content">
+
+        اکنون با پیاده‌سازی کامل یک ارتباط Unary در gRPC آشنا شدید. در بخش بعد،
+        <strong>Server Streaming</strong> را بررسی خواهیم کرد؛ مدلی که در آن Client
+        تنها یک درخواست ارسال می‌کند، اما Server می‌تواند مجموعه‌ای از پاسخ‌ها را
+        به‌صورت پیوسته و Real-Time برای Client ارسال کند.
+
+    </div>
+
+</div>
+
+
+<hr>
+
+<h2>Server Streaming چیست؟</h2>
+
+<p>
+
+    در بخش قبل با <strong>Unary RPC</strong> آشنا شدیم که در آن Client یک درخواست
+    ارسال می‌کرد و Server نیز تنها یک پاسخ برمی‌گرداند.
+
+</p>
+
+<p>
+
+    اما همیشه این مدل پاسخگوی نیاز سیستم نیست.
+
+</p>
+
+<p>
+
+    گاهی Server باید پس از دریافت یک درخواست، چندین پیام را در طول زمان برای
+    Client ارسال کند.
+
+</p>
+
+<p>
+
+    در چنین شرایطی از
+    <strong>Server Streaming RPC</strong>
+    استفاده می‌کنیم.
+
+</p>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        Server Streaming یعنی:
+
+        <strong>One Request → Multiple Responses</strong>
+
+        یعنی Client فقط یک درخواست ارسال می‌کند اما Server می‌تواند هر زمان که لازم
+        باشد چندین Response برای همان درخواست ارسال کند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>نحوه عملکرد Server Streaming</h2>
+
+<p>
+
+    در این مدل ارتباط، Connection تا پایان ارسال تمام پیام‌ها باز باقی می‌ماند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Streaming Flow</span>
+    </div>
+
+    <pre><code>
+Client
+
+      │
+
+      │ Request
+
+      ▼
+
+gRPC Server
+
+      │
+
+Response #1
+
+      ▲
+
+Response #2
+
+      ▲
+
+Response #3
+
+      ▲
+
+Response #4
+
+      ▲
+
+Response #5
+
+      ▲
+
+Connection Closed
+</code></pre>
+
+</div>
+
+<p>
+
+    همه این پاسخ‌ها مربوط به همان درخواست اولیه هستند.
+
+</p>
+
+<hr>
+
+<h2>Diagram</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Server Streaming</span>
+    </div>
+
+    <pre><code>
++---------------+
+
+     Client
+
++-------+-------+
+
+        │
+
+ One Request
+
+        │
+
+        ▼
+
++---------------+
+
+ gRPC Service
+
++-------+-------+
+
+        │
+
+ Stream
+
+        │
+
+        ├────────► Message 1
+
+        ├────────► Message 2
+
+        ├────────► Message 3
+
+        ├────────► Message 4
+
+        └────────► Message 5
+
+</code></pre>
+
+</div>
+
+<p>
+
+    برخلاف Unary، پس از اولین پاسخ ارتباط قطع نمی‌شود و Server می‌تواند تا پایان
+    عملیات پیام‌های بیشتری ارسال کند.
+
+</p>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        Connection تنها یک بار ایجاد می‌شود و تمام پیام‌ها روی همان Connection
+        ارسال می‌شوند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>چه زمانی از Server Streaming استفاده کنیم؟</h2>
+
+<p>
+
+    این مدل برای سناریوهایی مناسب است که اطلاعات به صورت تدریجی تولید می‌شوند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>سناریو</th>
+
+            <th>Server Streaming</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Live Stock Price</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Crypto Price Feed</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Notification Service</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Log Streaming</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Monitoring Dashboard</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Download Large File</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Get Customer</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Login</td>
+
+            <td>✖</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Proto File</h2>
+
+<p>
+
+    در Server Streaming، تنها تفاوت نسبت به Unary استفاده از کلمه
+    <strong>stream</strong>
+    در قسمت خروجی متد است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">price.proto</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>syntax = "proto3";
+
+option csharp_namespace = "Price.Grpc";
+
+package price;
+
+service PriceService
+{
+    rpc StreamPrices
+    (
+        PriceRequest
+    )
+    returns
+    (
+        stream PriceResponse
+    );
+}
+
+message PriceRequest
+{
+    string symbol = 1;
+}
+
+message PriceResponse
+{
+    string symbol = 1;
+
+    double price = 2;
+
+    string time = 3;
+}</code></pre>
+
+</div>
+
+<hr>
+
+<h2>توضیح Proto</h2>
+
+<p>
+
+    در نگاه اول فایل Proto بسیار شبیه Unary RPC است.
+
+</p>
+
+<p>
+
+    اما تفاوت اصلی در این قسمت قرار دارد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Streaming Response</span>
+    </div>
+
+    <pre><code>returns
+(
+    stream PriceResponse
+)</code></pre>
+
+</div>
+
+<p>
+
+    وجود کلمه
+    <strong>stream</strong>
+
+    به Generator اعلام می‌کند که این متد فقط یک Response تولید نخواهد کرد.
+
+</p>
+
+<p>
+
+    بلکه مجموعه‌ای از
+    <strong>PriceResponse</strong>
+
+    را در طول زمان برای Client ارسال خواهد کرد.
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Unary</th>
+
+            <th>Server Streaming</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>
+
+                <code>returns(ProductResponse)</code>
+
+            </td>
+
+            <td>
+
+                <code>returns(stream ProductResponse)</code>
+
+            </td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        کلمه <strong>stream</strong> فقط در سمت Response قرار گرفته است؛
+        زیرا در Server Streaming تنها Server چندین پیام ارسال می‌کند و Client فقط
+        یک درخواست دارد.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>جریان اجرای Server Streaming</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Execution Flow</span>
+    </div>
+
+    <pre><code>
+Client
+
+      │
+
+PriceRequest
+
+      ▼
+
+Price Service
+
+      │
+
+Read BTC Price
+
+      │
+
+Write Price
+
+      │
+
+Read Again
+
+      │
+
+Write Again
+
+      │
+
+Read Again
+
+      │
+
+Write Again
+
+      │
+
+...
+
+      │
+
+Finish Stream
+</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">🚀</span>
+
+    <div class="callout-content">
+
+        در بخش بعد، پیاده‌سازی کامل این Service در ASP.NET Core را خواهیم دید و با
+        کلاس <code>IServerStreamWriter&lt;T&gt;</code> آشنا می‌شویم که مسئول ارسال
+        پیام‌های متوالی به Client است.
+
+    </div>
+
+</div>
+
+
+<hr>
+
+<h2>پیاده‌سازی Server Streaming در ASP.NET Core</h2>
+
+<p>
+
+    پس از تعریف فایل
+    <code>.proto</code>
+    و Build شدن پروژه، کلاس پایه Service به صورت خودکار تولید می‌شود.
+
+</p>
+
+<p>
+
+    برای پیاده‌سازی Server Streaming کافی است از کلاس تولید شده ارث‌بری کنیم و
+    به جای برگرداندن یک شیء، پاسخ‌ها را از طریق
+    <strong>IServerStreamWriter&lt;T&gt;</strong>
+    برای Client ارسال کنیم.
+
+</p>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        در Unary مقدار Response را Return می‌کردیم، اما در Server Streaming پاسخ‌ها
+        یکی یکی توسط Server نوشته (Write) می‌شوند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>ساخت Service</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">PriceGrpcService.cs</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>using Grpc.Core;
+
+namespace Price.Api.Services;
+
+public class PriceGrpcService
+    : PriceService.PriceServiceBase
+{
+    public override async Task StreamPrices(
+        PriceRequest request,
+        IServerStreamWriter&lt;PriceResponse&gt; responseStream,
+        ServerCallContext context)
+    {
+
+    }
+}</code></pre>
+
+</div>
+
+<p>
+
+    همانند Unary، کلاس از
+    <code>PriceServiceBase</code>
+
+    ارث‌بری می‌کند.
+
+</p>
+
+<p>
+
+    اما این بار به جای خروجی
+    <code>Task&lt;PriceResponse&gt;</code>
+
+    تنها یک
+    <code>Task</code>
+
+    برگردانده می‌شود.
+
+</p>
+
+<p>
+
+    دلیل آن این است که Responseها توسط
+    <code>responseStream</code>
+
+    ارسال خواهند شد.
+
+</p>
+
+<hr>
+
+<h2>ارسال چندین پیام</h2>
+
+<p>
+
+    در مثال زیر هر ثانیه یک قیمت جدید برای Client ارسال می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Streaming Service</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>using Grpc.Core;
+
+namespace Price.Api.Services;
+
+public class PriceGrpcService
+    : PriceService.PriceServiceBase
+{
+    public override async Task StreamPrices(
+        PriceRequest request,
+        IServerStreamWriter&lt;PriceResponse&gt; responseStream,
+        ServerCallContext context)
+    {
+        var random = new Random();
+
+        for (int i = 0; i &lt; 10; i++)
+        {
+            var response = new PriceResponse
+            {
+                Symbol = request.Symbol,
+                Price = 50000 + random.NextDouble() * 1000,
+                Time = DateTime.Now.ToString("HH:mm:ss")
+            };
+
+            await responseStream.WriteAsync(response);
+
+            await Task.Delay(1000);
+        }
+    }
+}</code></pre>
+
+</div>
+
+<p>
+
+    در این مثال:
+
+</p>
+
+<ul>
+
+    <li>Client فقط یک درخواست ارسال می‌کند.</li>
+
+    <li>Server ده پیام مختلف ارسال می‌کند.</li>
+
+    <li>بین هر پیام یک ثانیه فاصله وجود دارد.</li>
+
+    <li>پس از پایان حلقه، ارتباط بسته می‌شود.</li>
+
+</ul>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        هر بار اجرای
+        <code>WriteAsync()</code>
+
+        معادل ارسال یک Response جدید برای همان Client است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>جریان اجرای Service</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Execution Flow</span>
+    </div>
+
+    <pre><code>
+Client
+
+      │
+
+PriceRequest
+
+      ▼
+
+StreamPrices()
+
+      │
+
+Loop
+
+      │
+
+WriteAsync()
+
+      │
+
+Delay
+
+      │
+
+WriteAsync()
+
+      │
+
+Delay
+
+      │
+
+WriteAsync()
+
+      │
+
+Finish
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>ثبت Service در Program.cs</h2>
+
+<p>
+
+    ثبت Server Streaming دقیقاً مشابه Unary RPC است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Program.cs</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddGrpc();
+
+var app = builder.Build();
+
+app.MapGrpcService&lt;PriceGrpcService&gt;();
+
+app.MapGet("/",
+    () => "Use a gRPC Client.");
+
+app.Run();</code></pre>
+
+</div>
+
+<p>
+
+    هیچ تنظیمات اضافه‌ای برای Streaming لازم نیست.
+
+</p>
+
+<p>
+
+    وجود متد Streaming در فایل Proto کافی است تا ASP.NET Core به صورت خودکار
+    Endpoint مناسب را ایجاد کند.
+
+</p>
+
+<hr>
+
+<h2>تفاوت Service در Unary و Streaming</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Unary</th>
+
+            <th>Server Streaming</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>
+
+                <code>Task&lt;Response&gt;</code>
+
+            </td>
+
+            <td>
+
+                <code>Task</code>
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td>
+
+                Return Response
+
+            </td>
+
+            <td>
+
+                WriteAsync(Response)
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td>
+
+                یک پاسخ
+
+            </td>
+
+            <td>
+
+                چندین پاسخ
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td>
+
+                Connection کوتاه</td>
+
+            <td>
+
+                Connection تا پایان Stream باز می‌ماند.</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        در Server Streaming هرگز از
+        <code>return response;</code>
+
+        استفاده نمی‌شود.
+
+        تمام Responseها باید توسط
+        <code>responseStream.WriteAsync()</code>
+
+        ارسال شوند.
+
+    </div>
+
+</div>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">🎯</span>
+
+    <div class="callout-content">
+
+        در بخش بعد، کلاس
+        <strong>IServerStreamWriter&lt;T&gt;</strong>
+        را به صورت کامل بررسی می‌کنیم و با نحوه ارسال پیام، مدیریت
+        CancellationToken، قطع ارتباط Client و Best Practiceهای Streaming آشنا
+        خواهیم شد.
+
+    </div>
+
+</div>
+
+
+<hr>
+
+<h2>پیاده‌سازی Server Streaming در ASP.NET Core</h2>
+
+<p>
+
+    پس از تعریف فایل
+    <code>.proto</code>
+    و Build شدن پروژه، کلاس پایه Service به صورت خودکار تولید می‌شود.
+
+</p>
+
+<p>
+
+    برای پیاده‌سازی Server Streaming کافی است از کلاس تولید شده ارث‌بری کنیم و
+    به جای برگرداندن یک شیء، پاسخ‌ها را از طریق
+    <strong>IServerStreamWriter&lt;T&gt;</strong>
+    برای Client ارسال کنیم.
+
+</p>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        در Unary مقدار Response را Return می‌کردیم، اما در Server Streaming پاسخ‌ها
+        یکی یکی توسط Server نوشته (Write) می‌شوند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>ساخت Service</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">PriceGrpcService.cs</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>using Grpc.Core;
+
+namespace Price.Api.Services;
+
+public class PriceGrpcService
+    : PriceService.PriceServiceBase
+{
+    public override async Task StreamPrices(
+        PriceRequest request,
+        IServerStreamWriter&lt;PriceResponse&gt; responseStream,
+        ServerCallContext context)
+    {
+
+    }
+}</code></pre>
+
+</div>
+
+<p>
+
+    همانند Unary، کلاس از
+    <code>PriceServiceBase</code>
+
+    ارث‌بری می‌کند.
+
+</p>
+
+<p>
+
+    اما این بار به جای خروجی
+    <code>Task&lt;PriceResponse&gt;</code>
+
+    تنها یک
+    <code>Task</code>
+
+    برگردانده می‌شود.
+
+</p>
+
+<p>
+
+    دلیل آن این است که Responseها توسط
+    <code>responseStream</code>
+
+    ارسال خواهند شد.
+
+</p>
+
+<hr>
+
+<h2>ارسال چندین پیام</h2>
+
+<p>
+
+    در مثال زیر هر ثانیه یک قیمت جدید برای Client ارسال می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Streaming Service</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>using Grpc.Core;
+
+namespace Price.Api.Services;
+
+public class PriceGrpcService
+    : PriceService.PriceServiceBase
+{
+    public override async Task StreamPrices(
+        PriceRequest request,
+        IServerStreamWriter&lt;PriceResponse&gt; responseStream,
+        ServerCallContext context)
+    {
+        var random = new Random();
+
+        for (int i = 0; i &lt; 10; i++)
+        {
+            var response = new PriceResponse
+            {
+                Symbol = request.Symbol,
+                Price = 50000 + random.NextDouble() * 1000,
+                Time = DateTime.Now.ToString("HH:mm:ss")
+            };
+
+            await responseStream.WriteAsync(response);
+
+            await Task.Delay(1000);
+        }
+    }
+}</code></pre>
+
+</div>
+
+<p>
+
+    در این مثال:
+
+</p>
+
+<ul>
+
+    <li>Client فقط یک درخواست ارسال می‌کند.</li>
+
+    <li>Server ده پیام مختلف ارسال می‌کند.</li>
+
+    <li>بین هر پیام یک ثانیه فاصله وجود دارد.</li>
+
+    <li>پس از پایان حلقه، ارتباط بسته می‌شود.</li>
+
+</ul>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        هر بار اجرای
+        <code>WriteAsync()</code>
+
+        معادل ارسال یک Response جدید برای همان Client است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>جریان اجرای Service</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Execution Flow</span>
+    </div>
+
+    <pre><code>
+Client
+
+      │
+
+PriceRequest
+
+      ▼
+
+StreamPrices()
+
+      │
+
+Loop
+
+      │
+
+WriteAsync()
+
+      │
+
+Delay
+
+      │
+
+WriteAsync()
+
+      │
+
+Delay
+
+      │
+
+WriteAsync()
+
+      │
+
+Finish
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>ثبت Service در Program.cs</h2>
+
+<p>
+
+    ثبت Server Streaming دقیقاً مشابه Unary RPC است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Program.cs</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddGrpc();
+
+var app = builder.Build();
+
+app.MapGrpcService&lt;PriceGrpcService&gt;();
+
+app.MapGet("/",
+    () => "Use a gRPC Client.");
+
+app.Run();</code></pre>
+
+</div>
+
+<p>
+
+    هیچ تنظیمات اضافه‌ای برای Streaming لازم نیست.
+
+</p>
+
+<p>
+
+    وجود متد Streaming در فایل Proto کافی است تا ASP.NET Core به صورت خودکار
+    Endpoint مناسب را ایجاد کند.
+
+</p>
+
+<hr>
+
+<h2>تفاوت Service در Unary و Streaming</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>Unary</th>
+
+            <th>Server Streaming</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>
+
+                <code>Task&lt;Response&gt;</code>
+
+            </td>
+
+            <td>
+
+                <code>Task</code>
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td>
+
+                Return Response
+
+            </td>
+
+            <td>
+
+                WriteAsync(Response)
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td>
+
+                یک پاسخ
+
+            </td>
+
+            <td>
+
+                چندین پاسخ
+
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td>
+
+                Connection کوتاه</td>
+
+            <td>
+
+                Connection تا پایان Stream باز می‌ماند.</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        در Server Streaming هرگز از
+        <code>return response;</code>
+
+        استفاده نمی‌شود.
+
+        تمام Responseها باید توسط
+        <code>responseStream.WriteAsync()</code>
+
+        ارسال شوند.
+
+    </div>
+
+</div>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">🎯</span>
+
+    <div class="callout-content">
+
+        در بخش بعد، کلاس
+        <strong>IServerStreamWriter&lt;T&gt;</strong>
+        را به صورت کامل بررسی می‌کنیم و با نحوه ارسال پیام، مدیریت
+        CancellationToken، قطع ارتباط Client و Best Practiceهای Streaming آشنا
+        خواهیم شد.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>IServerStreamWriter&lt;T&gt; چیست؟</h2>
+
+<p>
+
+    در Server Streaming، برخلاف Unary RPC که تنها یک شیء به عنوان Response
+    برگردانده می‌شود، Server باید بتواند چندین پیام را در طول زمان برای Client
+    ارسال کند.
+
+</p>
+
+<p>
+
+    به همین دلیل gRPC این قابلیت را توسط این Interface در اختیار ما قرار می‌دهد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Interface</span>
+    </div>
+
+    <pre><code>IServerStreamWriter&lt;PriceResponse&gt;</code></pre>
+
+</div>
+
+<p>
+
+    این Interface مسئول ارسال تمام پیام‌های خروجی به Client است.
+
+</p>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        می‌توان IServerStreamWriter را مانند یک کانال (Channel) تصور کرد که Server
+        از طریق آن پیام‌های متوالی را برای Client ارسال می‌کند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>ساختار متد Streaming</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Method Signature</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>public override async Task StreamPrices(
+    PriceRequest request,
+    IServerStreamWriter&lt;PriceResponse&gt;
+        responseStream,
+    ServerCallContext context)
+{
+
+}</code></pre>
+
+</div>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>پارامتر</th>
+
+            <th>توضیح</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>request</td>
+
+            <td>درخواست ارسالی Client</td>
+
+        </tr>
+
+        <tr>
+
+            <td>responseStream</td>
+
+            <td>ارسال پیام‌های Streaming</td>
+
+        </tr>
+
+        <tr>
+
+            <td>context</td>
+
+            <td>اطلاعات درخواست، Metadata و Cancellation</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>نحوه ارسال پیام‌ها</h2>
+
+<p>
+
+    برای ارسال هر پیام تنها کافی است متد
+    <strong>WriteAsync()</strong>
+    را فراخوانی کنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">WriteAsync</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>await responseStream.WriteAsync(
+    new PriceResponse
+    {
+        Symbol = "BTCUSDT",
+        Price = 64125
+    });</code></pre>
+
+</div>
+
+<p>
+
+    هر بار اجرای
+    <code>WriteAsync()</code>
+
+    معادل ارسال یک Response جدید برای همان Client است.
+
+</p>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        در Server Streaming هیچ Response نهایی وجود ندارد؛ بلکه مجموعه‌ای از
+        Responseها به ترتیب ارسال می‌شوند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>ارسال چندین پیام</h2>
+
+<p>
+
+    معمولاً ارسال پیام‌ها داخل یک حلقه انجام می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Streaming Loop</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>for (int i = 1; i &lt;= 5; i++)
+{
+    await responseStream.WriteAsync(
+        new PriceResponse
+        {
+            Symbol = "BTCUSDT",
+            Price = 65000 + i
+        });
+
+    await Task.Delay(1000);
+}</code></pre>
+
+</div>
+
+<p>
+
+    در این مثال هر ثانیه یک پیام جدید برای Client ارسال می‌شود.
+
+</p>
+
+<hr>
+
+<h2>حلقه WriteAsync چگونه کار می‌کند؟</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Streaming Flow</span>
+    </div>
+
+    <pre><code>
+Loop
+
+ │
+
+ ▼
+
+Create Response
+
+ │
+
+ ▼
+
+WriteAsync()
+
+ │
+
+ ▼
+
+Client Receives
+
+ │
+
+ ▼
+
+Delay
+
+ │
+
+ ▼
+
+Next Response
+</code></pre>
+
+</div>
+
+<p>
+
+    تا زمانی که حلقه ادامه دارد، Connection نیز باز باقی می‌ماند.
+
+</p>
+
+<hr>
+
+<h2>مدیریت CancellationToken</h2>
+
+<p>
+
+    ممکن است Client قبل از پایان Stream ارتباط را قطع کند.
+
+</p>
+
+<p>
+
+    در این حالت Server نباید همچنان به تولید پیام ادامه دهد.
+
+</p>
+
+<p>
+
+    اطلاعات مربوط به لغو درخواست از طریق
+    <code>ServerCallContext</code>
+
+    در دسترس است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Cancellation</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>while (!context.CancellationToken
+    .IsCancellationRequested)
+{
+    await responseStream.WriteAsync(
+        new PriceResponse
+        {
+            Symbol = "BTCUSDT",
+            Price = GetPrice()
+        });
+
+    await Task.Delay(
+        1000,
+        context.CancellationToken);
+}</code></pre>
+
+</div>
+
+<p>
+
+    به محض اینکه Client ارتباط را قطع کند، مقدار
+
+    <code>IsCancellationRequested</code>
+
+    برابر
+    <strong>true</strong>
+
+    خواهد شد.
+
+</p>
+
+<div class="callout callout-warning">
+
+    <span class="callout-icon">⚠️</span>
+
+    <div class="callout-content">
+
+        همیشه CancellationToken را بررسی کنید؛ در غیر این صورت ممکن است Server
+        بیهوده به تولید داده ادامه دهد و منابع سیستم هدر بروند.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>جریان کامل Server Streaming</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Execution Diagram</span>
+    </div>
+
+    <pre><code>
+Client
+
+      │
+
+PriceRequest
+
+      ▼
+
+Price Service
+
+      │
+
+while(...)
+
+      │
+
+WriteAsync()
+
+      │
+
+────────────► Client
+
+      │
+
+Delay
+
+      │
+
+WriteAsync()
+
+      │
+
+────────────► Client
+
+      │
+
+Delay
+
+      │
+
+WriteAsync()
+
+      │
+
+────────────► Client
+
+      │
+
+Cancellation?
+
+      │
+
+Yes
+
+      ▼
+
+Connection Closed
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>خطا هنگام ارسال پیام</h2>
+
+<p>
+
+    در صورتی که هنگام ارسال پیام خطایی رخ دهد یا Client ارتباط را قطع کند،
+    ممکن است متد
+    <code>WriteAsync()</code>
+
+    استثناء ایجاد کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Error Handling</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>try
+{
+    await responseStream.WriteAsync(response);
+}
+catch (RpcException)
+{
+    // Client disconnected
+}</code></pre>
+
+</div>
+
+<p>
+
+    در پروژه‌های واقعی بهتر است این خطاها ثبت (Log) شوند تا بتوان وضعیت ارتباط
+    Clientها را بررسی کرد.
+
+</p>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul>
+
+    <li>برای ارسال هر پیام از <strong>WriteAsync()</strong> استفاده کنید.</li>
+
+    <li>هرگز از <code>return response</code> در Server Streaming استفاده نکنید.</li>
+
+    <li>همیشه <code>context.CancellationToken</code> را بررسی کنید.</li>
+
+    <li>از <code>await</code> برای تمام فراخوانی‌های <code>WriteAsync()</code> استفاده کنید.</li>
+
+    <li>در صورت ارسال داده‌های حجیم، بین پیام‌ها فاصله منطقی ایجاد کنید تا از فشار بیش از حد بر Client و شبکه جلوگیری
+        شود.</li>
+
+    <li>منابعی مانند Connectionهای پایگاه داده یا فایل‌ها را پس از پایان Stream آزاد کنید.</li>
+
+    <li>خطاهای ناشی از قطع ارتباط Client را مدیریت و ثبت (Logging) کنید.</li>
+
+    <li>برای Streamهای طولانی، از Deadline و Timeout مناسب استفاده کنید.</li>
+
+    <li>در صورت نیاز به ارسال حجم بسیار زیاد داده، Paging یا Batch کردن پیام‌ها را در نظر بگیرید.</li>
+
+</ul>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">🚀</span>
+
+    <div class="callout-content">
+
+        <strong>IServerStreamWriter&lt;T&gt;</strong> مهم‌ترین جزء Server Streaming است.
+        این Interface امکان ارسال تدریجی و Real-Time داده‌ها را فراهم می‌کند و به
+        Server اجازه می‌دهد تا زمانی که ارتباط برقرار است، هر تعداد پیام را بدون
+        ایجاد درخواست جدید برای Client ارسال کند.
+
+    </div>
+
+</div>
+
+
+<hr>
+
+<h2>پیاده‌سازی Client در ASP.NET Core</h2>
+
+<p>
+
+    در Server Streaming، سمت Client برخلاف Unary تنها یک Response دریافت نمی‌کند.
+
+</p>
+
+<p>
+
+    پس از ارسال Request، یک Stream از پیام‌ها دریافت می‌شود که باید به صورت
+    تدریجی خوانده شوند.
+
+</p>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">💡</span>
+
+    <div class="callout-content">
+
+        در Unary از
+        <code>await client.GetSomethingAsync()</code>
+
+        استفاده می‌کردیم، اما در Server Streaming باید پیام‌ها را یکی یکی از Stream
+        بخوانیم.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>ثبت Client در Dependency Injection</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Program.cs</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>builder.Services
+    .AddGrpcClient&lt;
+        PriceService.PriceServiceClient&gt;(options =>
+{
+    options.Address =
+        new Uri("https://localhost:7002");
+});</code></pre>
+
+</div>
+
+<hr>
+
+<h2>خواندن Stream</h2>
+
+<p>
+
+    پس از ارسال درخواست، متد Streaming یک
+    <code>AsyncServerStreamingCall&lt;T&gt;</code>
+
+    برمی‌گرداند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Client</span>
+        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+    </div>
+
+    <pre><code>public class PriceClient
+{
+    private readonly PriceService
+        .PriceServiceClient _client;
+
+    public PriceClient(
+        PriceService.PriceServiceClient client)
+    {
+        _client = client;
+    }
+
+    public async Task StreamPrices()
+    {
+        using var call =
+            _client.StreamPrices(
+                new PriceRequest
+                {
+                    Symbol = "BTCUSDT"
+                });
+
+        await foreach (var item in
+            call.ResponseStream.ReadAllAsync())
+        {
+            Console.WriteLine(
+                $"{item.Symbol} : {item.Price}");
+        }
+    }
+}</code></pre>
+
+</div>
+
+<p>
+
+    به محض اینکه Server یک پیام جدید ارسال کند، حلقه
+    <code>await foreach</code>
+
+    آن را دریافت خواهد کرد.
+
+</p>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">✅</span>
+
+    <div class="callout-content">
+
+        Client منتظر پایان Stream نمی‌ماند؛ هر پیام بلافاصله پس از ارسال توسط Server
+        قابل پردازش است.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>مثال واقعی (Stock Price Service)</h2>
+
+<p>
+
+    فرض کنید یک سرویس قیمت ارزهای دیجیتال داریم.
+
+</p>
+
+<p>
+
+    کاربر فقط یک بار درخواست قیمت بیت‌کوین را ارسال می‌کند.
+
+</p>
+
+<p>
+
+    اما Server هر ثانیه قیمت جدید را ارسال می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Business Flow</span>
+    </div>
+
+    <pre><code>
+Trader
+
+      │
+
+Request BTC Price
+
+      ▼
+
+Price Service
+
+      │
+
+Read Exchange
+
+      │
+
+Price #1
+
+      │
+
+Price #2
+
+      │
+
+Price #3
+
+      │
+
+Price #4
+
+      │
+
+Price #5
+
+      ▼
+
+Trader Dashboard
+</code></pre>
+
+</div>
+
+<p>
+
+    در این سناریو هیچ نیازی نیست Client هر ثانیه درخواست جدید ارسال کند.
+
+</p>
+
+<hr>
+
+<h2>Diagram</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Complete Streaming</span>
+    </div>
+
+    <pre><code>
++---------------+
+
+ Trader
+
++-------+-------+
+
+        │
+
+Request
+
+        │
+
+        ▼
+
++---------------+
+
+ Price Service
+
++-------+-------+
+
+        │
+
+Get New Price
+
+        │
+
+────────────► Price #1
+
+────────────► Price #2
+
+────────────► Price #3
+
+────────────► Price #4
+
+────────────► Price #5
+
+        │
+
+Connection Closed
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>سناریوی دیگر (Order → Notification)</h2>
+
+<p>
+
+    نمونه دیگر، سیستم اعلان سفارش است.
+
+</p>
+
+<p>
+
+    Order Service تنها یک درخواست برای دنبال کردن وضعیت سفارش ارسال می‌کند.
+
+</p>
+
+<p>
+
+    Notification Service هر زمان وضعیت سفارش تغییر کند، پیام جدیدی ارسال می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Notification Flow</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+        │
+
+Watch Order
+
+        ▼
+
+Notification Service
+
+        │
+
+Order Created
+
+────────────►
+
+Payment Success
+
+────────────►
+
+Packed
+
+────────────►
+
+Sent
+
+────────────►
+
+Delivered
+</code></pre>
+
+</div>
+
+<p>
+
+    در این مدل، Client نیازی به Poll کردن مداوم سرور ندارد.
+
+</p>
+
+<hr>
+
+<h2>مقایسه با Unary RPC</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>ویژگی</th>
+
+            <th>Unary</th>
+
+            <th>Server Streaming</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Request</td>
+
+            <td>1</td>
+
+            <td>1</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Response</td>
+
+            <td>1</td>
+
+            <td>چندین Response</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Connection</td>
+
+            <td>کوتاه</td>
+
+            <td>تا پایان Stream باز می‌ماند</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Realtime</td>
+
+            <td>✖</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>CRUD</td>
+
+            <td>✔</td>
+
+            <td>✖</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Notification</td>
+
+            <td>✖</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Live Price</td>
+
+            <td>✖</td>
+
+            <td>✔</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Monitoring</td>
+
+            <td>✖</td>
+
+            <td>✔</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">📌</span>
+
+    <div class="callout-content">
+
+        اگر تنها به یک پاسخ نیاز دارید، Unary ساده‌تر و مناسب‌تر است؛ اما اگر داده‌ها
+        به مرور زمان تولید می‌شوند، Server Streaming انتخاب بهتری خواهد بود.
+
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Best Practices</h2>
+
+<ul>
+
+    <li>از <code>await foreach</code> برای خواندن Stream استفاده کنید.</li>
+
+    <li>همیشه شیء <code>AsyncServerStreamingCall</code> را با <code>using</code> یا <code>await using</code> مدیریت کنید
+        تا منابع آزاد شوند.</li>
+
+    <li>در صورت امکان از <strong>CancellationToken</strong> برای توقف دریافت Stream استفاده کنید.</li>
+
+    <li>منطق پردازش هر پیام را سبک نگه دارید تا دریافت پیام‌های بعدی به تأخیر نیفتد.</li>
+
+    <li>در Streamهای طولانی، خطاهای شبکه و <code>RpcException</code> را مدیریت کنید.</li>
+
+    <li>برای داده‌های لحظه‌ای مانند قیمت سهام، لاگ‌ها، اعلان‌ها و Monitoring از Server Streaming استفاده کنید.</li>
+
+    <li>اگر فقط به یک پاسخ نیاز دارید، از Unary RPC استفاده کنید تا پیچیدگی سیستم کاهش یابد.</li>
+
+    <li>در ارتباط‌های طولانی‌مدت، Timeout و Deadline مناسب تعریف کنید تا در صورت قطع ارتباط یا بروز خطا، منابع سیستم
+        آزاد شوند.</li>
+
+</ul>
+
+<div class="callout callout-success">
+
+    <span class="callout-icon">🚀</span>
+
+    <div class="callout-content">
+
+        Server Streaming یکی از قدرتمندترین قابلیت‌های gRPC است و امکان ارسال داده‌های
+        Real-Time را تنها با یک Request فراهم می‌کند. این الگو برای سناریوهایی مانند
+        Live Price، Notification، Monitoring، Log Streaming و Telemetry بسیار مناسب
+        است و جایگزینی کارآمد برای Polling مداوم یا درخواست‌های تکراری REST به شمار
+        می‌رود.
+
+    </div>
+
+</div>
+
+<div class="callout callout-info">
+
+    <span class="callout-icon">🎯</span>
+
+    <div class="callout-content">
+
+        در بخش بعد با <strong>Client Streaming RPC</strong> آشنا می‌شویم؛ مدلی که در
+        آن Client می‌تواند چندین پیام را برای Server ارسال کند و در پایان تنها یک
+        پاسخ دریافت نماید. این الگو برای سناریوهایی مانند آپلود فایل، ارسال Batch
+        داده‌ها و Import اطلاعات بسیار کاربردی است.
+
+    </div>
+
+</div>
