@@ -1,0 +1,645 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="microservices">ارتباط بین Microserviceها</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">مشکلات ارتباط Sync</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">🔗 ارتباط بین سرویس‌ها</div>
+
+    <h1>مشکلات ارتباط Synchronous</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/24</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۱۵ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+
+<p>
+
+    ارتباط‌های Synchronous مانند REST و gRPC بسیار ساده، قابل فهم و مناسب بسیاری
+    از سناریوها هستند؛ اما هرچه تعداد Microserviceها افزایش پیدا کند، مشکلات این
+    نوع ارتباط نیز بیشتر نمایان می‌شود.
+
+</p>
+
+<p>
+
+    از آنجا که سرویس درخواست‌دهنده باید تا پایان اجرای سرویس مقصد منتظر بماند،
+    هرگونه مشکل در شبکه یا سرویس مقصد مستقیماً روی سرویس درخواست‌دهنده نیز
+    تأثیر خواهد گذاشت.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        در معماری Microservices نباید تمام ارتباط‌ها را به صورت Sync طراحی کرد؛ زیرا
+        وابستگی بین سرویس‌ها به مرور زمان افزایش پیدا می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Tight Coupling</h2>
+
+<p>
+
+    یکی از مهم‌ترین مشکلات ارتباط Sync، ایجاد
+    <strong>Tight Coupling</strong>
+    بین سرویس‌ها است.
+
+</p>
+
+<p>
+
+    در این حالت، سرویس درخواست‌دهنده برای انجام عملیات خود مستقیماً به سرویس
+    دیگری وابسته است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Tight Coupling</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+REST
+
+      ▼
+
+Payment Service
+
+      │
+
+REST
+
+      ▼
+
+Inventory Service
+
+      │
+
+REST
+
+      ▼
+
+Notification Service
+</code></pre>
+
+</div>
+
+<p>
+
+    اکنون اگر سرویس Payment از دسترس خارج شود، Order نیز قادر به ادامه پردازش
+    نخواهد بود.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        هرچه تعداد وابستگی‌های مستقیم بیشتر شود، توسعه، تست و استقرار سیستم نیز
+        دشوارتر خواهد شد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Timeout</h2>
+
+<p>
+
+    در ارتباط‌های Sync، سرویس درخواست‌دهنده مدت مشخصی منتظر پاسخ می‌ماند.
+
+</p>
+
+<p>
+
+    اگر پاسخ در زمان تعیین‌شده دریافت نشود، ارتباط با خطای
+    <strong>Timeout</strong>
+    پایان می‌یابد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Timeout</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+      ▼
+
+Payment Service
+
+      │
+
+Processing...
+
+      │
+
+      │
+
+      ▼
+
+Timeout
+</code></pre>
+
+</div>
+
+<p>
+
+    مشکل اصلی این است که Timeout همیشه به معنی شکست عملیات نیست.
+
+</p>
+
+<p>
+
+    ممکن است Payment عملیات را با موفقیت انجام داده باشد اما پاسخ آن به دلیل
+    مشکل شبکه یا کندی سرویس به Order نرسیده باشد.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        پس از Timeout نباید بدون بررسی، همان عملیات را دوباره اجرا کرد؛ زیرا ممکن
+        است عملیات قبلاً انجام شده باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Retry</h2>
+
+<p>
+
+    برای مقابله با خطاهای موقتی، معمولاً از Retry استفاده می‌شود.
+
+</p>
+
+<p>
+
+    در این روش، در صورت شکست درخواست، همان درخواست مجدداً ارسال می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Retry</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+REST
+
+      ▼
+
+Payment
+
+Timeout
+
+      ▲
+
+Retry
+
+      │
+
+REST
+
+      ▼
+
+Payment
+
+Success
+</code></pre>
+
+</div>
+
+<p>
+
+    Retry برای خطاهای موقتی مانند Timeout یا Connection Reset بسیار مفید است،
+    اما اگر بدون محدودیت انجام شود می‌تواند باعث ایجاد فشار مضاعف روی سرویس
+    مقصد شود.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        در ASP.NET Core معمولاً از Polly یا قابلیت Retry در HttpClientFactory
+        برای پیاده‌سازی Retry استفاده می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Circuit Breaker</h2>
+
+<p>
+
+    اگر یک سرویس چندین بار متوالی با خطا مواجه شود، ادامه ارسال درخواست‌ها تنها
+    باعث افزایش بار سیستم خواهد شد.
+
+</p>
+
+<p>
+
+    الگوی
+    <strong>Circuit Breaker</strong>
+    پس از تعداد مشخصی خطا، ارتباط با سرویس مقصد را موقتاً قطع می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Circuit Breaker</span>
+    </div>
+
+    <pre><code>
+Request
+
+   │
+
+   ▼
+
+Payment
+
+   ✖
+
+Failure
+
+Failure
+
+Failure
+
+────────────
+
+Circuit Open
+
+────────────
+
+New Requests
+
+Rejected Immediately
+</code></pre>
+
+</div>
+
+<p>
+
+    پس از گذشت مدت مشخصی، Circuit Breaker چند درخواست آزمایشی ارسال می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Half Open</span>
+    </div>
+
+    <pre><code>
+Circuit Open
+
+      │
+
+Wait
+
+      │
+
+Half Open
+
+      │
+
+Test Request
+
+      │
+
+Success
+
+      ▼
+
+Circuit Closed
+</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        Circuit Breaker از ارسال هزاران درخواست بی‌نتیجه به سرویس معیوب جلوگیری
+        می‌کند و فرصت بازیابی را در اختیار آن قرار می‌دهد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Cascading Failure</h2>
+
+<p>
+
+    یکی از خطرناک‌ترین مشکلات ارتباط‌های Sync،
+    <strong>Cascading Failure</strong>
+    است.
+
+</p>
+
+<p>
+
+    در این حالت، خرابی یک سرویس باعث از کار افتادن زنجیره‌ای سایر سرویس‌ها
+    می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Cascade Failure</span>
+    </div>
+
+    <pre><code>
+Gateway
+
+   │
+
+   ▼
+
+Order Service
+
+   │
+
+   ▼
+
+Payment Service
+
+   ✖
+
+Timeout
+
+   ▲
+
+Order Waiting
+
+   ▲
+
+Gateway Waiting
+
+   ▲
+
+Client Waiting
+</code></pre>
+
+</div>
+
+<p>
+
+    اکنون تمام Threadها یا Connectionهای سرویس Order منتظر پاسخ Payment هستند.
+
+</p>
+
+<p>
+
+    پس از مدتی تعداد زیادی درخواست در صف انتظار قرار می‌گیرند و Order نیز دیگر
+    قادر به پاسخگویی نخواهد بود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Domino Effect</span>
+    </div>
+
+    <pre><code>
+Payment Down
+
+      │
+
+      ▼
+
+Order Waiting
+
+      │
+
+      ▼
+
+Gateway Waiting
+
+      │
+
+      ▼
+
+Clients Timeout
+
+      │
+
+      ▼
+
+Entire System Slows Down
+</code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        بسیاری از قطعی‌های بزرگ سیستم‌های Enterprise نه به دلیل خرابی یک سرویس،
+        بلکه به دلیل Cascading Failure رخ می‌دهند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>راهکارهای کاهش مشکلات ارتباط Sync</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>مشکل</th>
+
+            <th>راهکار</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Tight Coupling</td>
+
+            <td>استفاده از Event Driven و Message Broker</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Timeout</td>
+
+            <td>تنظیم Timeout مناسب و Retry محدود</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Retry Storm</td>
+
+            <td>Exponential Backoff + Jitter</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Cascading Failure</td>
+
+            <td>Circuit Breaker + Bulkhead</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Slow Service</td>
+
+            <td>Cache یا Asynchronous Processing</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>چه زمانی ارتباط Sync مناسب است؟</h2>
+
+<ul>
+
+    <li>دریافت پاسخ فوری از کاربر موردنیاز است.</li>
+
+    <li>عملیات کوتاه و سریع است.</li>
+
+    <li>وابستگی بین سرویس‌ها کم است.</li>
+
+    <li>عدم موفقیت عملیات باید همان لحظه به کاربر اعلام شود.</li>
+
+</ul>
+
+<h2>چه زمانی باید از Async استفاده کنیم؟</h2>
+
+<ul>
+
+    <li>ارسال ایمیل</li>
+
+    <li>ارسال پیامک</li>
+
+    <li>ثبت لاگ</li>
+
+    <li>گزارش‌گیری</li>
+
+    <li>اعلان (Notification)</li>
+
+    <li>همگام‌سازی داده‌ها</li>
+
+    <li>پردازش‌های زمان‌بر</li>
+
+</ul>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        یک سیستم موفق معمولاً ترکیبی از ارتباط‌های Sync و Async است. عملیات‌های
+        بلادرنگ (Real-time) با REST یا gRPC انجام می‌شوند و پردازش‌های غیرضروری برای
+        مسیر اصلی درخواست، از طریق Message Brokerها مانند RabbitMQ یا Kafka به‌صورت
+        Asynchronous انجام می‌شوند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    ارتباط‌های Synchronous ساده و قدرتمند هستند، اما استفاده بیش از حد از آن‌ها
+    باعث افزایش وابستگی، کاهش تحمل خطا و ایجاد مشکلاتی مانند Timeout و Cascading
+    Failure می‌شود. طراحی مناسب معماری معمولاً به این صورت است که فقط عملیات‌های
+    نیازمند پاسخ فوری به صورت Sync انجام شوند و سایر عملیات‌ها به کمک Message
+    Brokerها به صورت Async پردازش شوند.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        در فصل بعد وارد دنیای ارتباط‌های Asynchronous خواهیم شد و با Message Broker،
+        Queue، Exchange، Publisher، Consumer و تفاوت Message Queue و Publish/Subscribe
+        آشنا می‌شویم.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">REST و gRPC</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">3.1 معرفی Message Brokerها</div>
+        </div>
+    </a>
+
+</div>
+
+</div>
