@@ -1,0 +1,2462 @@
+<!-- Breadcrumb -->
+
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="microservices">ارتباط بین Microserviceها</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">GraphQL</span>
+</div>
+
+<!-- Article Header -->
+
+<div class="article-header">
+    <div class="article-tag">🔗 ارتباط بین سرویس‌ها</div>
+
+    ```
+    <h1>آشنایی با GraphQL</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/25</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۲۰ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+    ```
+
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    ```
+    GraphQL یک زبان Query و یک Runtime برای طراحی و پیاده‌سازی API است که به
+    Client اجازه می‌دهد دقیقاً مشخص کند چه داده‌هایی را نیاز دارد.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    برخلاف REST که معمولاً برای هر Resource یک یا چند Endpoint در نظر گرفته
+    می‌شود، در GraphQL بیشتر درخواست‌ها از طریق یک Endpoint واحد ارسال می‌شوند.
+    ```
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        ```
+        هدف اصلی GraphQL این است که Client فقط داده‌های موردنیاز خود را دریافت
+        کند و کنترل بیشتری روی ساختار Response داشته باشد.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>چرا GraphQL مهم است؟</h2>
+
+<p>
+
+    ```
+    در سیستم‌های مدرن، یک Client ممکن است برای نمایش یک صفحه به اطلاعات چندین
+    Resource مختلف نیاز داشته باشد.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    برای مثال، صفحه جزئیات یک سفارش ممکن است شامل اطلاعات سفارش، کاربر، پرداخت،
+    محصولات و وضعیت ارسال باشد.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    در معماری REST، Client ممکن است مجبور شود چندین درخواست مختلف ارسال کند.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">REST Requests</span>
+    </div>
+
+    <pre><code>
+```
+
+GET /api/orders/1001
+
+GET /api/users/25
+
+GET /api/payments/order/1001
+
+GET /api/products/501
+
+GET /api/shipping/order/1001 </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    در GraphQL، Client می‌تواند تمام داده‌های موردنیاز خود را در قالب یک Query
+    درخواست کند.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">GraphQL Query</span>
+    </div>
+
+    <pre><code>
+```
+
+query {
+order(id: 1001) {
+id
+status
+
+```
+customer {
+  id
+  fullName
+}
+
+payment {
+  status
+  amount
+}
+
+items {
+  quantity
+
+  product {
+    id
+    title
+  }
+}
+
+shipping {
+  status
+  trackingCode
+}
+```
+
+}
+} </code></pre>
+
+</div>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        ```
+        GraphQL می‌تواند تعداد درخواست‌های Client را کاهش دهد و داده‌های موردنیاز
+        یک صفحه را در یک Response ساختاریافته برگرداند.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>GraphQL چگونه کار می‌کند؟</h2>
+
+<p>
+
+    ```
+    در GraphQL، ساختار API با استفاده از یک Schema تعریف می‌شود.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    Schema مشخص می‌کند چه Typeهایی وجود دارند، چه فیلدهایی قابل دریافت هستند و
+    چه عملیات‌هایی توسط Client قابل اجرا است.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">GraphQL Flow</span>
+    </div>
+
+    <pre><code>
+```
+
+Client
+
+│
+
+GraphQL Query
+
+▼
+
+GraphQL Endpoint
+
+│
+
+Schema Validation
+
+▼
+
+Resolver
+
+│
+
+Database / Service / API
+
+▼
+
+GraphQL Response </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    GraphQL Server ابتدا Query دریافتی را با Schema مقایسه می‌کند. اگر Query معتبر
+    باشد، Resolver مربوط به هر Field اجرا می‌شود.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    در نهایت، Response دقیقاً با همان ساختاری که Client درخواست کرده است بازگردانده
+    می‌شود.
+    ```
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        ```
+        در GraphQL، Client ساختار Response را مشخص می‌کند؛ اما فقط می‌تواند فیلدهایی
+        را درخواست کند که در Schema تعریف شده‌اند.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Schema</h2>
+
+<p>
+
+    ```
+    Schema قرارداد اصلی میان Client و Server در GraphQL است.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    این قرارداد معمولاً با استفاده از
+    <strong>Schema Definition Language</strong>
+    یا SDL نوشته می‌شود.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">GraphQL Schema</span>
+    </div>
+
+    <pre><code>
+```
+
+type Product {
+id: ID!
+title: String!
+price: Float!
+}
+
+type OrderItem {
+quantity: Int!
+product: Product!
+}
+
+type Order {
+id: ID!
+status: String!
+items: [OrderItem!]!
+}
+
+type Query {
+order(id: ID!): Order
+} </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    علامت
+    <strong>!</strong>
+    به این معنا است که مقدار آن Field نمی‌تواند Null باشد.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    همچنین ساختار
+    <strong>[OrderItem!]!</strong>
+    به این معنا است که لیست نمی‌تواند Null باشد و اعضای داخل آن نیز نباید Null
+    باشند.
+    ```
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        ```
+        تغییر Schema باید با دقت انجام شود؛ زیرا حذف یا تغییر نوع یک Field ممکن است
+        Clientهای موجود را دچار مشکل کند.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Query</h2>
+
+<p>
+
+    ```
+    از Query برای دریافت اطلاعات استفاده می‌شود.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    Query در GraphQL مشابه عملیات خواندن داده در REST است.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Query Example</span>
+    </div>
+
+    <pre><code>
+```
+
+query GetOrder {
+order(id: 1001) {
+id
+status
+
+```
+items {
+  quantity
+
+  product {
+    title
+    price
+  }
+}
+```
+
+}
+} </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    Server فقط فیلدهای درخواست‌شده را در Response برمی‌گرداند.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Response</span>
+    </div>
+
+    <pre><code>
+```
+
+{
+"data": {
+"order": {
+"id": "1001",
+"status": "Paid",
+"items": [
+{
+"quantity": 2,
+"product": {
+"title": "Keyboard",
+"price": 120
+}
+}
+]
+}
+}
+} </code></pre>
+
+</div>
+
+<hr>
+
+<h2>Mutation</h2>
+
+<p>
+
+    ```
+    از Mutation برای ایجاد، تغییر یا حذف اطلاعات استفاده می‌شود.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    Mutation مشابه عملیات‌های POST، PUT، PATCH و DELETE در REST است.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Mutation Example</span>
+    </div>
+
+    <pre><code>
+```
+
+mutation CreateOrder {
+createOrder(
+input: {
+customerId: 25
+productId: 501
+quantity: 2
+}
+) {
+id
+status
+totalAmount
+}
+} </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    Mutation می‌تواند علاوه بر اجرای عملیات، اطلاعات نتیجه را نیز در همان Response
+    برگرداند.
+    ```
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        ```
+        بهتر است ورودی Mutationها در Typeهای جداگانه مانند
+        CreateOrderInput تعریف شوند تا Schema خواناتر و قابل توسعه‌تر باقی بماند.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Subscription</h2>
+
+<p>
+
+    ```
+    Subscription برای دریافت تغییرات Real-time از Server استفاده می‌شود.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    برخلاف Query و Mutation که معمولاً یک Request و یک Response دارند، Subscription
+    یک ارتباط طولانی‌مدت ایجاد می‌کند.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Subscription Flow</span>
+    </div>
+
+    <pre><code>
+```
+
+Client
+
+│
+
+Subscribe to Order Status
+
+▼
+
+GraphQL Server
+
+│
+
+Order Updated
+
+▼
+
+Event Sent to Client
+
+│
+
+Order Updated Again
+
+▼
+
+Another Event Sent </code></pre>
+
+</div>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Subscription Example</span>
+    </div>
+
+    <pre><code>
+```
+
+subscription {
+orderStatusChanged(orderId: 1001) {
+orderId
+status
+updatedAt
+}
+} </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    Subscriptionها معمولاً برای اعلان‌ها، چت، داشبوردهای زنده و نمایش وضعیت
+    Real-time عملیات استفاده می‌شوند.
+    ```
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        ```
+        Subscription معمولاً به WebSocket یا یک ارتباط پایدار نیاز دارد و مدیریت
+        مقیاس‌پذیری آن نسبت به Query و Mutation پیچیده‌تر است.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Resolver</h2>
+
+<p>
+
+    ```
+    Resolver تابعی است که مسئول دریافت مقدار یک Field در GraphQL است.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    هر Resolver می‌تواند داده را از Database، Cache، Microservice یا یک API خارجی
+    دریافت کند.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Resolver Flow</span>
+    </div>
+
+    <pre><code>
+```
+
+Query.order
+
+```
+│
+
+▼
+```
+
+Order Resolver
+
+```
+│
+
+├── Order Database
+
+├── Customer Service
+
+├── Payment Service
+
+└── Shipping Service
+```
+
+</code></pre>
+
+</div>
+
+<p>
+
+    ```
+    برای مثال، Resolver مربوط به Field سفارش ممکن است ابتدا سفارش را از Database
+    دریافت کند و Resolverهای داخلی آن اطلاعات کاربر، پرداخت و ارسال را از سرویس‌های
+    دیگر دریافت کنند.
+    ```
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        ```
+        Resolverها نباید به منطق تجاری حجیم تبدیل شوند. بهتر است منطق اصلی در
+        Application Service یا Domain Service قرار گیرد و Resolver فقط نقش هماهنگ‌کننده
+        داشته باشد.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>مثال واقعی در Microservices</h2>
+
+<p>
+
+    ```
+    فرض کنید یک فروشگاه اینترنتی شامل سرویس‌های زیر است:
+    ```
+
+</p>
+
+<ul>
+
+    ```
+    <li>Order Service</li>
+
+    <li>Customer Service</li>
+
+    <li>Payment Service</li>
+
+    <li>Inventory Service</li>
+
+    <li>Shipping Service</li>
+    ```
+
+</ul>
+
+<p>
+
+    ```
+    اپلیکیشن موبایل برای نمایش صفحه جزئیات سفارش به اطلاعات تمام این سرویس‌ها نیاز
+    دارد.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Without GraphQL</span>
+    </div>
+
+    <pre><code>
+```
+
+Mobile App
+
+├── GET /orders/1001
+
+├── GET /customers/25
+
+├── GET /payments/1001
+
+├── GET /inventory/items
+
+└── GET /shipping/1001 </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    در این حالت، Client از ساختار داخلی Backend و سرویس‌های مختلف آگاه می‌شود.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    با اضافه کردن GraphQL Gateway، Client فقط با یک Endpoint در ارتباط خواهد بود.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">GraphQL Gateway</span>
+    </div>
+
+    <pre><code>
+```
+
+Mobile App
+
+```
+  │
+```
+
+GraphQL Query
+
+```
+  ▼
+```
+
+GraphQL Gateway
+
+```
+  │
+
+  ├── Order Service
+
+  ├── Customer Service
+
+  ├── Payment Service
+
+  ├── Inventory Service
+
+  └── Shipping Service
+```
+
+</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        ```
+        GraphQL Gateway می‌تواند یک API یکپارچه در اختیار Client قرار دهد و جزئیات
+        ارتباط با Microserviceهای داخلی را پنهان کند.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Over-fetching</h2>
+
+<p>
+
+    ```
+    Over-fetching زمانی رخ می‌دهد که Server اطلاعات بیشتری از نیاز Client برگرداند.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    برای مثال، ممکن است Client فقط نام محصول را نیاز داشته باشد اما REST API تمام
+    اطلاعات محصول را ارسال کند.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">REST Response</span>
+    </div>
+
+    <pre><code>
+```
+
+{
+"id": 501,
+"title": "Keyboard",
+"description": "Mechanical Keyboard",
+"price": 120,
+"weight": 0.9,
+"categoryId": 12,
+"createdAt": "2026-07-10",
+"updatedAt": "2026-07-15",
+"warehouseId": 4
+} </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    در حالی که Client فقط به این اطلاعات نیاز دارد:
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">GraphQL Query</span>
+    </div>
+
+    <pre><code>
+```
+
+query {
+product(id: 501) {
+title
+price
+}
+} </code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        ```
+        GraphQL با انتخاب Fieldها توسط Client، مشکل Over-fetching را تا حد زیادی
+        کاهش می‌دهد.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Under-fetching</h2>
+
+<p>
+
+    ```
+    Under-fetching زمانی رخ می‌دهد که یک Response برای تکمیل صفحه کافی نباشد و
+    Client مجبور شود درخواست‌های بیشتری ارسال کند.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Under-fetching</span>
+    </div>
+
+    <pre><code>
+```
+
+Request Order
+
+```
+ │
+
+ ▼
+```
+
+Order Response
+
+```
+ │
+```
+
+Need Customer
+
+```
+ ▼
+```
+
+Request Customer
+
+```
+ │
+```
+
+Need Payment
+
+```
+ ▼
+```
+
+Request Payment </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    GraphQL به Client اجازه می‌دهد داده‌های مرتبط را در یک Query دریافت کند و تعداد
+    Round Tripهای شبکه را کاهش دهد.
+    ```
+
+</p>
+
+<hr>
+
+<h2>مشکل N+1 Query</h2>
+
+<p>
+
+    ```
+    یکی از مهم‌ترین مشکلات پیاده‌سازی GraphQL،
+    <strong>N+1 Query Problem</strong>
+    است.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    فرض کنید لیستی از ۱۰۰ سفارش دریافت شده است و برای هر سفارش یک Query جداگانه
+    برای دریافت Customer اجرا شود.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">N+1 Queries</span>
+    </div>
+
+    <pre><code>
+```
+
+1 Query
+
+Get 100 Orders
+
+```
+  │
+
+  ▼
+```
+
+100 Queries
+
+Get Customer of Each Order
+
+```
+  │
+
+  ▼
+```
+
+Total: 101 Queries </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    این مشکل می‌تواند فشار زیادی روی Database یا Microservice مقصد ایجاد کند.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    یکی از راهکارهای رایج برای حل آن استفاده از
+    <strong>DataLoader</strong>
+    است.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">DataLoader</span>
+    </div>
+
+    <pre><code>
+```
+
+Customer IDs
+
+25, 26, 31, 42, 51
+
+```
+  │
+```
+
+Batch Request
+
+```
+  ▼
+```
+
+SELECT *
+FROM Customers
+WHERE Id IN (25, 26, 31, 42, 51) </code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        ```
+        اگر Resolverها بدون Batch و Cache طراحی شوند، یک Query ساده GraphQL ممکن
+        است صدها درخواست داخلی یا Query پایگاه داده ایجاد کند.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Query Depth</h2>
+
+<p>
+
+    ```
+    Client در GraphQL می‌تواند Queryهای تو در تو ارسال کند.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    اگر محدودیتی روی عمق Query وجود نداشته باشد، ممکن است یک Query بسیار سنگین
+    ایجاد شود.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Deep Query</span>
+    </div>
+
+    <pre><code>
+```
+
+query {
+customer(id: 25) {
+orders {
+items {
+product {
+category {
+products {
+reviews {
+author {
+orders {
+items {
+product {
+title
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+} </code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        ```
+        اجازه دادن به Queryهای بسیار عمیق می‌تواند باعث مصرف زیاد CPU، Memory،
+        Database Connection و پهنای باند شود.
+
+    </div>
+    ```
+
+</div>
+
+<p>
+
+    ```
+    برای کنترل این مشکل می‌توان از Depth Limit، Complexity Limit و Timeout استفاده
+    کرد.
+    ```
+
+</p>
+
+<hr>
+
+<h2>Query Complexity</h2>
+
+<p>
+
+    ```
+    عمق Query تنها معیار سنگین بودن آن نیست.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    ممکن است یک Query عمق کمی داشته باشد اما تعداد بسیار زیادی آیتم درخواست کند.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Expensive Query</span>
+    </div>
+
+    <pre><code>
+```
+
+query {
+orders(first: 10000) {
+id
+items {
+product {
+title
+reviews {
+comment
+}
+}
+}
+}
+} </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    در چنین شرایطی باید برای هر Field هزینه مشخصی در نظر گرفته شود و Queryهایی که
+    از حد مجاز عبور می‌کنند رد شوند.
+    ```
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        ```
+        Pagination، محدودیت تعداد آیتم‌ها و Query Cost Analysis از مهم‌ترین ابزارهای
+        محافظت از GraphQL API هستند.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Error Handling</h2>
+
+<p>
+
+    ```
+    نحوه مدیریت خطا در GraphQL با REST تفاوت دارد.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    در بسیاری از پیاده‌سازی‌ها، حتی در صورت رخ دادن خطا ممکن است Response با Status
+    Code برابر 200 بازگردد و جزئیات خطا در بخش
+    <strong>errors</strong>
+    قرار گیرد.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">GraphQL Error Response</span>
+    </div>
+
+    <pre><code>
+```
+
+{
+"data": {
+"order": null
+},
+"errors": [
+{
+"message": "Order not found",
+"path": [
+"order"
+],
+"extensions": {
+"code": "ORDER_NOT_FOUND"
+}
+}
+]
+} </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    GraphQL همچنین می‌تواند Partial Response برگرداند؛ یعنی بخشی از اطلاعات موفق
+    باشد و بخشی دیگر با خطا مواجه شود.
+    ```
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        ```
+        Client باید علاوه بر بخش data، همیشه بخش errors را نیز بررسی کند.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Authentication و Authorization</h2>
+
+<p>
+
+    ```
+    Authentication معمولاً قبل از ورود درخواست به Resolverها انجام می‌شود.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    پس از شناسایی کاربر، Authorization می‌تواند در سطح Operation، Type، Field یا
+    Resolver اعمال شود.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Authorization Levels</span>
+    </div>
+
+    <pre><code>
+```
+
+GraphQL Request
+
+```
+  │
+```
+
+Authentication
+
+```
+  ▼
+```
+
+Operation Authorization
+
+```
+  │
+```
+
+Resolver Authorization
+
+```
+  │
+```
+
+Field Authorization
+
+```
+  ▼
+```
+
+Response </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    برای مثال، ممکن است یک کاربر اجازه مشاهده سفارش را داشته باشد اما اجازه مشاهده
+    اطلاعات حساس پرداخت را نداشته باشد.
+    ```
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        ```
+        مخفی کردن یک Field از رابط کاربری به معنی امن بودن آن نیست. Authorization
+        باید در سمت Server و داخل Resolver یا Policy مناسب اعمال شود.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Caching در GraphQL</h2>
+
+<p>
+
+    ```
+    Caching در REST معمولاً با URL و HTTP Method ساده‌تر انجام می‌شود.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    در GraphQL، بیشتر درخواست‌ها به یک Endpoint مشترک ارسال می‌شوند و Query در Body
+    درخواست قرار دارد؛ بنابراین Caching نیازمند طراحی دقیق‌تری است.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    روش‌های رایج Caching عبارت‌اند از:
+    ```
+
+</p>
+
+<ul>
+
+    ```
+    <li>Cache کردن داده داخل Resolver</li>
+
+    <li>استفاده از DataLoader Cache</li>
+
+    <li>استفاده از Distributed Cache مانند Redis</li>
+
+    <li>Persisted Query</li>
+
+    <li>Client-side Normalized Cache</li>
+    ```
+
+</ul>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        ```
+        Cache باید با توجه به سطح دسترسی کاربران طراحی شود؛ زیرا Cache کردن Response
+        بدون در نظر گرفتن Identity ممکن است اطلاعات یک کاربر را در اختیار کاربر
+        دیگری قرار دهد.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Persisted Query</h2>
+
+<p>
+
+    ```
+    در Persisted Query، متن کامل Query در هر درخواست ارسال نمی‌شود.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    Client شناسه یا Hash یک Query از پیش ثبت‌شده را ارسال می‌کند.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Persisted Query</span>
+    </div>
+
+    <pre><code>
+```
+
+Client
+
+│
+
+Query Hash: abc123
+
+▼
+
+GraphQL Server
+
+│
+
+Find Stored Query
+
+▼
+
+Execute Query </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    این روش می‌تواند حجم Request را کاهش دهد و کنترل بیشتری روی Queryهای مجاز ایجاد
+    کند.
+    ```
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        ```
+        Persisted Query برای اپلیکیشن‌های موبایل، APIهای عمومی و سیستم‌هایی که به
+        کنترل امنیتی بیشتری نیاز دارند بسیار مفید است.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>GraphQL Federation</h2>
+
+<p>
+
+    ```
+    در معماری Microservices ممکن است هر سرویس بخشی از Schema را مدیریت کند.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    GraphQL Federation امکان ترکیب چند Subgraph و ساخت یک GraphQL Schema واحد را
+    فراهم می‌کند.
+    ```
+
+</p>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">GraphQL Federation</span>
+    </div>
+
+    <pre><code>
+```
+
+Client
+
+│
+
+▼
+
+GraphQL Gateway
+
+│
+
+├── Order Subgraph
+
+├── Customer Subgraph
+
+├── Product Subgraph
+
+├── Payment Subgraph
+
+└── Shipping Subgraph </code></pre>
+
+</div>
+
+<p>
+
+    ```
+    در این معماری، هر تیم مالک بخشی از Schema است و Gateway یک Graph واحد در اختیار
+    Client قرار می‌دهد.
+    ```
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        ```
+        Federation پیچیدگی‌های جدیدی مانند مالکیت Schema، هماهنگی Typeها، مدیریت
+        نسخه، Observability و خطاهای توزیع‌شده ایجاد می‌کند.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>مزایای GraphQL</h2>
+
+<table class="table">
+
+    ```
+    <thead>
+
+        <tr>
+
+            <th>مزیت</th>
+
+            <th>توضیح</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>کاهش Over-fetching</td>
+
+            <td>Client فقط Fieldهای موردنیاز را دریافت می‌کند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>کاهش Under-fetching</td>
+
+            <td>داده‌های مرتبط را می‌توان در یک Query دریافت کرد.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Schema قوی</td>
+
+            <td>ساختار API و Typeها به‌صورت واضح تعریف می‌شوند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>توسعه سریع Frontend</td>
+
+            <td>Client برای دریافت ترکیب‌های جدید داده کمتر به Endpoint جدید نیاز دارد.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>ابزارهای توسعه مناسب</td>
+
+            <td>امکان Auto-complete، Documentation و بررسی Typeها وجود دارد.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>API یکپارچه</td>
+
+            <td>چند Microservice می‌توانند پشت یک GraphQL Gateway قرار بگیرند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Partial Response</td>
+
+            <td>در صورت خطای بخشی از Query، سایر داده‌های موفق قابل بازگشت هستند.</td>
+
+        </tr>
+
+    </tbody>
+    ```
+
+</table>
+
+<hr>
+
+<h2>معایب GraphQL</h2>
+
+<table class="table">
+
+    ```
+    <thead>
+
+        <tr>
+
+            <th>چالش</th>
+
+            <th>توضیح</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>پیچیدگی پیاده‌سازی</td>
+
+            <td>طراحی Schema، Resolver، Authorization و Error Handling نیازمند دقت است.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>N+1 Query</td>
+
+            <td>Resolverهای نامناسب ممکن است تعداد زیادی درخواست داخلی ایجاد کنند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Caching دشوارتر</td>
+
+            <td>Cache مبتنی بر URL مانند REST به‌سادگی قابل استفاده نیست.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Queryهای پرهزینه</td>
+
+            <td>Client می‌تواند Queryهای عمیق یا بزرگ ارسال کند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Monitoring پیچیده‌تر</td>
+
+            <td>تمام عملیات‌ها ممکن است از یک Endpoint عبور کنند.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>File Upload</td>
+
+            <td>آپلود فایل معمولاً به طراحی و قرارداد جداگانه نیاز دارد.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>پیچیدگی Federation</td>
+
+            <td>ترکیب چند Schema نیازمند حاکمیت و هماهنگی میان تیم‌ها است.</td>
+
+        </tr>
+
+    </tbody>
+    ```
+
+</table>
+
+<hr>
+
+<h2>GraphQL در مقابل REST</h2>
+
+<table class="table">
+
+    ```
+    <thead>
+
+        <tr>
+
+            <th>ویژگی</th>
+
+            <th>REST</th>
+
+            <th>GraphQL</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Endpoint</td>
+
+            <td>معمولاً چند Endpoint</td>
+
+            <td>معمولاً یک Endpoint</td>
+
+        </tr>
+
+        <tr>
+
+            <td>ساختار Response</td>
+
+            <td>توسط Server تعیین می‌شود</td>
+
+            <td>توسط Client انتخاب می‌شود</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Over-fetching</td>
+
+            <td>احتمال بیشتر</td>
+
+            <td>احتمال کمتر</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Under-fetching</td>
+
+            <td>احتمال بیشتر</td>
+
+            <td>احتمال کمتر</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Caching HTTP</td>
+
+            <td>ساده‌تر</td>
+
+            <td>پیچیده‌تر</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Versioning</td>
+
+            <td>معمولاً با URL یا Header</td>
+
+            <td>معمولاً با Deprecation فیلدها</td>
+
+        </tr>
+
+        <tr>
+
+            <td>یادگیری اولیه</td>
+
+            <td>ساده‌تر</td>
+
+            <td>پیچیده‌تر</td>
+
+        </tr>
+
+        <tr>
+
+            <td>انعطاف Client</td>
+
+            <td>کمتر</td>
+
+            <td>بیشتر</td>
+
+        </tr>
+
+    </tbody>
+    ```
+
+</table>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        ```
+        GraphQL جایگزین مطلق REST نیست. انتخاب میان REST و GraphQL باید بر اساس نوع
+        Client، پیچیدگی داده، نیازهای تیم و معماری سیستم انجام شود.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>Best Practiceهای GraphQL</h2>
+
+<table class="table">
+
+    ```
+    <thead>
+
+        <tr>
+
+            <th>انجام دهید ✅</th>
+
+            <th>انجام ندهید ❌</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Schema را بر اساس Domain طراحی کنید.</td>
+
+            <td>Schema را مستقیماً از جدول‌های Database تولید نکنید.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>برای لیست‌ها Pagination قرار دهید.</td>
+
+            <td>لیست‌های نامحدود برنگردانید.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>از DataLoader برای Batch و Cache استفاده کنید.</td>
+
+            <td>برای هر آیتم یک Query جداگانه اجرا نکنید.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Query Depth و Complexity را محدود کنید.</td>
+
+            <td>هر Query دلخواهی را بدون محدودیت اجرا نکنید.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Authorization را در سمت Server اعمال کنید.</td>
+
+            <td>به مخفی بودن Field در UI اعتماد نکنید.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>برای خطاها Error Code مشخص تعریف کنید.</td>
+
+            <td>جزئیات داخلی Exception را به Client نمایش ندهید.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Resolverها را ساده و سبک نگه دارید.</td>
+
+            <td>تمام Business Logic را داخل Resolver قرار ندهید.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Fieldهای قدیمی را Deprecate کنید.</td>
+
+            <td>Fieldهای پرکاربرد را ناگهانی حذف نکنید.</td>
+
+        </tr>
+
+        <tr>
+
+            <td>برای Production از Observability استفاده کنید.</td>
+
+            <td>فقط Endpoint کلی GraphQL را مانیتور نکنید.</td>
+
+        </tr>
+
+    </tbody>
+    ```
+
+</table>
+
+<hr>
+
+<h2>اشتباهات رایج</h2>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        ```
+        <strong>اشتباه رایج اول:</strong>
+
+        تبدیل مستقیم تمام Entityهای Database به GraphQL Type. این کار باعث نشت
+        ساختار Database به API و افزایش Coupling می‌شود.
+
+    </div>
+    ```
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        ```
+        <strong>اشتباه رایج دوم:</strong>
+
+        اجرای مستقیم Query پایگاه داده داخل هر Resolver بدون استفاده از Batch،
+        Projection یا DataLoader.
+
+    </div>
+    ```
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        ```
+        <strong>اشتباه رایج سوم:</strong>
+
+        فعال کردن Queryهای نامحدود بدون Depth Limit، Complexity Limit، Pagination
+        و Timeout.
+
+    </div>
+    ```
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        ```
+        <strong>اشتباه رایج چهارم:</strong>
+
+        استفاده از GraphQL صرفاً به دلیل محبوب بودن آن، بدون وجود مشکل واقعی در
+        REST API فعلی.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        ```
+        <strong>سؤال رایج مصاحبه:</strong>
+
+        مشکل N+1 در GraphQL چیست و چگونه آن را حل می‌کنید؟
+
+        <br>
+        <br>
+
+        <strong>پاسخ:</strong>
+
+        زمانی که ابتدا یک لیست دریافت می‌شود و سپس برای هر آیتم یک Query یا Request
+        جداگانه اجرا می‌شود، مشکل N+1 رخ می‌دهد. برای حل آن می‌توان از DataLoader،
+        Batch Query، Cache، Projection و دریافت گروهی داده‌ها استفاده کرد.
+
+    </div>
+    ```
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        ```
+        <strong>سؤال رایج مصاحبه:</strong>
+
+        آیا GraphQL همیشه بهتر از REST است؟
+
+        <br>
+        <br>
+
+        <strong>پاسخ:</strong>
+
+        خیر. GraphQL برای سناریوهایی که Clientهای مختلف به ساختارهای متفاوتی از داده
+        نیاز دارند بسیار مناسب است؛ اما REST برای APIهای ساده، عملیات‌های فایل،
+        Caching مبتنی بر HTTP و سیستم‌های کم‌پیچیدگی می‌تواند انتخاب بهتری باشد.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>چه زمانی GraphQL مناسب است؟</h2>
+
+<ul>
+
+    ```
+    <li>چند Client مختلف مانند Web، Mobile و Tablet وجود دارد.</li>
+
+    <li>هر Client به مجموعه متفاوتی از داده‌ها نیاز دارد.</li>
+
+    <li>صفحات دارای داده‌های تو در تو و مرتبط هستند.</li>
+
+    <li>تعداد زیاد REST Request باعث کاهش Performance شده است.</li>
+
+    <li>تیم Frontend به انعطاف بیشتری برای دریافت داده نیاز دارد.</li>
+
+    <li>قرار است چند Microservice پشت یک API یکپارچه قرار گیرند.</li>
+
+    <li>نیاز به Schema و قرارداد Type-safe وجود دارد.</li>
+    ```
+
+</ul>
+
+<hr>
+
+<h2>چه زمانی GraphQL مناسب نیست؟</h2>
+
+<ul>
+
+    ```
+    <li>API بسیار ساده و دارای چند Endpoint محدود است.</li>
+
+    <li>بیشتر عملیات‌ها مربوط به Upload و Download فایل هستند.</li>
+
+    <li>HTTP Caching اهمیت بسیار زیادی دارد.</li>
+
+    <li>تیم تجربه کافی برای مدیریت پیچیدگی GraphQL ندارد.</li>
+
+    <li>ساختار Response همیشه ثابت و از قبل مشخص است.</li>
+
+    <li>نیازی به Queryهای انعطاف‌پذیر از سمت Client وجود ندارد.</li>
+
+    <li>محدودیت زمانی پروژه اجازه طراحی صحیح Schema را نمی‌دهد.</li>
+    ```
+
+</ul>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        ```
+        استفاده از GraphQL بدون نیاز واقعی می‌تواند به جای حل مسئله، پیچیدگی جدیدی
+        به سیستم اضافه کند.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>واژه‌نامه</h2>
+
+<table class="table">
+
+    ```
+    <thead>
+
+        <tr>
+
+            <th>اصطلاح</th>
+
+            <th>توضیح</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Schema</td>
+
+            <td>قرارداد اصلی GraphQL شامل Typeها، Fieldها و Operationها</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Query</td>
+
+            <td>عملیات دریافت داده</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Mutation</td>
+
+            <td>عملیات ایجاد، تغییر یا حذف داده</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Subscription</td>
+
+            <td>دریافت تغییرات Real-time از Server</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Resolver</td>
+
+            <td>تابعی که مقدار یک Field را دریافت یا محاسبه می‌کند</td>
+
+        </tr>
+
+        <tr>
+
+            <td>SDL</td>
+
+            <td>زبان تعریف Schema در GraphQL</td>
+
+        </tr>
+
+        <tr>
+
+            <td>DataLoader</td>
+
+            <td>ابزاری برای Batch و Cache کردن درخواست‌های Resolver</td>
+
+        </tr>
+
+        <tr>
+
+            <td>N+1 Problem</td>
+
+            <td>اجرای تعداد زیادی Query یا Request برای دریافت داده‌های مرتبط</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Federation</td>
+
+            <td>ترکیب چند GraphQL Schema در یک Graph واحد</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Persisted Query</td>
+
+            <td>ارسال شناسه Query ثبت‌شده به جای متن کامل Query</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Query Depth</td>
+
+            <td>تعداد سطوح تو در توی یک Query</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Query Complexity</td>
+
+            <td>میزان هزینه محاسباتی اجرای یک Query</td>
+
+        </tr>
+
+    </tbody>
+    ```
+
+</table>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        ```
+        GraphQL را زمانی انتخاب کنید که انعطاف در دریافت داده یک نیاز واقعی باشد،
+        نه صرفاً به این دلیل که می‌خواهید تمام REST APIهای سیستم را حذف کنید.
+
+    </div>
+    ```
+
+</div>
+
+<hr>
+
+<h2>مسیر یادگیری</h2>
+
+<div class="code-block">
+
+    ```
+    <div class="code-header">
+        <span class="code-lang">Learning Path</span>
+    </div>
+
+    <pre><code>
+```
+
+REST API
+
+│
+
+▼
+
+GraphQL Basics
+
+│
+
+▼
+
+Schema and Types
+
+│
+
+▼
+
+Query and Mutation
+
+│
+
+▼
+
+Resolver
+
+│
+
+▼
+
+DataLoader
+
+│
+
+▼
+
+Authorization
+
+│
+
+▼
+
+Caching
+
+│
+
+▼
+
+Subscription
+
+│
+
+▼
+
+Federation </code></pre>
+
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    ```
+    GraphQL یک روش قدرتمند برای طراحی APIهای انعطاف‌پذیر است که به Client اجازه
+    می‌دهد دقیقاً داده‌های موردنیاز خود را درخواست کند.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    این فناوری می‌تواند مشکلات Over-fetching و Under-fetching را کاهش دهد و یک API
+    یکپارچه روی چند Microservice ایجاد کند.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    با این حال، GraphQL پیچیدگی‌هایی مانند N+1 Query، Queryهای پرهزینه، Caching،
+    Authorization، Monitoring و مدیریت Schema را نیز به همراه دارد.
+    ```
+
+</p>
+
+<p>
+
+    ```
+    موفقیت در استفاده از GraphQL به طراحی صحیح Schema، Resolverهای بهینه، محدودیت
+    Query، Pagination، DataLoader و Observability مناسب وابسته است.
+    ```
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        ```
+        GraphQL یک ابزار قدرتمند است، اما مانند هر ابزار معماری باید بر اساس مسئله
+        واقعی سیستم انتخاب شود. در بسیاری از پروژه‌ها، ترکیب REST، GraphQL و
+        ارتباط‌های Asynchronous بهترین نتیجه را ایجاد می‌کند.
+
+    </div>
+    ```
+
+</div>
+
+<!-- Navigation Footer -->
+
+<div class="nav-footer">
+
+    ```
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">REST و gRPC</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">GraphQL در ASP.NET Core</div>
+        </div>
+    </a>
+    ```
+
+</div>
