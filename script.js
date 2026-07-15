@@ -106,3 +106,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
+
+function toggleSidebarDesktop() {
+
+    const sidebar = document.getElementById("sidebar");
+    const main = document.querySelector(".main");
+
+    sidebar.classList.toggle("closed");
+    main.classList.toggle("full");
+
+}
