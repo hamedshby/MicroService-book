@@ -1,0 +1,849 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="microservices">Synchronous Communication</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">gRPC Interview</span>
+</div>
+
+<div class="interview-section">
+
+    <h1>سوالات مصاحبه gRPC - بخش ۱ (مفاهیم پایه)</h1>
+
+    <div class="divider"></div>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱: gRPC چیست؟</h2>
+
+        <p>
+
+            gRPC یک فریمورک متن‌باز برای پیاده‌سازی <strong>Remote Procedure Call (RPC)</strong> است که توسط Google
+            توسعه داده شده است. این فریمورک از HTTP/2 و Protocol Buffers برای برقراری ارتباط سریع، کم‌حجم و Type-Safe
+            بین سرویس‌ها استفاده می‌کند.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲: gRPC مخفف چیست؟</h2>
+
+        <p>
+
+            gRPC مخفف <strong>Google Remote Procedure Call</strong> است. امروزه gRPC یک پروژه متن‌باز مستقل است و تنها
+            به محصولات Google محدود نمی‌شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳: چرا Google پروژه gRPC را توسعه داد؟</h2>
+
+        <p>
+
+            Google برای کاهش Latency، کاهش حجم پیام‌ها، افزایش Performance و ایجاد ارتباط سریع بین سرویس‌های داخلی خود،
+            gRPC را توسعه داد. استفاده از HTTP/2 و Protocol Buffers باعث شد gRPC نسبت به REST در ارتباط
+            Service-to-Service کارایی بیشتری داشته باشد.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۴: gRPC چگونه کار می‌کند؟</h2>
+
+        <p>
+
+            ابتدا قرارداد ارتباطی در فایل <code>.proto</code> تعریف می‌شود. سپس Client و Server از روی آن کلاس‌های
+            موردنیاز را تولید می‌کنند. هنگام فراخوانی متد، داده‌ها با Protocol Buffers به صورت Binary Serialize شده، از
+            طریق HTTP/2 ارسال می‌شوند و پاسخ مجدداً Deserialize شده و به صورت یک شیء در اختیار برنامه قرار می‌گیرد.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۵: RPC چیست؟</h2>
+
+        <p>
+
+            RPC یا <strong>Remote Procedure Call</strong> روشی برای فراخوانی متدهای یک سرویس روی یک سیستم دیگر است، به
+            گونه‌ای که برای برنامه‌نویس مانند فراخوانی یک متد محلی به نظر برسد. gRPC یکی از محبوب‌ترین پیاده‌سازی‌های
+            RPC است.
+
+        </p>
+
+    </div>
+
+</div>
+<hr>
+
+<div class="interview-section">
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۶: تفاوت RPC و REST چیست؟</h2>
+
+        <p>
+
+            در REST ارتباط بر اساس Resource و Endpoint انجام می‌شود و معمولاً داده‌ها با JSON منتقل می‌شوند. اما در RPC
+            ارتباط بر اساس فراخوانی متدها است و در gRPC داده‌ها توسط Protocol Buffers و از طریق HTTP/2 منتقل می‌شوند. به
+            همین دلیل gRPC معمولاً سرعت و کارایی بیشتری نسبت به REST دارد.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۷: چه زمانی gRPC را انتخاب می‌کنید؟</h2>
+
+        <p>
+
+            زمانی که ارتباط بین Microserviceها نیاز به Performance بالا، Latency پایین، حجم کم پیام‌ها، Type Safety و
+            Streaming داشته باشد، gRPC بهترین انتخاب است. این فناوری بیشتر برای ارتباط Service-to-Service در شبکه داخلی
+            استفاده می‌شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۸: چه زمانی REST را انتخاب می‌کنید؟</h2>
+
+        <p>
+
+            REST برای APIهای عمومی، ارتباط با Browser، Mobile Application، سیستم‌های Third-Party و سرویس‌هایی که نیاز به
+            سازگاری بالا و خوانایی پیام‌ها دارند، انتخاب مناسب‌تری است.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۹: مزایای gRPC چیست؟</h2>
+
+        <p>
+
+            از مهم‌ترین مزایای gRPC می‌توان به Performance بالا، استفاده از HTTP/2، حجم کم پیام‌ها، Protocol Buffers،
+            پشتیبانی از Streaming، تولید خودکار Client و Server، Type Safety، ارتباط سریع بین Microserviceها و مصرف کمتر
+            CPU و پهنای باند اشاره کرد.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱۰: معایب gRPC چیست؟</h2>
+
+        <p>
+
+            gRPC برای Browserها پشتیبانی محدودی دارد، پیام‌های Binary آن مانند JSON قابل خواندن نیستند، نیاز به فایل
+            Proto دارد و برای APIهای عمومی معمولاً به اندازه REST مناسب نیست. همچنین تست دستی آن نسبت به REST پیچیده‌تر
+            است.
+
+        </p>
+
+    </div>
+
+</div>
+<hr>
+
+<div class="interview-section">
+
+
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱۱: Protocol Buffers چیست؟</h2>
+
+        <p>
+
+            Protocol Buffers یا <strong>Protobuf</strong> یک مکانیزم Serialize و Deserialize داده‌ها است که توسط Google
+            توسعه داده شده است. این فناوری داده‌ها را به صورت Binary ذخیره و منتقل می‌کند، بنابراین نسبت به JSON حجم
+            کمتری داشته و سرعت پردازش بالاتری دارد.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱۲: Proto File چیست؟</h2>
+
+        <p>
+
+            فایل <code>.proto</code> قرارداد (Contract) بین Client و Server را مشخص می‌کند. در این فایل Messageها،
+            Serviceها، Enumها و RPC Methodها تعریف می‌شوند و بر اساس آن کلاس‌های موردنیاز در زبان‌های مختلف به صورت
+            خودکار تولید می‌شوند.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱۳: چرا gRPC از Protocol Buffers استفاده می‌کند؟</h2>
+
+        <p>
+
+            زیرا Protocol Buffers نسبت به JSON حجم کمتری دارد، سریع‌تر Serialize و Deserialize می‌شود، مصرف CPU و پهنای
+            باند را کاهش می‌دهد و ارتباط بین سرویس‌ها را سریع‌تر و بهینه‌تر می‌کند.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱۴: Code Generation در gRPC چگونه انجام می‌شود؟</h2>
+
+        <p>
+
+            هنگام Build پروژه، فایل <code>.proto</code> توسط ابزار <strong>Grpc.Tools</strong> پردازش می‌شود و کلاس‌های
+            C# شامل Messageها، Client، Service Base و سایر کلاس‌های موردنیاز به صورت خودکار تولید می‌شوند. به همین دلیل
+            نیازی به نوشتن دستی DTOها و Clientها نیست.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱۵: Contract First چیست؟</h2>
+
+        <p>
+
+            Contract First روشی در طراحی API است که ابتدا قرارداد ارتباطی در فایل <code>.proto</code> تعریف می‌شود و سپس
+            Client و Server بر اساس همان قرارداد پیاده‌سازی می‌شوند. این روش باعث یکپارچگی، جلوگیری از ناسازگاری بین
+            سرویس‌ها و ساده‌تر شدن توسعه سیستم‌های توزیع‌شده می‌شود.
+
+        </p>
+
+    </div>
+
+</div>
+<hr>
+
+<div class="interview-section">
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱۶: HTTP/2 چیست؟</h2>
+
+        <p>
+
+            HTTP/2 نسخه دوم پروتکل HTTP است که نسبت به HTTP/1.1 امکاناتی مانند Multiplexing، Header Compression، Binary
+            Protocol و Server Push را ارائه می‌دهد. gRPC به صورت پیش‌فرض روی HTTP/2 اجرا می‌شود تا ارتباطی سریع‌تر و با
+            تأخیر کمتر بین سرویس‌ها برقرار کند.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱۷: تفاوت HTTP/1.1 و HTTP/2 چیست؟</h2>
+
+        <p>
+
+            در HTTP/1.1 معمولاً هر Connection تنها یک درخواست را در یک زمان پردازش می‌کند، اما HTTP/2 امکان ارسال همزمان
+            چندین درخواست روی یک Connection را فراهم می‌کند. همچنین HTTP/2 از Binary Protocol و Header Compression
+            استفاده می‌کند که باعث کاهش مصرف پهنای باند و افزایش Performance می‌شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱۸: Multiplexing چیست؟</h2>
+
+        <p>
+
+            Multiplexing قابلیتی در HTTP/2 است که اجازه می‌دهد چندین Request و Response به صورت همزمان و مستقل روی یک
+            Connection منتقل شوند. این ویژگی باعث کاهش تعداد Connectionهای موردنیاز و افزایش سرعت ارتباط بین سرویس‌ها
+            می‌شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۱۹: چرا Multiplexing سرعت gRPC را افزایش می‌دهد؟</h2>
+
+        <p>
+
+            زیرا دیگر نیازی به ایجاد Connection جدید برای هر درخواست نیست. چندین درخواست می‌توانند به صورت همزمان روی یک
+            Connection ارسال شوند، بنابراین زمان انتظار، سربار ایجاد Connection و Latency کاهش پیدا می‌کند و Throughput
+            سیستم افزایش می‌یابد.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲۰: Binary Protocol چیست؟</h2>
+
+        <p>
+
+            Binary Protocol روشی برای انتقال داده‌ها به صورت Binary است، نه متن (Text). gRPC از Protocol Buffers برای
+            تولید داده‌های Binary استفاده می‌کند که حجم کمتری نسبت به JSON دارند و سریع‌تر Serialize و Deserialize
+            می‌شوند.
+
+        </p>
+
+    </div>
+
+    <div class="callout callout-info">
+
+        <span class="callout-icon">💡</span>
+
+        <div class="callout-content">
+
+            در بخش بعد با تفاوت Binary و JSON، Header Compression، الگوریتم HPACK، دلیل استفاده gRPC از HTTP/2 و امکان
+            اجرای gRPC روی HTTP/1.1 آشنا خواهید شد.
+
+        </div>
+
+    </div>
+
+</div>
+<hr>
+
+<div class="interview-section">
+
+    <h1>سوالات مصاحبه gRPC - بخش ۵ (HTTP/2 و Performance)</h1>
+
+    <div class="divider"></div>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲۱: تفاوت Binary و JSON چیست؟</h2>
+
+        <p>
+
+            JSON یک فرمت متنی (Text-Based) است که خوانایی بالایی برای انسان دارد، اما حجم بیشتری تولید می‌کند. در مقابل،
+            Binary یک فرمت دودویی است که حجم کمتری دارد، سریع‌تر Serialize و Deserialize می‌شود و مصرف CPU و پهنای باند
+            را کاهش می‌دهد. به همین دلیل gRPC از Protocol Buffers و Binary Protocol استفاده می‌کند.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲۲: Header Compression چیست؟</h2>
+
+        <p>
+
+            Header Compression قابلیتی در HTTP/2 است که هدرهای تکراری HTTP را فشرده می‌کند. این کار باعث کاهش حجم
+            داده‌های ارسالی، مصرف کمتر پهنای باند و افزایش سرعت ارتباط، به‌ویژه در سیستم‌هایی با تعداد زیاد درخواست،
+            می‌شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲۳: HPACK چیست؟</h2>
+
+        <p>
+
+            HPACK الگوریتم فشرده‌سازی Headerها در HTTP/2 است. این الگوریتم با نگهداری مقادیر تکراری در یک جدول (Header
+            Table)، از ارسال مجدد هدرهای یکسان جلوگیری می‌کند و باعث کاهش حجم درخواست‌ها و پاسخ‌ها می‌شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲۴: چرا gRPC از HTTP/2 استفاده می‌کند؟</h2>
+
+        <p>
+
+            زیرا HTTP/2 قابلیت‌هایی مانند Multiplexing، Binary Protocol، Header Compression و Streaming را به صورت بومی
+            فراهم می‌کند. این ویژگی‌ها باعث کاهش Latency، افزایش Throughput و بهبود Performance در ارتباط بین
+            Microserviceها می‌شوند.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲۵: آیا gRPC روی HTTP/1.1 کار می‌کند؟</h2>
+
+        <p>
+
+            gRPC استاندارد برای عملکرد کامل خود به HTTP/2 نیاز دارد و روی HTTP/1.1 اجرا نمی‌شود. البته برای مرورگرها
+            می‌توان از <strong>gRPC-Web</strong> استفاده کرد که درخواست‌ها را از طریق Proxy به gRPC استاندارد تبدیل
+            می‌کند.
+
+        </p>
+
+    </div>
+
+    <div class="callout callout-info">
+
+        <span class="callout-icon">💡</span>
+
+        <div class="callout-content">
+
+            در بخش بعد با سؤالات مربوط به <strong>Latency</strong>، کاهش مصرف CPU، حجم پیام‌ها، مقایسه Performance با
+            REST و زمان‌هایی که استفاده از gRPC بیشترین تأثیر را دارد آشنا خواهید شد.
+
+        </div>
+
+    </div>
+
+</div>
+
+<hr>
+<div class="interview-section">
+
+    <h1>سوالات مصاحبه gRPC - بخش ۶ (HTTP/2 و Performance)</h1>
+
+    <div class="divider"></div>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲۶: Latency در gRPC چگونه کاهش پیدا می‌کند؟</h2>
+
+        <p>
+
+            gRPC با استفاده از HTTP/2، قابلیت Multiplexing، Protocol Buffers و Header Compression میزان تأخیر (Latency)
+            را کاهش می‌دهد. همچنین به دلیل استفاده از یک Connection مشترک، سربار ایجاد Connectionهای متعدد نیز حذف
+            می‌شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲۷: چرا حجم پیام‌های gRPC کمتر است؟</h2>
+
+        <p>
+
+            زیرا gRPC به جای JSON از Protocol Buffers استفاده می‌کند. Protobuf داده‌ها را به صورت Binary ذخیره و منتقل
+            می‌کند که نسبت به JSON حجم بسیار کمتری دارد و در نتیجه مصرف پهنای باند کاهش می‌یابد.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲۸: چرا gRPC مصرف CPU کمتری دارد؟</h2>
+
+        <p>
+
+            Protocol Buffers نسبت به JSON عملیات Serialize و Deserialize سریع‌تری دارد و پردازش کمتری روی CPU انجام
+            می‌دهد. همچنین Binary بودن پیام‌ها باعث کاهش زمان پردازش و افزایش کارایی سیستم می‌شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۲۹: آیا همیشه gRPC سریع‌تر از REST است؟</h2>
+
+        <p>
+
+            خیر. gRPC معمولاً در ارتباط‌های داخلی بین Microserviceها و زمانی که تعداد درخواست‌ها زیاد باشد، عملکرد بهتری
+            دارد. اما برای APIهای عمومی، Browserها یا سرویس‌های خارجی، REST به دلیل سازگاری بیشتر و پشتیبانی گسترده‌تر
+            می‌تواند انتخاب مناسب‌تری باشد.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳۰: چه زمانی افزایش Performance gRPC محسوس است؟</h2>
+
+        <p>
+
+            زمانی که تعداد درخواست‌ها زیاد باشد، حجم داده‌ها بالا باشد یا ارتباط مداوم بین Microserviceها برقرار شود،
+            مزایای gRPC کاملاً محسوس خواهد بود. در این شرایط استفاده از HTTP/2 و Protocol Buffers باعث کاهش Latency،
+            افزایش Throughput و مصرف کمتر منابع نسبت به REST می‌شود.
+
+        </p>
+
+    </div>
+
+    <div class="callout callout-success">
+
+        <span class="callout-icon">🎯</span>
+
+        <div class="callout-content">
+
+            با پایان این بخش، مفاهیم مربوط به <strong>HTTP/2</strong>، <strong>Performance</strong>،
+            <strong>Latency</strong>، <strong>Binary Protocol</strong>، <strong>Header Compression</strong> و تفاوت‌های
+            عملکردی gRPC و REST را مرور کردید. در بخش بعد وارد سؤالات مربوط به <strong>Proto File</strong>،
+            <strong>Message</strong>، <strong>Service</strong>، <strong>Enum</strong> و <strong>Code Generation</strong>
+            خواهیم شد.
+
+        </div>
+
+    </div>
+
+</div>
+<hr>
+
+<div class="interview-section">
+
+    <h1>سوالات مصاحبه gRPC - بخش ۷ (Proto File)</h1>
+
+    <div class="divider"></div>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳۱: Proto File چیست؟</h2>
+
+        <p>
+
+            Proto File فایلی با پسوند <code>.proto</code> است که قرارداد (Contract) بین Client و Server را تعریف می‌کند.
+            در این فایل Messageها، Serviceها، Enumها و RPC Methodها مشخص می‌شوند و بر اساس آن کلاس‌های موردنیاز به صورت
+            خودکار تولید می‌شوند.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳۲: syntax = "proto3" یعنی چه؟</h2>
+
+        <p>
+
+            این عبارت نسخه سینتکس فایل Proto را مشخص می‌کند. امروزه تقریباً تمام پروژه‌های gRPC از <code>proto3</code>
+            استفاده می‌کنند، زیرا نسخه استاندارد، ساده‌تر و سازگارتر با زبان‌های مختلف برنامه‌نویسی است.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳۳: package چیست؟</h2>
+
+        <p>
+
+            کلمه <code>package</code> فضای نام (Namespace) فایل Proto را مشخص می‌کند و از تداخل نام Serviceها و
+            Messageها جلوگیری می‌کند. این مقدار در تولید کلاس‌ها و مدیریت قراردادها نیز کاربرد دارد.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳۴: csharp_namespace چیست؟</h2>
+
+        <p>
+
+            گزینه <code>csharp_namespace</code> تعیین می‌کند کلاس‌های C# تولید شده در چه Namespaceای قرار بگیرند. این
+            گزینه باعث می‌شود ساختار پروژه منظم‌تر باشد و Namespace کلاس‌های تولید شده با ساختار پروژه هماهنگ شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳۵: Message چیست؟</h2>
+
+        <p>
+
+            Message ساختاری برای تعریف داده‌های ورودی و خروجی در gRPC است و معادل DTO یا Model در ASP.NET Core محسوب
+            می‌شود. هر Message از تعدادی Field تشکیل شده که هر کدام دارای یک شماره یکتا هستند.
+
+        </p>
+
+    </div>
+
+    <div class="callout callout-info">
+
+        <span class="callout-icon">💡</span>
+
+        <div class="callout-content">
+
+            در بخش بعد با <strong>Enum</strong>، <strong>Service</strong>، <strong>RPC Method</strong> و اهمیت شماره
+            Fieldها آشنا خواهید شد.
+
+        </div>
+
+    </div>
+
+</div>
+
+<hr>
+
+<div class="interview-section">
+
+    <h1>سوالات مصاحبه gRPC - بخش ۸ (Proto File)</h1>
+
+    <div class="divider"></div>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳۶: Enum چیست؟</h2>
+
+        <p>
+
+            Enum مجموعه‌ای از مقادیر ثابت و از پیش تعریف‌شده است که برای نمایش وضعیت‌ها یا مقادیر محدود استفاده می‌شود.
+            استفاده از Enum باعث خوانایی بیشتر کد، جلوگیری از استفاده از اعداد جادویی (Magic Numbers) و افزایش Type
+            Safety می‌شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳۷: Service چیست؟</h2>
+
+        <p>
+
+            Service مجموعه‌ای از RPC Methodها را تعریف می‌کند و مشخص می‌کند Client چه متدهایی را می‌تواند فراخوانی کند.
+            از نظر مفهومی، Service در gRPC مشابه Controller در REST است.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳۸: RPC Method چیست؟</h2>
+
+        <p>
+
+            RPC Method متدی است که در داخل یک Service تعریف می‌شود و توسط Client قابل فراخوانی است. هر RPC دارای نوع
+            ورودی (Request) و خروجی (Response) مشخصی است و می‌تواند از نوع Unary یا Streaming باشد.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۳۹: چرا شماره Fieldها مهم هستند؟</h2>
+
+        <p>
+
+            در Protocol Buffers هر Field دارای یک شماره یکتا است که در فرآیند Serialize و Deserialize استفاده می‌شود.
+            این شماره‌ها بخشی از قرارداد Binary هستند و برای سازگاری بین نسخه‌های مختلف سرویس اهمیت زیادی دارند.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۴۰: آیا می‌توان شماره Field را تغییر داد؟</h2>
+
+        <p>
+
+            خیر. پس از انتشار API نباید شماره Fieldها را تغییر داد، زیرا این کار باعث ناسازگاری بین Client و Server
+            می‌شود. اگر نیاز به افزودن فیلد جدید باشد، باید از یک شماره جدید استفاده کرد و شماره‌های قبلی را حفظ نمود.
+
+        </p>
+
+    </div>
+
+    <div class="callout callout-warning">
+
+        <span class="callout-icon">⚠️</span>
+
+        <div class="callout-content">
+
+            یکی از مهم‌ترین قوانین طراحی Proto این است که پس از انتشار سرویس، شماره Fieldها را تغییر ندهید و از استفاده
+            مجدد شماره‌های حذف‌شده خودداری کنید.
+
+        </div>
+
+    </div>
+
+</div>
+
+<hr>
+<div class="interview-section">
+
+    <h1>سوالات مصاحبه gRPC - بخش ۹ (Proto File)</h1>
+
+    <div class="divider"></div>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۴۱: چگونه Property جدید به Message اضافه کنیم؟</h2>
+
+        <p>
+
+            برای اضافه کردن Property جدید، یک Field با شماره (Field Number) جدید به انتهای Message اضافه می‌کنیم. این
+            کار با نسخه‌های قبلی سازگار است و باعث ایجاد Breaking Change نمی‌شود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۴۲: Breaking Change چیست؟</h2>
+
+        <p>
+
+            Breaking Change تغییری است که باعث ناسازگاری بین Client و Server می‌شود. تغییر شماره Fieldها، حذف Fieldهای
+            مورد استفاده، تغییر نوع داده (Data Type) یا تغییر نام Service و RPC Method از جمله نمونه‌های Breaking Change
+            در gRPC هستند.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۴۳: Non-Breaking Change چیست؟</h2>
+
+        <p>
+
+            Non-Breaking Change تغییری است که بدون ایجاد مشکل برای Clientهای قدیمی قابل اعمال باشد. اضافه کردن Field
+            جدید با شماره جدید، اضافه کردن RPC Method جدید یا افزودن مقدار جدید به Enum از نمونه‌های Non-Breaking Change
+            محسوب می‌شوند.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۴۴: چگونه Versioning در gRPC انجام می‌شود؟</h2>
+
+        <p>
+
+            Versioning معمولاً با ایجاد فایل Proto جدید، استفاده از Packageهای جداگانه (مانند <code>v1</code> و
+            <code>v2</code>) یا تعریف Serviceهای نسخه‌بندی‌شده انجام می‌شود. تا حد امکان باید از تغییرات سازگار
+            (Backward Compatible) استفاده کرد و از ایجاد Breaking Change جلوگیری نمود.
+
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div class="faq-item">
+
+        <h2>❓ سوال ۴۵: بهترین روش طراحی Proto چیست؟</h2>
+
+        <p>
+
+            از <code>proto3</code> استفاده کنید، شماره Fieldها را تغییر ندهید، برای هر Message مسئولیت مشخصی در نظر
+            بگیرید، از Enum برای وضعیت‌ها استفاده کنید، فایل‌های Proto را کوچک و ماژولار نگه دارید و Contract را به
+            گونه‌ای طراحی کنید که در آینده بدون ایجاد Breaking Change قابل توسعه باشد.
+
+        </p>
+
+    </div>
+
+    <div class="callout callout-success">
+
+        <span class="callout-icon">🎯</span>
+
+        <div class="callout-content">
+
+            با پایان این بخش، مفاهیم مربوط به <strong>Proto File</strong>، <strong>Message</strong>،
+            <strong>Enum</strong>، <strong>Service</strong>، <strong>RPC Method</strong>، <strong>Versioning</strong> و
+            <strong>Breaking Change</strong> را مرور کردید. در بخش بعد وارد سؤالات مربوط به <strong>Unary RPC</strong>،
+            نحوه پیاده‌سازی آن در ASP.NET Core و ارتباط بین Client و Server خواهیم شد.
+
+        </div>
+
+    </div>
+
+</div>
