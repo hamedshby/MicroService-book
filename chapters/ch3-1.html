@@ -1,0 +1,583 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="asynchronous-communication">
+        ارتباط Asynchronous
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Message Broker چیست؟</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">📨 ارتباط Asynchronous</div>
+
+    <h1>Message Broker چیست؟</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/25</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۸ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    در ارتباط‌های Synchronous، یک سرویس مستقیماً سرویس دیگری را فراخوانی کرده و
+    تا دریافت پاسخ منتظر می‌ماند.
+
+</p>
+
+<p>
+
+    اما در ارتباط‌های Asynchronous، سرویس فرستنده پیام را ارسال می‌کند و برای
+    ادامه پردازش، منتظر اجرای سرویس مقصد نمی‌ماند.
+
+</p>
+
+<p>
+
+    ابزاری که دریافت، نگهداری و انتقال این پیام‌ها را مدیریت می‌کند،
+    <strong>Message Broker</strong>
+    نام دارد.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        Message Broker واسطه‌ای میان سرویس تولیدکننده پیام و سرویس مصرف‌کننده پیام
+        است و وابستگی مستقیم میان آن‌ها را کاهش می‌دهد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>یک مثال ساده</h2>
+
+<p>
+
+    فرض کنید کاربر سفارشی ثبت می‌کند. پس از ثبت سفارش باید ایمیل تأیید، پیامک و
+    Notification نیز ارسال شوند.
+
+</p>
+
+<p>
+
+    در روش Sync، سرویس Order باید تمام سرویس‌ها را یکی پس از دیگری فراخوانی کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Synchronous Communication</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+      ├── REST ──► Email Service
+
+      ├── REST ──► SMS Service
+
+      └── REST ──► Notification Service
+</code></pre>
+
+</div>
+
+<p>
+
+    در این حالت، کندی یا خرابی یکی از سرویس‌ها می‌تواند زمان ثبت سفارش را افزایش
+    دهد یا کل عملیات را با خطا مواجه کند.
+
+</p>
+
+<p>
+
+    با استفاده از Message Broker، سرویس Order فقط یک پیام منتشر می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Asynchronous Communication</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+OrderCreated Message
+
+      ▼
+
+Message Broker
+
+      │
+
+      ├──► Email Service
+
+      ├──► SMS Service
+
+      └──► Notification Service
+</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        پس از ثبت پیام در Broker، سرویس Order می‌تواند پاسخ را سریع‌تر به کاربر
+        برگرداند و سایر پردازش‌ها در پس‌زمینه انجام شوند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>اجزای اصلی Message Broker</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>جزء</th>
+            <th>وظیفه</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Producer</td>
+            <td>پیام را تولید و برای Broker ارسال می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Message Broker</td>
+            <td>پیام را دریافت، نگهداری و مسیریابی می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Queue یا Topic</td>
+            <td>محل قرارگیری پیام‌ها تا زمان پردازش است.</td>
+        </tr>
+
+        <tr>
+            <td>Consumer</td>
+            <td>پیام را دریافت و پردازش می‌کند.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Message Flow</span>
+    </div>
+
+    <pre><code>
+Producer
+
+   │
+
+Publish Message
+
+   ▼
+
+Message Broker
+
+   │
+
+Queue / Topic
+
+   ▼
+
+Consumer
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Message چیست؟</h2>
+
+<p>
+
+    Message بسته‌ای از اطلاعات است که یک سرویس برای سرویس دیگری ارسال می‌کند.
+
+</p>
+
+<p>
+
+    برای مثال، پیام ثبت سفارش می‌تواند شامل شناسه سفارش، شناسه مشتری، مبلغ و زمان
+    ثبت سفارش باشد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">OrderCreated Message</span>
+    </div>
+
+    <pre><code>
+{
+  "eventId": "7c14a9df",
+  "eventType": "OrderCreated",
+  "orderId": 1001,
+  "customerId": 25,
+  "totalAmount": 850000,
+  "createdAt": "2026-07-16T10:30:00Z"
+}
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        پیام بهتر است فقط اطلاعات موردنیاز Consumerها را داشته باشد و به ساختار
+        داخلی Database سرویس تولیدکننده وابسته نباشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>مزایای Message Broker</h2>
+
+<ul>
+    <li>کاهش وابستگی مستقیم میان Microserviceها</li>
+    <li>انجام پردازش‌های زمان‌بر در پس‌زمینه</li>
+    <li>افزایش تحمل خطا و پایداری سیستم</li>
+    <li>امکان Retry پیام‌های ناموفق</li>
+    <li>امکان پردازش پیام‌ها توسط چند Consumer</li>
+    <li>کنترل بهتر حجم بالای درخواست‌ها</li>
+</ul>
+
+<p>
+
+    برای مثال، اگر Email Service موقتاً از دسترس خارج شود، پیام می‌تواند در Queue
+    باقی بماند و پس از بازیابی سرویس پردازش شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Temporary Failure</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+      ▼
+
+Message Broker
+
+      │
+
+Email Service Down
+
+      │
+
+Message Stays in Queue
+
+      │
+
+Email Service Restored
+
+      ▼
+
+Message Processed
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>چالش‌های Message Broker</h2>
+
+<p>
+
+    استفاده از Message Broker فقط مزیت ندارد و پیچیدگی‌های جدیدی نیز وارد سیستم
+    می‌کند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>چالش</th>
+            <th>توضیح</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Duplicate Message</td>
+            <td>ممکن است یک پیام بیشتر از یک‌بار تحویل داده شود.</td>
+        </tr>
+
+        <tr>
+            <td>Message Ordering</td>
+            <td>همیشه تضمینی برای ترتیب پردازش پیام‌ها وجود ندارد.</td>
+        </tr>
+
+        <tr>
+            <td>Eventual Consistency</td>
+            <td>اطلاعات سرویس‌ها ممکن است با کمی تأخیر هماهنگ شوند.</td>
+        </tr>
+
+        <tr>
+            <td>Monitoring</td>
+            <td>ردیابی جریان پیام‌ها نسبت به REST دشوارتر است.</td>
+        </tr>
+
+        <tr>
+            <td>Broker Failure</td>
+            <td>خود Message Broker نیز باید پایدار و قابل بازیابی باشد.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        Consumerها باید به‌صورت Idempotent طراحی شوند؛ یعنی پردازش چندباره یک پیام
+        نتیجه نهایی را خراب نکند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Message Brokerهای معروف</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>ابزار</th>
+            <th>کاربرد رایج</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>RabbitMQ</td>
+            <td>Message Queue، Routing و پردازش وظایف</td>
+        </tr>
+
+        <tr>
+            <td>Apache Kafka</td>
+            <td>Event Streaming و پردازش حجم بالای Event</td>
+        </tr>
+
+        <tr>
+            <td>Azure Service Bus</td>
+            <td>پیام‌رسانی مدیریت‌شده در محیط Azure</td>
+        </tr>
+
+        <tr>
+            <td>Amazon SQS</td>
+            <td>صف پیام مدیریت‌شده در AWS</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        RabbitMQ و Kafka هر دو ابزار پیام‌رسانی هستند، اما معماری، نحوه نگهداری
+        پیام و سناریوهای استفاده آن‌ها یکسان نیست.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>چه زمانی از Message Broker استفاده کنیم؟</h2>
+
+<ul>
+    <li>ارسال ایمیل، پیامک و Notification</li>
+    <li>پردازش فایل یا تصویر</li>
+    <li>ثبت گزارش و Audit Log</li>
+    <li>هماهنگی چند Microservice پس از یک رویداد</li>
+    <li>پردازش‌های زمان‌بر</li>
+    <li>مدیریت حجم ناگهانی درخواست‌ها</li>
+</ul>
+
+<h2>چه زمانی استفاده از آن ضروری نیست؟</h2>
+
+<ul>
+    <li>عملیات بسیار ساده و کوتاه است.</li>
+    <li>پاسخ فوری سرویس مقصد موردنیاز است.</li>
+    <li>سیستم فقط از چند سرویس کوچک تشکیل شده است.</li>
+    <li>اضافه شدن Broker پیچیدگی بیشتری از ارزش آن ایجاد می‌کند.</li>
+</ul>
+
+<hr>
+
+<h2>اشتباه رایج</h2>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        ارسال Entity کامل Database داخل Message یک اشتباه رایج است. پیام باید یک
+        قرارداد مستقل و مشخص داشته باشد تا تغییرات داخلی سرویس Producer باعث خرابی
+        Consumerها نشود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال:</strong>
+
+        اگر Consumer هنگام پردازش پیام از دسترس خارج شود چه اتفاقی می‌افتد؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        در یک طراحی صحیح، پیام تا زمانی که Consumer پردازش موفق آن را تأیید نکند
+        از Queue حذف نمی‌شود. پس از بازیابی Consumer، پیام دوباره در اختیار آن قرار
+        می‌گیرد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>واژه‌نامه</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>اصطلاح</th>
+            <th>توضیح</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Producer</td>
+            <td>تولیدکننده و ارسال‌کننده پیام</td>
+        </tr>
+
+        <tr>
+            <td>Consumer</td>
+            <td>دریافت‌کننده و پردازش‌کننده پیام</td>
+        </tr>
+
+        <tr>
+            <td>Queue</td>
+            <td>محلی برای نگهداری پیام‌ها تا زمان پردازش</td>
+        </tr>
+
+        <tr>
+            <td>Acknowledgment</td>
+            <td>تأیید موفقیت پردازش پیام توسط Consumer</td>
+        </tr>
+
+        <tr>
+            <td>Idempotency</td>
+            <td>ایمن بودن پردازش تکراری یک پیام</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        هر عملیاتی که برای پاسخ فوری به کاربر ضروری نیست، می‌تواند گزینه مناسبی
+        برای پردازش Asynchronous از طریق Message Broker باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    Message Broker واسطه‌ای برای انتقال پیام میان سرویس‌ها است. با استفاده از آن،
+    Producer و Consumer لازم نیست مستقیماً یکدیگر را بشناسند یا هم‌زمان در دسترس
+    باشند.
+
+</p>
+
+<p>
+
+    این ابزار وابستگی سرویس‌ها را کاهش می‌دهد و تحمل خطا، مقیاس‌پذیری و انعطاف
+    سیستم را افزایش می‌دهد؛ اما نیازمند مدیریت صحیح پیام‌های تکراری، خطاها،
+    مانیتورینگ و سازگاری داده‌ها است.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد با Message Queue آشنا می‌شویم و بررسی می‌کنیم پیام‌ها چگونه در
+        صف قرار می‌گیرند و میان Consumerها توزیع می‌شوند.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">مشکلات ارتباط Sync</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">3.2 Message Queue</div>
+        </div>
+    </a>
+
+</div>
