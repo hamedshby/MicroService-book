@@ -1,0 +1,675 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="asynchronous-communication">
+        ارتباط Asynchronous
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Message Queue</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">📨 ارتباط Asynchronous</div>
+
+    <h1>Message Queue چیست؟</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/26</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۷ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    <strong>Message Queue</strong>
+    صفی برای نگهداری موقت پیام‌ها است تا Consumerها بتوانند آن‌ها را پردازش کنند.
+
+</p>
+
+<p>
+
+    Producer پیام را داخل Queue قرار می‌دهد و بدون انتظار برای پردازش آن، به کار
+    خود ادامه می‌دهد.
+
+</p>
+
+<p>
+
+    Consumer نیز هر زمان آماده باشد، پیام را از Queue دریافت و پردازش می‌کند.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        Message Queue باعث می‌شود Producer و Consumer مجبور نباشند هم‌زمان فعال و
+        در دسترس باشند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>ساختار ساده Message Queue</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Message Queue Flow</span>
+    </div>
+
+    <pre><code>
+Producer
+
+   │
+
+Send Message
+
+   ▼
+
+Message Queue
+
+   │
+
+Store Message
+
+   ▼
+
+Consumer
+
+   │
+
+Process Message
+</code></pre>
+
+</div>
+
+<p>
+
+    تا زمانی که Consumer پیام را با موفقیت پردازش نکند، پیام می‌تواند داخل Queue
+    باقی بماند.
+
+</p>
+
+<hr>
+
+<h2>یک مثال واقعی</h2>
+
+<p>
+
+    فرض کنید پس از ثبت سفارش باید یک ایمیل تأیید برای کاربر ارسال شود.
+
+</p>
+
+<p>
+
+    سرویس Order یک پیام داخل Queue قرار می‌دهد و بلافاصله پاسخ ثبت سفارش را به
+    کاربر برمی‌گرداند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Order Email Queue</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+OrderCreated Message
+
+      ▼
+
+Email Queue
+
+      │
+
+      ▼
+
+Email Service
+
+      │
+
+Send Confirmation Email
+</code></pre>
+
+</div>
+
+<p>
+
+    اگر Email Service موقتاً از دسترس خارج شود، پیام از بین نمی‌رود و پس از
+    بازیابی سرویس پردازش خواهد شد.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        Queue مانند یک Buffer عمل می‌کند و اختلاف سرعت میان Producer و Consumer
+        را مدیریت می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Producer و Consumer</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>جزء</th>
+            <th>وظیفه</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Producer</td>
+            <td>پیام را تولید و وارد Queue می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Queue</td>
+            <td>پیام را تا زمان پردازش نگهداری می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Consumer</td>
+            <td>پیام را دریافت و عملیات موردنظر را اجرا می‌کند.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Acknowledgment چیست؟</h2>
+
+<p>
+
+    پس از دریافت پیام، Consumer باید نتیجه پردازش را به Broker اعلام کند.
+
+</p>
+
+<p>
+
+    این تأیید با نام
+    <strong>Acknowledgment</strong>
+    یا به‌اختصار
+    <strong>Ack</strong>
+    شناخته می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Acknowledgment</span>
+    </div>
+
+    <pre><code>
+Queue
+
+  │
+
+Deliver Message
+
+  ▼
+
+Consumer
+
+  │
+
+Process Successfully
+
+  ▼
+
+ACK
+
+  │
+
+Message Removed
+</code></pre>
+
+</div>
+
+<p>
+
+    اگر Consumer قبل از ارسال Ack متوقف شود، Broker می‌تواند پیام را دوباره در
+    اختیار همان Consumer یا Consumer دیگری قرار دهد.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        چون ممکن است یک پیام دوباره تحویل داده شود، Consumer باید به‌صورت
+        Idempotent طراحی شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>چند Consumer برای یک Queue</h2>
+
+<p>
+
+    برای افزایش سرعت پردازش می‌توان چند Consumer را به یک Queue متصل کرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Competing Consumers</span>
+    </div>
+
+    <pre><code>
+                 ┌──► Consumer 1
+                 │
+Message Queue ───┼──► Consumer 2
+                 │
+                 └──► Consumer 3
+</code></pre>
+
+</div>
+
+<p>
+
+    در این مدل، پیام‌ها میان Consumerها تقسیم می‌شوند و هر پیام معمولاً فقط توسط
+    یکی از آن‌ها پردازش می‌شود.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        این الگو با نام
+        <strong>Competing Consumers</strong>
+        شناخته می‌شود و برای افزایش مقیاس‌پذیری بسیار کاربردی است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>ترتیب پیام‌ها</h2>
+
+<p>
+
+    بسیاری از Queueها پیام‌ها را بر اساس ترتیب ورود پردازش می‌کنند که با نام
+    <strong>FIFO</strong>
+    شناخته می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">FIFO</span>
+    </div>
+
+    <pre><code>
+First In
+
+Message 1
+
+Message 2
+
+Message 3
+
+First Out
+</code></pre>
+
+</div>
+
+<p>
+
+    با این حال، وجود چند Consumer، Retry یا اولویت‌بندی پیام‌ها ممکن است ترتیب
+    نهایی پردازش را تغییر دهد.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        اگر ترتیب پیام‌ها برای Business اهمیت دارد، نباید بدون بررسی قابلیت‌های
+        Broker به ترتیب دریافت آن‌ها اعتماد کرد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Retry و Dead Letter Queue</h2>
+
+<p>
+
+    اگر پردازش پیام با خطا مواجه شود، می‌توان آن را دوباره برای Consumer ارسال
+    کرد.
+
+</p>
+
+<p>
+
+    اما اگر پیام پس از چند Retry همچنان ناموفق باشد، بهتر است به صف جداگانه‌ای با
+    نام
+    <strong>Dead Letter Queue</strong>
+    منتقل شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Retry and DLQ</span>
+    </div>
+
+    <pre><code>
+Main Queue
+
+    │
+
+    ▼
+
+Consumer
+
+    │
+
+Processing Failed
+
+    ▼
+
+Retry
+
+    │
+
+Failed Again
+
+    ▼
+
+Dead Letter Queue
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        پیام‌های موجود در Dead Letter Queue باید مانیتور، بررسی و در صورت نیاز
+        دوباره پردازش شوند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>مزایای Message Queue</h2>
+
+<ul>
+    <li>کاهش وابستگی میان Producer و Consumer</li>
+    <li>پردازش عملیات‌ها در پس‌زمینه</li>
+    <li>جلوگیری از فشار ناگهانی روی Consumer</li>
+    <li>امکان Retry پیام‌های ناموفق</li>
+    <li>افزایش مقیاس‌پذیری با چند Consumer</li>
+    <li>جلوگیری از حذف پیام هنگام قطعی موقت سرویس</li>
+</ul>
+
+<hr>
+
+<h2>چالش‌های Message Queue</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>چالش</th>
+            <th>توضیح</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Duplicate Message</td>
+            <td>ممکن است یک پیام بیش از یک‌بار تحویل داده شود.</td>
+        </tr>
+
+        <tr>
+            <td>Message Ordering</td>
+            <td>ترتیب پردازش همیشه تضمین‌شده نیست.</td>
+        </tr>
+
+        <tr>
+            <td>Poison Message</td>
+            <td>یک پیام خراب ممکن است دائماً با خطا مواجه شود.</td>
+        </tr>
+
+        <tr>
+            <td>Queue Backlog</td>
+            <td>کندی Consumer باعث افزایش تعداد پیام‌های منتظر می‌شود.</td>
+        </tr>
+
+        <tr>
+            <td>Monitoring</td>
+            <td>تعداد پیام‌ها، خطاها و زمان پردازش باید بررسی شود.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Message Queue چه تفاوتی با Database دارد؟</h2>
+
+<p>
+
+    Database برای نگهداری پایدار اطلاعات Business طراحی شده است، اما Queue برای
+    انتقال و پردازش پیام میان سرویس‌ها استفاده می‌شود.
+
+</p>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>ویژگی</th>
+            <th>Message Queue</th>
+            <th>Database</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>هدف اصلی</td>
+            <td>انتقال و پردازش پیام</td>
+            <td>ذخیره اطلاعات</td>
+        </tr>
+
+        <tr>
+            <td>عمر داده</td>
+            <td>معمولاً تا زمان پردازش</td>
+            <td>معمولاً بلندمدت</td>
+        </tr>
+
+        <tr>
+            <td>مصرف داده</td>
+            <td>پس از Ack ممکن است حذف شود</td>
+            <td>پس از خواندن باقی می‌ماند</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        استفاده از جدول Database به‌عنوان Queue، بدون مدیریت Lock، Retry،
+        Concurrency و Cleanup معمولاً مشکلات زیادی ایجاد می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>چه زمانی از Message Queue استفاده کنیم؟</h2>
+
+<ul>
+    <li>ارسال ایمیل و پیامک</li>
+    <li>پردازش فایل و تصویر</li>
+    <li>ثبت گزارش و Audit Log</li>
+    <li>پردازش سفارش‌ها</li>
+    <li>اجرای Jobهای زمان‌بر</li>
+    <li>کنترل حجم بالای درخواست‌ها</li>
+</ul>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال:</strong>
+
+        تفاوت Message Queue و Publish/Subscribe چیست؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        در Message Queue هر پیام معمولاً توسط یکی از Consumerها پردازش می‌شود؛ اما
+        در Publish/Subscribe یک پیام می‌تواند به چند Subscriber مستقل تحویل داده
+        شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>واژه‌نامه</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>اصطلاح</th>
+            <th>توضیح</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Queue</td>
+            <td>صف نگهداری پیام‌ها تا زمان پردازش</td>
+        </tr>
+
+        <tr>
+            <td>Ack</td>
+            <td>تأیید موفقیت پردازش پیام</td>
+        </tr>
+
+        <tr>
+            <td>Retry</td>
+            <td>تلاش مجدد برای پردازش پیام</td>
+        </tr>
+
+        <tr>
+            <td>Dead Letter Queue</td>
+            <td>صف پیام‌هایی که پردازش آن‌ها چند بار ناموفق بوده است</td>
+        </tr>
+
+        <tr>
+            <td>Competing Consumers</td>
+            <td>چند Consumer که پیام‌های یک Queue را میان خود تقسیم می‌کنند</td>
+        </tr>
+
+        <tr>
+            <td>Queue Backlog</td>
+            <td>پیام‌هایی که هنوز منتظر پردازش هستند</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        قرار گرفتن پیام در Queue به معنی پردازش موفق آن نیست؛ پردازش باید با Ack،
+        Retry، Idempotency و Monitoring کامل شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    Message Queue پیام‌ها را میان Producer و Consumer نگهداری و منتقل می‌کند.
+    Producer برای اجرای Consumer منتظر نمی‌ماند و Consumer نیز پیام‌ها را با سرعت
+    مناسب خود پردازش می‌کند.
+
+</p>
+
+<p>
+
+    Queue باعث افزایش مقیاس‌پذیری و تحمل خطا می‌شود؛ اما مدیریت پیام‌های تکراری،
+    Retry، ترتیب پردازش و Dead Letter Queue بخش مهمی از طراحی آن است.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد با Event آشنا می‌شویم و بررسی می‌کنیم Event چه تفاوتی با Command
+        و Message دارد.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">3.1 Message Broker چیست؟</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">3.3 Event</div>
+        </div>
+    </a>
+
+</div>
