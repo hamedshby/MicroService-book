@@ -1,0 +1,564 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="asynchronous-communication">
+        ارتباط Asynchronous
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Message-Driven Architecture</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">📨 ارتباط Asynchronous</div>
+
+    <h1>Message-Driven Architecture چیست؟</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/25</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۷ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    <strong>Message-Driven Architecture</strong>
+    سبکی از معماری نرم‌افزار است که در آن اجزای سیستم از طریق ارسال و دریافت
+    Message با یکدیگر ارتباط برقرار می‌کنند.
+
+</p>
+
+<p>
+
+    به‌جای اینکه یک سرویس مستقیماً سرویس دیگری را فراخوانی کند، Message را داخل
+    Message Broker قرار می‌دهد تا سرویس مقصد آن را در زمان مناسب پردازش کند.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        هدف اصلی Message-Driven Architecture کاهش وابستگی مستقیم میان سرویس‌ها و
+        انجام پردازش‌ها به‌صورت Asynchronous است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>یک مثال ساده</h2>
+
+<p>
+
+    فرض کنید پس از ثبت سفارش باید اطلاعات آن برای پردازش پرداخت ارسال شود.
+
+</p>
+
+<p>
+
+    سرویس Order یک Message با نام
+    <strong>ProcessPayment</strong>
+    ایجاد کرده و آن را داخل Queue قرار می‌دهد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Message-Driven Flow</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+ProcessPayment Message
+
+      ▼
+
+Payment Queue
+
+      │
+
+      ▼
+
+Payment Service
+
+      │
+
+Process Payment
+</code></pre>
+
+</div>
+
+<p>
+
+    سرویس Order برای اجرای Payment Service منتظر نمی‌ماند و Payment Service هر
+    زمان آماده باشد Message را پردازش می‌کند.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        اگر Payment Service موقتاً از دسترس خارج شود، Message می‌تواند داخل Queue
+        باقی بماند و پس از بازیابی سرویس پردازش شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>اجزای اصلی</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>جزء</th>
+            <th>وظیفه</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Message Producer</td>
+            <td>Message را تولید و ارسال می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Message Broker</td>
+            <td>Message را دریافت، نگهداری و مسیریابی می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Queue یا Topic</td>
+            <td>محل قرارگیری Message تا زمان پردازش است.</td>
+        </tr>
+
+        <tr>
+            <td>Message Consumer</td>
+            <td>Message را دریافت و عملیات مربوط به آن را اجرا می‌کند.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Message چه اطلاعاتی دارد؟</h2>
+
+<p>
+
+    Message معمولاً شامل نام عملیات، شناسه یکتا، زمان ایجاد و اطلاعات موردنیاز
+    Consumer است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">ProcessPayment Message</span>
+    </div>
+
+    <pre><code>
+{
+  "messageId": "98f31b42",
+  "messageType": "ProcessPayment",
+  "orderId": 1001,
+  "customerId": 25,
+  "amount": 850000,
+  "createdAt": "2026-07-17T09:30:00Z"
+}
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        Message باید یک قرارداد مستقل داشته باشد و بهتر است Entity کامل Database
+        داخل آن قرار نگیرد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>تفاوت Message-Driven و ارتباط Sync</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>ویژگی</th>
+            <th>ارتباط Sync</th>
+            <th>Message-Driven</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>نوع ارتباط</td>
+            <td>مستقیم</td>
+            <td>از طریق Broker</td>
+        </tr>
+
+        <tr>
+            <td>انتظار برای پاسخ</td>
+            <td>دارد</td>
+            <td>معمولاً ندارد</td>
+        </tr>
+
+        <tr>
+            <td>نیاز به فعال بودن مقصد</td>
+            <td>دارد</td>
+            <td>معمولاً ندارد</td>
+        </tr>
+
+        <tr>
+            <td>تحمل خطا</td>
+            <td>کمتر</td>
+            <td>بیشتر</td>
+        </tr>
+
+        <tr>
+            <td>پیچیدگی</td>
+            <td>کمتر</td>
+            <td>بیشتر</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>تفاوت Message-Driven و Event-Driven</h2>
+
+<p>
+
+    این دو معماری شبیه یکدیگر هستند، اما نوع Message و هدف ارتباط در آن‌ها متفاوت
+    است.
+
+</p>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>ویژگی</th>
+            <th>Message-Driven</th>
+            <th>Event-Driven</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>هدف</td>
+            <td>ارسال درخواست برای انجام یک کار</td>
+            <td>اعلام وقوع یک اتفاق</td>
+        </tr>
+
+        <tr>
+            <td>نمونه</td>
+            <td>ProcessPayment</td>
+            <td>PaymentCompleted</td>
+        </tr>
+
+        <tr>
+            <td>دریافت‌کننده</td>
+            <td>معمولاً یک Consumer مشخص</td>
+            <td>ممکن است چند Consumer باشد</td>
+        </tr>
+
+        <tr>
+            <td>نوع پیام</td>
+            <td>اغلب Command</td>
+            <td>Event</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        Message-Driven یک مفهوم گسترده‌تر است و می‌تواند شامل Command، Event یا
+        انواع دیگر Message باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>پردازش پیام ناموفق</h2>
+
+<p>
+
+    اگر Consumer نتواند Message را پردازش کند، معمولاً Message دوباره در اختیار آن
+    قرار می‌گیرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Failed Message</span>
+    </div>
+
+    <pre><code>
+Main Queue
+
+    │
+
+    ▼
+
+Consumer
+
+    │
+
+Processing Failed
+
+    ▼
+
+Retry
+
+    │
+
+Failed Again
+
+    ▼
+
+Dead Letter Queue
+</code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        Retry باید محدود باشد. پیام‌هایی که دائماً با خطا مواجه می‌شوند باید به
+        Dead Letter Queue منتقل شوند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>مزایای Message-Driven Architecture</h2>
+
+<ul>
+    <li>کاهش وابستگی مستقیم میان سرویس‌ها</li>
+    <li>انجام پردازش‌های زمان‌بر در پس‌زمینه</li>
+    <li>افزایش تحمل خطا</li>
+    <li>امکان Retry پیام‌های ناموفق</li>
+    <li>افزایش مقیاس‌پذیری با چند Consumer</li>
+    <li>کنترل بهتر افزایش ناگهانی حجم درخواست‌ها</li>
+</ul>
+
+<hr>
+
+<h2>چالش‌ها</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>چالش</th>
+            <th>توضیح</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Duplicate Message</td>
+            <td>ممکن است یک Message چند بار تحویل داده شود.</td>
+        </tr>
+
+        <tr>
+            <td>Message Ordering</td>
+            <td>ترتیب پردازش همیشه تضمین‌شده نیست.</td>
+        </tr>
+
+        <tr>
+            <td>Queue Backlog</td>
+            <td>کندی Consumer باعث تجمع Messageها می‌شود.</td>
+        </tr>
+
+        <tr>
+            <td>Debugging</td>
+            <td>ردیابی عملیات میان چند سرویس دشوارتر است.</td>
+        </tr>
+
+        <tr>
+            <td>Eventual Consistency</td>
+            <td>نتیجه عملیات ممکن است با کمی تأخیر در سیستم دیده شود.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>Best Practiceها</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>انجام دهید ✅</th>
+            <th>انجام ندهید ❌</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>برای هر Message شناسه یکتا قرار دهید.</td>
+            <td>پردازش دقیقاً یک‌باره را فرض نکنید.</td>
+        </tr>
+
+        <tr>
+            <td>Consumer را Idempotent طراحی کنید.</td>
+            <td>Message تکراری را بدون بررسی پردازش نکنید.</td>
+        </tr>
+
+        <tr>
+            <td>از Retry محدود و DLQ استفاده کنید.</td>
+            <td>Retry بی‌نهایت انجام ندهید.</td>
+        </tr>
+
+        <tr>
+            <td>Queue Backlog را مانیتور کنید.</td>
+            <td>فقط وضعیت Broker را بررسی نکنید.</td>
+        </tr>
+
+        <tr>
+            <td>قرارداد Message را Version کنید.</td>
+            <td>ساختار Message را ناگهانی تغییر ندهید.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>چه زمانی مناسب است؟</h2>
+
+<ul>
+    <li>عملیات برای پاسخ فوری کاربر ضروری نیست.</li>
+    <li>پردازش زمان‌بر یا سنگین است.</li>
+    <li>سرویس مقصد ممکن است موقتاً در دسترس نباشد.</li>
+    <li>حجم درخواست‌ها ناگهان افزایش پیدا می‌کند.</li>
+    <li>نیاز به Retry و پردازش مطمئن وجود دارد.</li>
+</ul>
+
+<hr>
+
+<h2>اشتباه رایج</h2>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        ارسال Message به Broker به معنی موفقیت کامل عملیات نیست. سیستم باید وضعیت
+        پردازش، Retry، Dead Letter Queue و خطاهای Consumer را نیز مانیتور کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال:</strong>
+
+        اگر یک Message دو بار به Consumer تحویل داده شود، چگونه از اجرای دوباره
+        عملیات جلوگیری می‌کنید؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        Consumer باید Idempotent باشد. معمولاً شناسه Message در Database ذخیره
+        می‌شود و قبل از پردازش بررسی می‌شود که Message قبلاً پردازش نشده باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        در معماری Message-Driven هیچ‌گاه فرض نکنید یک Message فقط یک بار و دقیقاً
+        به همان ترتیب مورد انتظار پردازش می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    در Message-Driven Architecture، سرویس‌ها از طریق Message و Message Broker با
+    یکدیگر ارتباط برقرار می‌کنند. این روش وابستگی مستقیم را کاهش داده و امکان
+    پردازش Asynchronous، Retry و مقیاس‌پذیری بهتر را فراهم می‌کند.
+
+</p>
+
+<p>
+
+    با این حال، طراحی Consumerهای Idempotent، مدیریت Messageهای ناموفق، Monitoring
+    و کنترل Queue Backlog برای پایداری سیستم ضروری است.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد تفاوت Message Queue و Publish/Subscribe را بررسی می‌کنیم و با
+        نحوه توزیع Message میان چند Consumer آشنا می‌شویم.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">3.4 Event-Driven Architecture</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">تفاوت Queue و Publish/Subscribe</div>
+        </div>
+    </a>
+
+</div>
