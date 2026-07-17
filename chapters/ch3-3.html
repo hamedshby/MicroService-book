@@ -1,0 +1,564 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="asynchronous-communication">
+        ارتباط Asynchronous
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Event</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">📨 ارتباط Asynchronous</div>
+
+    <h1>Event چیست؟</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/26</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۶ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    در معماری Microservices،
+    <strong>Event</strong>
+    پیامی است که اعلام می‌کند اتفاقی در گذشته رخ داده است.
+
+</p>
+
+<p>
+
+    برای مثال، زمانی که یک سفارش ثبت می‌شود، سرویس Order می‌تواند رویدادی با نام
+    <strong>OrderCreated</strong>
+    منتشر کند.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        Event به سرویس‌های دیگر نمی‌گوید چه کاری انجام دهند؛ فقط آن‌ها را از وقوع
+        یک اتفاق مطلع می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>یک مثال ساده</h2>
+
+<p>
+
+    فرض کنید کاربر یک سفارش جدید ثبت می‌کند.
+
+</p>
+
+<p>
+
+    پس از ثبت موفق سفارش، سرویس Order یک Event منتشر می‌کند و سایر سرویس‌ها بر
+    اساس نیاز خود به آن واکنش نشان می‌دهند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">OrderCreated Event</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+OrderCreated
+
+      ▼
+
+Message Broker
+
+      │
+
+      ├──► Email Service
+
+      ├──► Inventory Service
+
+      └──► Analytics Service
+</code></pre>
+
+</div>
+
+<p>
+
+    Email Service ایمیل تأیید ارسال می‌کند، Inventory Service موجودی را به‌روزرسانی
+    می‌کند و Analytics Service اطلاعات فروش را ثبت می‌کند.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        سرویس Order لازم نیست Consumerها را بشناسد و فقط وقوع Event را اعلام می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>ساختار یک Event</h2>
+
+<p>
+
+    یک Event معمولاً شامل نام رویداد، شناسه یکتا، زمان وقوع و اطلاعات موردنیاز
+    Consumerها است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Event Example</span>
+    </div>
+
+    <pre><code>
+{
+  "eventId": "55d9c681",
+  "eventType": "OrderCreated",
+  "occurredAt": "2026-07-16T11:20:00Z",
+  "orderId": 1001,
+  "customerId": 25,
+  "totalAmount": 850000
+}
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        نام Event بهتر است به شکل گذشته نوشته شود؛ مانند OrderCreated،
+        PaymentCompleted یا ProductPriceChanged.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>تفاوت Event و Command</h2>
+
+<p>
+
+    Event و Command هر دو نوعی Message هستند، اما هدف متفاوتی دارند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>ویژگی</th>
+            <th>Event</th>
+            <th>Command</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>هدف</td>
+            <td>اعلام وقوع یک اتفاق</td>
+            <td>درخواست انجام یک عملیات</td>
+        </tr>
+
+        <tr>
+            <td>زمان فعل</td>
+            <td>گذشته</td>
+            <td>دستوری</td>
+        </tr>
+
+        <tr>
+            <td>نمونه نام</td>
+            <td>OrderCreated</td>
+            <td>CreateOrder</td>
+        </tr>
+
+        <tr>
+            <td>دریافت‌کننده</td>
+            <td>ممکن است چند Consumer باشد</td>
+            <td>معمولاً یک Handler مشخص</td>
+        </tr>
+
+        <tr>
+            <td>انتظار نتیجه</td>
+            <td>معمولاً ندارد</td>
+            <td>ممکن است نتیجه مورد انتظار باشد</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        Event نباید به شکل دستور طراحی شود. نامی مانند SendOrderEmail یک Command
+        است، اما OrderCreated یک Event محسوب می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Event چه تفاوتی با Message دارد؟</h2>
+
+<p>
+
+    Message یک اصطلاح عمومی برای داده‌ای است که میان سرویس‌ها منتقل می‌شود.
+
+</p>
+
+<p>
+
+    Event یکی از انواع Message است که بیان می‌کند یک اتفاق قبلاً رخ داده است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Message Types</span>
+    </div>
+
+    <pre><code>
+Message
+
+   │
+
+   ├── Command
+   │     └── CreatePayment
+   │
+   └── Event
+         └── PaymentCompleted
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Integration Event</h2>
+
+<p>
+
+    Eventهایی که میان Microserviceها منتشر می‌شوند معمولاً با نام
+    <strong>Integration Event</strong>
+    شناخته می‌شوند.
+
+</p>
+
+<p>
+
+    این Eventها بخشی از قرارداد عمومی سرویس هستند و Consumerهای دیگر به ساختار
+    آن‌ها وابسته می‌شوند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Integration Event</span>
+    </div>
+
+    <pre><code>
+Payment Service
+
+      │
+
+PaymentCompleted
+
+      ▼
+
+Message Broker
+
+      │
+
+      ├──► Order Service
+
+      ├──► Notification Service
+
+      └──► Accounting Service
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        تغییر ساختار Integration Event باید با دقت انجام شود؛ زیرا ممکن است چند
+        سرویس دیگر از آن استفاده کنند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>مزایای استفاده از Event</h2>
+
+<ul>
+    <li>کاهش وابستگی مستقیم میان سرویس‌ها</li>
+    <li>امکان اضافه شدن Consumer جدید بدون تغییر Producer</li>
+    <li>اجرای پردازش‌ها به‌صورت Asynchronous</li>
+    <li>افزایش توسعه‌پذیری سیستم</li>
+    <li>مناسب برای ثبت تغییرات مهم Business</li>
+</ul>
+
+<hr>
+
+<h2>چالش‌های Event</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>چالش</th>
+            <th>توضیح</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Duplicate Event</td>
+            <td>ممکن است یک Event بیش از یک‌بار تحویل داده شود.</td>
+        </tr>
+
+        <tr>
+            <td>Event Ordering</td>
+            <td>ترتیب رسیدن Eventها همیشه تضمین‌شده نیست.</td>
+        </tr>
+
+        <tr>
+            <td>Eventual Consistency</td>
+            <td>سرویس‌ها ممکن است با کمی تأخیر هماهنگ شوند.</td>
+        </tr>
+
+        <tr>
+            <td>Schema Change</td>
+            <td>تغییر قرارداد Event ممکن است Consumerها را خراب کند.</td>
+        </tr>
+
+        <tr>
+            <td>Tracing</td>
+            <td>ردیابی جریان کامل عملیات دشوارتر از ارتباط Sync است.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        Consumer باید در برابر دریافت Event تکراری مقاوم باشد و از Idempotency
+        استفاده کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Best Practiceهای طراحی Event</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>انجام دهید ✅</th>
+            <th>انجام ندهید ❌</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>نام Event را در زمان گذشته انتخاب کنید.</td>
+            <td>از نام‌های دستوری استفاده نکنید.</td>
+        </tr>
+
+        <tr>
+            <td>شناسه و زمان وقوع Event را قرار دهید.</td>
+            <td>به Timestamp سیستم Consumer وابسته نشوید.</td>
+        </tr>
+
+        <tr>
+            <td>فقط اطلاعات موردنیاز را ارسال کنید.</td>
+            <td>Entity کامل Database را منتشر نکنید.</td>
+        </tr>
+
+        <tr>
+            <td>قرارداد Event را Version کنید.</td>
+            <td>ساختار Event را ناگهانی تغییر ندهید.</td>
+        </tr>
+
+        <tr>
+            <td>Consumer را Idempotent طراحی کنید.</td>
+            <td>فرض نکنید Event فقط یک‌بار تحویل می‌شود.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>اشتباه رایج</h2>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        یک اشتباه رایج این است که Producer بداند هر Consumer دقیقاً چه کاری انجام
+        می‌دهد. Producer فقط باید Event را منتشر کند و تصمیم‌گیری درباره واکنش به
+        آن بر عهده Consumerها باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال:</strong>
+
+        تفاوت Event و Command چیست؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        Command درخواست انجام یک عملیات است و معمولاً یک Handler مشخص دارد؛ اما
+        Event اعلام می‌کند اتفاقی رخ داده و ممکن است توسط چند Consumer مستقل
+        پردازش شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>واژه‌نامه</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>اصطلاح</th>
+            <th>توضیح</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Event</td>
+            <td>پیامی که وقوع یک اتفاق در گذشته را اعلام می‌کند</td>
+        </tr>
+
+        <tr>
+            <td>Command</td>
+            <td>پیامی برای درخواست انجام یک عملیات</td>
+        </tr>
+
+        <tr>
+            <td>Integration Event</td>
+            <td>Event منتشرشده میان Microserviceها</td>
+        </tr>
+
+        <tr>
+            <td>Producer</td>
+            <td>سرویسی که Event را منتشر می‌کند</td>
+        </tr>
+
+        <tr>
+            <td>Consumer</td>
+            <td>سرویسی که Event را دریافت و پردازش می‌کند</td>
+        </tr>
+
+        <tr>
+            <td>Eventual Consistency</td>
+            <td>هماهنگ شدن داده‌های سرویس‌ها با کمی تأخیر</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        Event باید بیان کند چه اتفاقی رخ داده است، نه اینکه سرویس‌های دیگر باید چه
+        کاری انجام دهند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    Event پیامی است که وقوع یک اتفاق را اعلام می‌کند. Producer آن را منتشر می‌کند
+    و Consumerهای مختلف می‌توانند بدون ایجاد وابستگی مستقیم به آن واکنش نشان دهند.
+
+</p>
+
+<p>
+
+    استفاده صحیح از Event باعث افزایش انعطاف‌پذیری و کاهش Coupling می‌شود؛ اما
+    مدیریت Eventهای تکراری، ترتیب پردازش، تغییر قرارداد و Eventual Consistency
+    اهمیت زیادی دارد.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد با Event-Driven Architecture آشنا می‌شویم و بررسی می‌کنیم چگونه
+        سرویس‌ها با انتشار و دریافت Event با یکدیگر همکاری می‌کنند.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">3.2 Message Queue</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">3.4 Event-Driven Architecture</div>
+        </div>
+    </a>
+
+</div>
