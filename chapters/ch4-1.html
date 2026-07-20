@@ -1,0 +1,465 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="rabbitmq">RabbitMQ</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">معرفی RabbitMQ</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">🐇 RabbitMQ</div>
+
+    <h1>معرفی RabbitMQ</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/26</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۶ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    <strong>RabbitMQ</strong>
+    یک Message Broker متن‌باز است که برای انتقال پیام میان سرویس‌ها و پیاده‌سازی
+    ارتباط‌های Asynchronous استفاده می‌شود.
+
+</p>
+
+<p>
+
+    Producer پیام را برای RabbitMQ ارسال می‌کند و Consumer آن را در زمان مناسب
+    دریافت و پردازش می‌کند.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        RabbitMQ به سرویس‌ها کمک می‌کند بدون وابستگی مستقیم و بدون نیاز به در دسترس
+        بودن هم‌زمان، با یکدیگر ارتباط برقرار کنند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>RabbitMQ چگونه کار می‌کند؟</h2>
+
+<p>
+
+    برخلاف تصور ساده، Producer معمولاً پیام را مستقیماً داخل Queue قرار نمی‌دهد.
+
+</p>
+
+<p>
+
+    پیام ابتدا به
+    <strong>Exchange</strong>
+    ارسال می‌شود و Exchange بر اساس قوانین Routing آن را به یک یا چند Queue
+    منتقل می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">RabbitMQ Flow</span>
+    </div>
+
+    <pre><code>
+Producer
+
+   │
+
+Publish Message
+
+   ▼
+
+Exchange
+
+   │
+
+Routing
+
+   ▼
+
+Queue
+
+   │
+
+Deliver Message
+
+   ▼
+
+Consumer
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        Exchange مسئول مسیریابی پیام است و Queue مسئول نگهداری پیام تا زمان پردازش
+        توسط Consumer است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>یک مثال ساده</h2>
+
+<p>
+
+    فرض کنید پس از ثبت سفارش، باید یک ایمیل تأیید برای کاربر ارسال شود.
+
+</p>
+
+<p>
+
+    Order Service پیام
+    <strong>OrderCreated</strong>
+    را منتشر می‌کند و Email Service آن را پردازش می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Order Example</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+OrderCreated
+
+      ▼
+
+RabbitMQ Exchange
+
+      │
+
+      ▼
+
+Email Queue
+
+      │
+
+      ▼
+
+Email Service
+</code></pre>
+
+</div>
+
+<p>
+
+    اگر Email Service موقتاً متوقف شود، پیام می‌تواند داخل Queue باقی بماند و پس
+    از بازگشت سرویس پردازش شود.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        با استفاده از RabbitMQ، ثبت سفارش به سرعت انجام می‌شود و ارسال ایمیل در
+        پس‌زمینه ادامه پیدا می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>اجزای اصلی RabbitMQ</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>جزء</th>
+            <th>وظیفه</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Producer</td>
+            <td>پیام را تولید و منتشر می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Exchange</td>
+            <td>پیام را بر اساس Routing به Queue مناسب ارسال می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Queue</td>
+            <td>پیام را تا زمان پردازش نگهداری می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Binding</td>
+            <td>ارتباط میان Exchange و Queue را مشخص می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Consumer</td>
+            <td>پیام را از Queue دریافت و پردازش می‌کند.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>چرا از RabbitMQ استفاده می‌کنیم؟</h2>
+
+<ul>
+    <li>کاهش وابستگی مستقیم میان Microserviceها</li>
+    <li>اجرای پردازش‌های زمان‌بر در پس‌زمینه</li>
+    <li>نگهداری پیام هنگام قطعی موقت Consumer</li>
+    <li>امکان Retry پیام‌های ناموفق</li>
+    <li>توزیع پردازش میان چند Consumer</li>
+    <li>کنترل افزایش ناگهانی حجم درخواست‌ها</li>
+</ul>
+
+<hr>
+
+<h2>RabbitMQ چه کاربردهایی دارد؟</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>سناریو</th>
+            <th>نمونه</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>ارسال Notification</td>
+            <td>ایمیل، پیامک و Push Notification</td>
+        </tr>
+
+        <tr>
+            <td>پردازش پس‌زمینه</td>
+            <td>پردازش تصویر، فایل و گزارش</td>
+        </tr>
+
+        <tr>
+            <td>ارتباط Microserviceها</td>
+            <td>انتقال Command و Integration Event</td>
+        </tr>
+
+        <tr>
+            <td>مدیریت بار</td>
+            <td>قرار دادن درخواست‌های زیاد در Queue</td>
+        </tr>
+
+        <tr>
+            <td>پردازش مالی</td>
+            <td>تسویه، پرداخت و ثبت تراکنش</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>RabbitMQ و AMQP</h2>
+
+<p>
+
+    RabbitMQ از پروتکل
+    <strong>AMQP</strong>
+    برای انتقال پیام پشتیبانی می‌کند.
+
+</p>
+
+<p>
+
+    AMQP یک استاندارد پیام‌رسانی است که مفاهیمی مانند Exchange، Queue، Binding،
+    Routing Key و Acknowledgment را تعریف می‌کند.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        RabbitMQ فقط یک Queue ساده نیست؛ بلکه امکاناتی مانند Routing، Retry،
+        Acknowledgment، Dead Letter Queue و Priority Queue را نیز ارائه می‌دهد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>RabbitMQ چه تفاوتی با REST دارد؟</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>ویژگی</th>
+            <th>REST</th>
+            <th>RabbitMQ</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>نوع ارتباط</td>
+            <td>معمولاً Synchronous</td>
+            <td>معمولاً Asynchronous</td>
+        </tr>
+
+        <tr>
+            <td>انتظار برای پاسخ</td>
+            <td>دارد</td>
+            <td>معمولاً ندارد</td>
+        </tr>
+
+        <tr>
+            <td>نیاز به فعال بودن مقصد</td>
+            <td>دارد</td>
+            <td>الزامی نیست</td>
+        </tr>
+
+        <tr>
+            <td>نگهداری درخواست</td>
+            <td>معمولاً ندارد</td>
+            <td>در Queue نگهداری می‌شود</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        RabbitMQ جایگزین کامل REST نیست. عملیات‌هایی که به پاسخ فوری نیاز دارند
+        همچنان می‌توانند با REST یا gRPC انجام شوند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>چالش‌های استفاده از RabbitMQ</h2>
+
+<ul>
+    <li>احتمال تحویل تکراری پیام</li>
+    <li>پیچیدگی بیشتر در Debugging و Monitoring</li>
+    <li>نیاز به مدیریت Retry و Dead Letter Queue</li>
+    <li>احتمال افزایش Queue Backlog</li>
+    <li>نیاز به مدیریت ترتیب پیام‌ها</li>
+</ul>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        ارسال موفق پیام به RabbitMQ به معنی پردازش موفق آن نیست. وضعیت Consumerها،
+        Queueها و پیام‌های ناموفق نیز باید مانیتور شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال:</strong>
+
+        آیا Producer در RabbitMQ پیام را مستقیماً به Queue ارسال می‌کند؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        خیر. Producer پیام را به Exchange منتشر می‌کند و Exchange بر اساس Binding
+        و Routing Key آن را به Queue مناسب منتقل می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        RabbitMQ فقط ابزار انتقال پیام است؛ پایداری واقعی زمانی ایجاد می‌شود که
+        Consumerها Idempotent باشند و Retry، Ack و Monitoring به‌درستی طراحی شوند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    RabbitMQ یک Message Broker قدرتمند برای پیاده‌سازی ارتباط Asynchronous میان
+    سرویس‌ها است. پیام‌ها از Producer به Exchange ارسال شده و سپس وارد Queue
+    مناسب می‌شوند.
+
+</p>
+
+<p>
+
+    استفاده از RabbitMQ باعث کاهش Coupling، افزایش تحمل خطا و امکان پردازش
+    پس‌زمینه می‌شود؛ اما مدیریت صحیح پیام‌های تکراری، خطاها و Queueها ضروری است.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد RabbitMQ را نصب می‌کنیم و با پنل مدیریتی آن آشنا می‌شویم.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">Message-Driven Architecture</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">4.2 نصب RabbitMQ</div>
+        </div>
+    </a>
+
+</div>

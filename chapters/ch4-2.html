@@ -1,0 +1,425 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="rabbitmq">RabbitMQ</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">نصب RabbitMQ</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">🐇 RabbitMQ</div>
+
+    <h1>نصب RabbitMQ</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/26</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۸ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    RabbitMQ را می‌توان روی ویندوز، لینوکس، Docker و Kubernetes اجرا کرد.
+    امروزه در اکثر پروژه‌های Microservice، RabbitMQ داخل Docker اجرا می‌شود؛ زیرا
+    راه‌اندازی، به‌روزرسانی و مدیریت آن بسیار ساده‌تر است.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        اگر قصد یادگیری RabbitMQ را دارید، بهترین و سریع‌ترین روش استفاده از Docker است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>پیش‌نیازها</h2>
+
+<ul>
+
+    <li>Docker</li>
+
+    <li>Docker Compose (اختیاری)</li>
+
+    <li>پورت‌های 5672 و 15672 آزاد باشند.</li>
+
+</ul>
+
+<hr>
+
+<h2>اجرای RabbitMQ با Docker</h2>
+
+<p>
+
+    ساده‌ترین روش اجرای RabbitMQ استفاده از Image رسمی آن است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Docker</span>
+    </div>
+
+    <pre><code>docker run -d \
+--name rabbitmq \
+-p 5672:5672 \
+-p 15672:15672 \
+rabbitmq:4-management
+</code></pre>
+
+</div>
+
+<p>
+
+    نسخه
+    <strong>management</strong>
+    علاوه بر RabbitMQ، پنل مدیریتی تحت وب را نیز در اختیار شما قرار می‌دهد.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        پس از اجرای Container، RabbitMQ آماده استفاده خواهد بود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>پورت‌های RabbitMQ</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>پورت</th>
+
+            <th>کاربرد</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>5672</td>
+
+            <td>ارتباط برنامه‌ها با RabbitMQ از طریق AMQP</td>
+
+        </tr>
+
+        <tr>
+
+            <td>15672</td>
+
+            <td>پنل مدیریتی تحت وب</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>ورود به پنل مدیریت</h2>
+
+<p>
+
+    پس از اجرای RabbitMQ، مرورگر را باز کرده و آدرس زیر را وارد کنید.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Management UI</span>
+    </div>
+
+    <pre><code>http://localhost:15672
+</code></pre>
+
+</div>
+
+<p>
+
+    اطلاعات پیش‌فرض ورود به صورت زیر است:
+
+</p>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+
+            <th>فیلد</th>
+
+            <th>مقدار</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        <tr>
+
+            <td>Username</td>
+
+            <td>guest</td>
+
+        </tr>
+
+        <tr>
+
+            <td>Password</td>
+
+            <td>guest</td>
+
+        </tr>
+
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        در محیط Production هرگز از نام کاربری و رمز عبور پیش‌فرض استفاده نکنید.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>بررسی اجرای RabbitMQ</h2>
+
+<p>
+
+    اگر نصب با موفقیت انجام شده باشد، صفحه Dashboard را مشاهده خواهید کرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Dashboard</span>
+    </div>
+
+    <pre><code>
+Overview
+
+Connections
+
+Channels
+
+Exchanges
+
+Queues
+
+Admin
+</code></pre>
+
+</div>
+
+<p>
+
+    در این پنل می‌توانید Queueها، Exchangeها، Connectionها و Consumerها را مدیریت
+    و مانیتور کنید.
+
+</p>
+
+<hr>
+
+<h2>توقف و اجرای مجدد Container</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Docker Commands</span>
+    </div>
+
+    <pre><code>docker stop rabbitmq
+
+docker start rabbitmq
+</code></pre>
+
+</div>
+
+<p>
+
+    برای مشاهده وضعیت Container نیز می‌توانید از دستور زیر استفاده کنید.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Docker PS</span>
+    </div>
+
+    <pre><code>docker ps
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>ساختار کلی RabbitMQ</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">RabbitMQ Architecture</span>
+    </div>
+
+    <pre><code>
+Producer
+
+    │
+
+    ▼
+
+Exchange
+
+    │
+
+    ▼
+
+Queue
+
+    │
+
+    ▼
+
+Consumer
+</code></pre>
+
+</div>
+
+<p>
+
+    در فصل‌های بعد هر یک از این اجزا را به‌صورت کامل بررسی خواهیم کرد.
+
+</p>
+
+<hr>
+
+<h2>اشتباه رایج</h2>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        بسیاری تصور می‌کنند Producer مستقیماً پیام را داخل Queue قرار می‌دهد؛
+        در حالی که در RabbitMQ پیام ابتدا وارد Exchange شده و سپس به Queue مناسب
+        هدایت می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال:</strong>
+
+        چرا معمولاً از Image
+        <strong>rabbitmq:management</strong>
+        استفاده می‌شود؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        زیرا علاوه بر Broker، پنل مدیریتی تحت وب را نیز در اختیار قرار می‌دهد و
+        مشاهده Queueها، Exchangeها، Connectionها و Consumerها را بسیار ساده می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        برای محیط توسعه همیشه RabbitMQ را با نسخه
+        <strong>management</strong>
+        اجرا کنید تا بتوانید جریان پیام‌ها را به‌صورت گرافیکی مشاهده و عیب‌یابی کنید.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    ساده‌ترین روش نصب RabbitMQ استفاده از Docker است. پس از اجرای Container،
+    Broker روی پورت 5672 و پنل مدیریتی روی پورت 15672 در دسترس خواهد بود.
+
+</p>
+
+<p>
+
+    در ادامه این فصل با مفاهیم اصلی RabbitMQ مانند Exchange، Queue، Binding و
+    Routing Key آشنا خواهیم شد.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد با مفاهیم اصلی RabbitMQ آشنا می‌شویم و بررسی می‌کنیم Exchange،
+        Queue، Binding و Routing Key چه نقشی در انتقال پیام دارند.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">4.1 معرفی RabbitMQ</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">4.3 مفاهیم RabbitMQ</div>
+        </div>
+    </a>
+
+</div>
