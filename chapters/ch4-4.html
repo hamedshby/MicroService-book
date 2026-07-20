@@ -1,0 +1,914 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="rabbitmq">RabbitMQ</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">انواع Exchange</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">🐇 RabbitMQ</div>
+
+    <h1>انواع Exchange در RabbitMQ</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/26</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۱۲ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    در RabbitMQ، سرویس Producer پیام را مستقیماً برای Queue ارسال نمی‌کند.
+    پیام ابتدا وارد
+    <strong>Exchange</strong>
+    می‌شود و Exchange آن را بر اساس قوانین Routing به یک یا چند Queue هدایت
+    می‌کند.
+
+</p>
+
+<p>
+
+    RabbitMQ چهار نوع اصلی Exchange دارد:
+
+</p>
+
+<ul>
+    <li>Direct Exchange</li>
+    <li>Fanout Exchange</li>
+    <li>Topic Exchange</li>
+    <li>Headers Exchange</li>
+</ul>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        در تمام مثال‌های این فصل، Order Service پیام‌های مربوط به سفارش را منتشر
+        می‌کند و سرویس‌هایی مانند Notification، Payment و Analytics آن‌ها را
+        دریافت می‌کنند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نصب پکیج RabbitMQ در .NET</h2>
+
+<p>
+
+    ابتدا پکیج رسمی RabbitMQ را به پروژه Order Service اضافه کنید.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Terminal</span>
+    </div>
+
+    <pre><code>dotnet add package RabbitMQ.Client</code></pre>
+
+</div>
+
+<p>
+
+    سپس Connection و Channel را ایجاد می‌کنیم. در مثال‌های بعدی از همین ساختار
+    استفاده خواهد شد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Connection</span>
+    </div>
+
+    <pre><code>using RabbitMQ.Client;
+
+var factory = new ConnectionFactory
+{
+    HostName = "localhost",
+    UserName = "guest",
+    Password = "guest",
+    ClientProvidedName = "OrderService"
+};
+
+await using var connection = await factory.CreateConnectionAsync();
+await using var channel = await connection.CreateChannelAsync();
+</code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        در برنامه واقعی نباید برای انتشار هر پیام یک Connection جدید ایجاد کنید.
+        Connection باید طول عمر بیشتری داشته باشد و مدیریت آن از طریق Dependency
+        Injection انجام شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Direct Exchange</h2>
+
+<p>
+
+    در
+    <strong>Direct Exchange</strong>
+    پیام زمانی وارد Queue می‌شود که Routing Key پیام دقیقاً با Binding Key آن
+    Queue برابر باشد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Direct Exchange Flow</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+Routing Key: order.created
+
+        │
+
+        ▼
+
+Direct Exchange
+
+        │
+
+        ├── order.created
+        │       ▼
+        │   Notification Queue
+        │
+        └── order.cancelled
+                ▼
+            Refund Queue
+</code></pre>
+
+</div>
+
+<h3>تعریف Direct Exchange و Queue</h3>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Direct Exchange Setup</span>
+    </div>
+
+    <pre><code>const string exchangeName = "order.direct";
+const string queueName = "order.notification.queue";
+const string routingKey = "order.created";
+
+await channel.ExchangeDeclareAsync(
+    exchange: exchangeName,
+    type: ExchangeType.Direct,
+    durable: true,
+    autoDelete: false);
+
+await channel.QueueDeclareAsync(
+    queue: queueName,
+    durable: true,
+    exclusive: false,
+    autoDelete: false);
+
+await channel.QueueBindAsync(
+    queue: queueName,
+    exchange: exchangeName,
+    routingKey: routingKey);
+</code></pre>
+
+</div>
+
+<h3>انتشار پیام OrderCreated</h3>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Direct Exchange Publisher</span>
+    </div>
+
+    <pre><code>using System.Text;
+using System.Text.Json;
+
+var message = new
+{
+    MessageId = Guid.NewGuid(),
+    MessageType = "OrderCreated",
+    OrderId = 1001,
+    CustomerId = 25,
+    TotalAmount = 850000,
+    CreatedAt = DateTime.UtcNow
+};
+
+byte[] body = Encoding.UTF8.GetBytes(
+    JsonSerializer.Serialize(message));
+
+await channel.BasicPublishAsync(
+    exchange: exchangeName,
+    routingKey: "order.created",
+    body: body);
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        Direct Exchange برای سناریوهایی مناسب است که مقصد پیام با یک Routing Key
+        دقیق مانند order.created یا order.cancelled مشخص می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Fanout Exchange</h2>
+
+<p>
+
+    <strong>Fanout Exchange</strong>
+    پیام را برای تمام Queueهای متصل به خود ارسال می‌کند و Routing Key را نادیده
+    می‌گیرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Fanout Exchange Flow</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+OrderCreated
+
+      ▼
+
+Fanout Exchange
+
+      │
+
+      ├──► Notification Queue
+
+      ├──► Analytics Queue
+
+      └──► Audit Queue
+</code></pre>
+
+</div>
+
+<h3>تعریف Fanout Exchange</h3>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Fanout Exchange Setup</span>
+    </div>
+
+    <pre><code>const string exchangeName = "order.fanout";
+
+await channel.ExchangeDeclareAsync(
+    exchange: exchangeName,
+    type: ExchangeType.Fanout,
+    durable: true,
+    autoDelete: false);
+
+string[] queues =
+[
+    "order.notification.queue",
+    "order.analytics.queue",
+    "order.audit.queue"
+];
+
+foreach (string queueName in queues)
+{
+    await channel.QueueDeclareAsync(
+        queue: queueName,
+        durable: true,
+        exclusive: false,
+        autoDelete: false);
+
+    await channel.QueueBindAsync(
+        queue: queueName,
+        exchange: exchangeName,
+        routingKey: string.Empty);
+}
+</code></pre>
+
+</div>
+
+<h3>انتشار پیام</h3>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Fanout Exchange Publisher</span>
+    </div>
+
+    <pre><code>byte[] body = Encoding.UTF8.GetBytes(
+    JsonSerializer.Serialize(message));
+
+await channel.BasicPublishAsync(
+    exchange: exchangeName,
+    routingKey: string.Empty,
+    body: body);
+</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        در این مثال، Notification، Analytics و Audit هرکدام یک نسخه مستقل از
+        پیام OrderCreated را دریافت می‌کنند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Topic Exchange</h2>
+
+<p>
+
+    <strong>Topic Exchange</strong>
+    پیام‌ها را با استفاده از الگوهای Routing Key مسیریابی می‌کند.
+
+</p>
+
+<p>
+
+    Routing Key معمولاً از چند بخش تشکیل می‌شود که با نقطه از یکدیگر جدا شده‌اند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Routing Keys</span>
+    </div>
+
+    <pre><code>
+order.created
+
+order.paid
+
+order.cancelled
+
+order.payment.failed
+</code></pre>
+
+</div>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>علامت</th>
+            <th>کاربرد</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>*</td>
+            <td>دقیقاً یک بخش را پوشش می‌دهد.</td>
+        </tr>
+
+        <tr>
+            <td>#</td>
+            <td>صفر یا چند بخش را پوشش می‌دهد.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<h3>تعریف Topic Exchange</h3>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Topic Exchange Setup</span>
+    </div>
+
+    <pre><code>const string exchangeName = "order.topic";
+
+await channel.ExchangeDeclareAsync(
+    exchange: exchangeName,
+    type: ExchangeType.Topic,
+    durable: true,
+    autoDelete: false);
+
+await channel.QueueDeclareAsync(
+    queue: "order.payment.queue",
+    durable: true,
+    exclusive: false,
+    autoDelete: false);
+
+await channel.QueueBindAsync(
+    queue: "order.payment.queue",
+    exchange: exchangeName,
+    routingKey: "order.payment.*");
+
+await channel.QueueDeclareAsync(
+    queue: "order.audit.queue",
+    durable: true,
+    exclusive: false,
+    autoDelete: false);
+
+await channel.QueueBindAsync(
+    queue: "order.audit.queue",
+    exchange: exchangeName,
+    routingKey: "order.#");
+</code></pre>
+
+</div>
+
+<h3>انتشار خطای پرداخت سفارش</h3>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Topic Exchange Publisher</span>
+    </div>
+
+    <pre><code>var paymentFailedMessage = new
+{
+    MessageId = Guid.NewGuid(),
+    MessageType = "OrderPaymentFailed",
+    OrderId = 1001,
+    Reason = "InsufficientBalance",
+    CreatedAt = DateTime.UtcNow
+};
+
+byte[] body = Encoding.UTF8.GetBytes(
+    JsonSerializer.Serialize(paymentFailedMessage));
+
+await channel.BasicPublishAsync(
+    exchange: exchangeName,
+    routingKey: "order.payment.failed",
+    body: body);
+</code></pre>
+
+</div>
+
+<p>
+
+    این پیام به Queueهایی که دارای Binding Key برابر
+    <strong>order.payment.*</strong>
+    یا
+    <strong>order.#</strong>
+    هستند ارسال می‌شود.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        الگوی order.* فقط پیام‌هایی مانند order.created را پوشش می‌دهد و با
+        order.payment.failed مطابقت ندارد؛ زیرا پیام دارای سه بخش است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Headers Exchange</h2>
+
+<p>
+
+    در
+    <strong>Headers Exchange</strong>
+    مسیریابی بر اساس Headerهای پیام انجام می‌شود و Routing Key نقشی ندارد.
+
+</p>
+
+<p>
+
+    برای مثال می‌توان سفارش‌ها را بر اساس کشور یا اولویت آن‌ها مسیریابی کرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Headers Exchange Flow</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+Headers:
+Country = IR
+Priority = High
+
+      │
+
+      ▼
+
+Headers Exchange
+
+      │
+
+      ├──► Iran Orders Queue
+
+      └──► High Priority Queue
+</code></pre>
+
+</div>
+
+<h3>تعریف Headers Exchange</h3>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Headers Exchange Setup</span>
+    </div>
+
+    <pre><code>const string exchangeName = "order.headers";
+const string queueName = "order.high-priority.queue";
+
+await channel.ExchangeDeclareAsync(
+    exchange: exchangeName,
+    type: ExchangeType.Headers,
+    durable: true,
+    autoDelete: false);
+
+await channel.QueueDeclareAsync(
+    queue: queueName,
+    durable: true,
+    exclusive: false,
+    autoDelete: false);
+
+var bindingArguments =
+    new Dictionary&lt;string, object?&gt;
+    {
+        ["x-match"] = "all",
+        ["country"] = "IR",
+        ["priority"] = "high"
+    };
+
+await channel.QueueBindAsync(
+    queue: queueName,
+    exchange: exchangeName,
+    routingKey: string.Empty,
+    arguments: bindingArguments);
+</code></pre>
+
+</div>
+
+<h3>انتشار پیام دارای Header</h3>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Headers Exchange Publisher</span>
+    </div>
+
+    <pre><code>var properties = new BasicProperties
+{
+    Persistent = true,
+    ContentType = "application/json",
+    Headers = new Dictionary&lt;string, object?&gt;
+    {
+        ["country"] = "IR",
+        ["priority"] = "high"
+    }
+};
+
+byte[] body = Encoding.UTF8.GetBytes(
+    JsonSerializer.Serialize(message));
+
+await channel.BasicPublishAsync(
+    exchange: exchangeName,
+    routingKey: string.Empty,
+    mandatory: false,
+    basicProperties: properties,
+    body: body);
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        Headers Exchange نسبت به Direct، Fanout و Topic کمتر استفاده می‌شود و
+        زمانی مناسب است که Routing به چند ویژگی پیام وابسته باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Default Exchange</h2>
+
+<p>
+
+    RabbitMQ یک Direct Exchange داخلی با نام خالی
+    <strong>""</strong>
+    دارد که با نام Default Exchange شناخته می‌شود.
+
+</p>
+
+<p>
+
+    در این حالت، نام Queue به‌عنوان Routing Key ارسال می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Default Exchange</span>
+    </div>
+
+    <pre><code>const string queueName = "order.notification.queue";
+
+await channel.QueueDeclareAsync(
+    queue: queueName,
+    durable: true,
+    exclusive: false,
+    autoDelete: false);
+
+byte[] body = Encoding.UTF8.GetBytes(
+    JsonSerializer.Serialize(message));
+
+await channel.BasicPublishAsync(
+    exchange: string.Empty,
+    routingKey: queueName,
+    body: body);
+</code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        Default Exchange برای مثال‌های ساده مناسب است؛ اما در سیستم‌های بزرگ بهتر
+        است Exchange و قوانین Routing به‌صورت واضح تعریف شوند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نمونه Consumer در .NET</h2>
+
+<p>
+
+    Consumer پیام OrderCreated را از Notification Queue دریافت کرده و پس از
+    پردازش موفق، پیام را Ack می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Notification Consumer</span>
+    </div>
+
+    <pre><code>using RabbitMQ.Client.Events;
+using System.Text;
+
+const string queueName = "order.notification.queue";
+
+var consumer = new AsyncEventingBasicConsumer(channel);
+
+consumer.ReceivedAsync += async (_, eventArgs) =>
+{
+    try
+    {
+        string json = Encoding.UTF8.GetString(
+            eventArgs.Body.Span);
+
+        Console.WriteLine(
+            $"OrderCreated received: {json}");
+
+        // Send order notification...
+
+        await channel.BasicAckAsync(
+            deliveryTag: eventArgs.DeliveryTag,
+            multiple: false);
+    }
+    catch (Exception exception)
+    {
+        Console.WriteLine(exception.Message);
+
+        await channel.BasicNackAsync(
+            deliveryTag: eventArgs.DeliveryTag,
+            multiple: false,
+            requeue: false);
+    }
+};
+
+await channel.BasicConsumeAsync(
+    queue: queueName,
+    autoAck: false,
+    consumer: consumer);
+</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        با قرار دادن autoAck روی false، پیام فقط پس از اجرای BasicAckAsync به‌عنوان
+        پردازش‌شده تأیید می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>مقایسه انواع Exchange</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>Exchange</th>
+            <th>روش Routing</th>
+            <th>مثال Order Service</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Direct</td>
+            <td>تطابق دقیق Routing Key</td>
+            <td>ارسال order.cancelled به Refund Queue</td>
+        </tr>
+
+        <tr>
+            <td>Fanout</td>
+            <td>ارسال به تمام Queueها</td>
+            <td>انتشار OrderCreated برای چند سرویس</td>
+        </tr>
+
+        <tr>
+            <td>Topic</td>
+            <td>تطابق الگویی Routing Key</td>
+            <td>مدیریت پیام‌های order.payment.*</td>
+        </tr>
+
+        <tr>
+            <td>Headers</td>
+            <td>Headerهای پیام</td>
+            <td>مسیریابی سفارش بر اساس کشور و اولویت</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>کدام Exchange را انتخاب کنیم؟</h2>
+
+<ul>
+    <li>
+        برای مسیریابی دقیق از
+        <strong>Direct Exchange</strong>
+        استفاده کنید.
+    </li>
+
+    <li>
+        برای ارسال یک Event به تمام Subscriberها از
+        <strong>Fanout Exchange</strong>
+        استفاده کنید.
+    </li>
+
+    <li>
+        برای مسیریابی انعطاف‌پذیر و الگومحور از
+        <strong>Topic Exchange</strong>
+        استفاده کنید.
+    </li>
+
+    <li>
+        برای مسیریابی بر اساس چند ویژگی پیام از
+        <strong>Headers Exchange</strong>
+        استفاده کنید.
+    </li>
+</ul>
+
+<hr>
+
+<h2>اشتباه رایج</h2>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        تنها تعریف Exchange کافی نیست. باید Queue و Binding نیز قبل از انتشار پیام
+        ایجاد شده باشند؛ در غیر این صورت ممکن است پیام هیچ Queue مقصدی نداشته باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال:</strong>
+
+        تفاوت Direct و Topic Exchange چیست؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        Direct Exchange به تطابق دقیق Routing Key و Binding Key نیاز دارد؛ اما
+        Topic Exchange امکان مسیریابی الگومحور با استفاده از * و # را فراهم
+        می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        Exchange را بر اساس نیاز واقعی Routing انتخاب کنید. پیچیده‌تر بودن Exchange
+        به معنی بهتر بودن آن نیست.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    Exchange مسئول مسیریابی پیام‌ها در RabbitMQ است. Direct از تطابق دقیق، Fanout
+    از Broadcast، Topic از الگوهای Routing و Headers از Headerهای پیام استفاده
+    می‌کند.
+
+</p>
+
+<p>
+
+    در .NET می‌توان با استفاده از RabbitMQ.Client، Exchange و Queue را تعریف کرد،
+    Binding ساخت، پیام منتشر کرد و آن را با AsyncEventingBasicConsumer دریافت کرد.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد Queue را دقیق‌تر بررسی می‌کنیم و ویژگی‌هایی مانند Durable،
+        Exclusive، Auto Delete و نگهداری پیام‌های OrderCreated را همراه با کد
+        .NET یاد می‌گیریم.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">4.3 مفاهیم RabbitMQ</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">4.5 Queue و ویژگی‌های آن</div>
+        </div>
+    </a>
+
+</div>
