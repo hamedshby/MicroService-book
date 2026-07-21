@@ -1,0 +1,697 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="rabbitmq">RabbitMQ</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Queue</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">🐇 RabbitMQ</div>
+
+    <h1>Queue در RabbitMQ</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/30</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۱۰ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    <strong>Queue</strong>
+    محلی برای نگهداری پیام‌ها در RabbitMQ است. پیام پس از عبور از Exchange وارد
+    Queue می‌شود و تا زمان دریافت توسط Consumer در آن باقی می‌ماند.
+
+</p>
+
+<p>
+
+    در سناریوی ما، Order Service پیام
+    <strong>OrderCreated</strong>
+    را منتشر می‌کند و Notification Service آن را از Queue دریافت می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Message Flow</span>
+    </div>
+
+    <pre><code>
+Order Service
+
+      │
+
+OrderCreated
+
+      ▼
+
+Order Exchange
+
+      │
+
+      ▼
+
+order.notification.queue
+
+      │
+
+      ▼
+
+Notification Service
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        Queue میان Producer و Consumer قرار می‌گیرد و اختلاف سرعت آن‌ها را مدیریت
+        می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>تعریف Queue در .NET</h2>
+
+<p>
+
+    برای ساخت Queue از متد
+    <strong>QueueDeclareAsync</strong>
+    استفاده می‌کنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Declare Queue</span>
+    </div>
+
+    <pre><code>using RabbitMQ.Client;
+
+var factory = new ConnectionFactory
+{
+    HostName = "localhost",
+    UserName = "guest",
+    Password = "guest",
+    ClientProvidedName = "OrderService"
+};
+
+await using var connection =
+    await factory.CreateConnectionAsync();
+
+await using var channel =
+    await connection.CreateChannelAsync();
+
+const string queueName = "order.notification.queue";
+
+await channel.QueueDeclareAsync(
+    queue: queueName,
+    durable: true,
+    exclusive: false,
+    autoDelete: false,
+    arguments: null);
+</code></pre>
+
+</div>
+
+<p>
+
+    اگر Queue از قبل وجود نداشته باشد ساخته می‌شود. اگر وجود داشته باشد، RabbitMQ
+    ویژگی‌های آن را بررسی می‌کند.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        نمی‌توان یک Queue موجود را دوباره با ویژگی‌های متفاوت تعریف کرد. برای مثال،
+        Queue ساخته‌شده با durable برابر true را نمی‌توان با durable برابر false
+        تعریف کرد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>ویژگی Durable</h2>
+
+<p>
+
+    ویژگی
+    <strong>durable</strong>
+    مشخص می‌کند تعریف Queue پس از Restart شدن RabbitMQ باقی بماند یا خیر.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Durable Queue</span>
+    </div>
+
+    <pre><code>await channel.QueueDeclareAsync(
+    queue: "order.notification.queue",
+    durable: true,
+    exclusive: false,
+    autoDelete: false,
+    arguments: null);
+</code></pre>
+
+</div>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>مقدار</th>
+            <th>رفتار</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>true</td>
+            <td>تعریف Queue پس از Restart باقی می‌ماند.</td>
+        </tr>
+
+        <tr>
+            <td>false</td>
+            <td>Queue موقتی است و پس از Restart باقی نمی‌ماند.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        Durable بودن Queue به‌تنهایی برای حفظ پیام‌ها کافی نیست. پیام نیز باید به
+        صورت Persistent منتشر شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>ارسال پیام Persistent</h2>
+
+<p>
+
+    برای افزایش ماندگاری پیام OrderCreated، ویژگی
+    <strong>Persistent</strong>
+    را هنگام انتشار فعال می‌کنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Persistent Message</span>
+    </div>
+
+    <pre><code>using System.Text;
+using System.Text.Json;
+using RabbitMQ.Client;
+
+var message = new
+{
+    MessageId = Guid.NewGuid(),
+    MessageType = "OrderCreated",
+    OrderId = 1001,
+    CustomerId = 25,
+    TotalAmount = 850000,
+    CreatedAt = DateTime.UtcNow
+};
+
+byte[] body = Encoding.UTF8.GetBytes(
+    JsonSerializer.Serialize(message));
+
+var properties = new BasicProperties
+{
+    Persistent = true,
+    ContentType = "application/json",
+    MessageId = message.MessageId.ToString(),
+    Type = message.MessageType
+};
+
+await channel.BasicPublishAsync(
+    exchange: "order.direct",
+    routingKey: "order.created",
+    mandatory: true,
+    basicProperties: properties,
+    body: body);
+</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        برای پیام‌های مهم، Queue را Durable و پیام را Persistent تعریف کنید.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>ویژگی Exclusive</h2>
+
+<p>
+
+    اگر
+    <strong>exclusive</strong>
+    برابر true باشد، Queue فقط توسط همان Connection قابل استفاده است و با بسته
+    شدن Connection حذف می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Exclusive Queue</span>
+    </div>
+
+    <pre><code>QueueDeclareOk result =
+    await channel.QueueDeclareAsync(
+        queue: string.Empty,
+        durable: false,
+        exclusive: true,
+        autoDelete: true,
+        arguments: null);
+
+string generatedQueueName = result.QueueName;
+</code></pre>
+
+</div>
+
+<p>
+
+    با ارسال نام خالی، RabbitMQ یک نام یکتا برای Queue تولید می‌کند.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        Exclusive Queue بیشتر برای سناریوهای موقتی مانند Reply Queue، دریافت Log
+        یا Subscriptionهای کوتاه‌مدت مناسب است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>ویژگی Auto Delete</h2>
+
+<p>
+
+    اگر
+    <strong>autoDelete</strong>
+    برابر true باشد، Queue پس از قطع آخرین Consumer به‌صورت خودکار حذف می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Auto Delete Queue</span>
+    </div>
+
+    <pre><code>await channel.QueueDeclareAsync(
+    queue: "order.monitoring.temporary",
+    durable: false,
+    exclusive: false,
+    autoDelete: true,
+    arguments: null);
+</code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        برای Queueهای اصلی مانند order.notification.queue معمولاً autoDelete باید
+        false باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>مقایسه ویژگی‌های Queue</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>ویژگی</th>
+            <th>وظیفه</th>
+            <th>پیشنهاد برای Order Service</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>durable</td>
+            <td>حفظ تعریف Queue پس از Restart</td>
+            <td>true</td>
+        </tr>
+
+        <tr>
+            <td>exclusive</td>
+            <td>محدود کردن Queue به یک Connection</td>
+            <td>false</td>
+        </tr>
+
+        <tr>
+            <td>autoDelete</td>
+            <td>حذف Queue پس از قطع Consumerها</td>
+            <td>false</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>اتصال Queue به Exchange</h2>
+
+<p>
+
+    پس از تعریف Queue باید آن را با یک Binding به Exchange متصل کنیم.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Queue Binding</span>
+    </div>
+
+    <pre><code>const string exchangeName = "order.direct";
+const string queueName = "order.notification.queue";
+const string routingKey = "order.created";
+
+await channel.ExchangeDeclareAsync(
+    exchange: exchangeName,
+    type: ExchangeType.Direct,
+    durable: true,
+    autoDelete: false);
+
+await channel.QueueDeclareAsync(
+    queue: queueName,
+    durable: true,
+    exclusive: false,
+    autoDelete: false,
+    arguments: null);
+
+await channel.QueueBindAsync(
+    queue: queueName,
+    exchange: exchangeName,
+    routingKey: routingKey);
+</code></pre>
+
+</div>
+
+<p>
+
+    اکنون پیام‌هایی با Routing Key برابر
+    <strong>order.created</strong>
+    وارد Notification Queue می‌شوند.
+
+</p>
+
+<hr>
+
+<h2>دریافت پیام از Queue</h2>
+
+<p>
+
+    Notification Service پیام را دریافت می‌کند و پس از پردازش موفق برای آن
+    Acknowledgment ارسال می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Queue Consumer</span>
+    </div>
+
+    <pre><code>using System.Text;
+using RabbitMQ.Client.Events;
+
+const string queueName = "order.notification.queue";
+
+await channel.BasicQosAsync(
+    prefetchSize: 0,
+    prefetchCount: 10,
+    global: false);
+
+var consumer = new AsyncEventingBasicConsumer(channel);
+
+consumer.ReceivedAsync += async (_, eventArgs) =>
+{
+    try
+    {
+        string json = Encoding.UTF8.GetString(
+            eventArgs.Body.Span);
+
+        Console.WriteLine(
+            $"OrderCreated received: {json}");
+
+        // ارسال پیام تأیید سفارش برای مشتری
+        await SendOrderNotificationAsync(json);
+
+        await channel.BasicAckAsync(
+            deliveryTag: eventArgs.DeliveryTag,
+            multiple: false);
+    }
+    catch (Exception exception)
+    {
+        Console.WriteLine(exception.Message);
+
+        await channel.BasicNackAsync(
+            deliveryTag: eventArgs.DeliveryTag,
+            multiple: false,
+            requeue: false);
+    }
+};
+
+await channel.BasicConsumeAsync(
+    queue: queueName,
+    autoAck: false,
+    consumer: consumer);
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        با autoAck برابر false، پیام فقط پس از اجرای BasicAckAsync از Queue حذف
+        می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Prefetch Count</h2>
+
+<p>
+
+    ویژگی
+    <strong>Prefetch Count</strong>
+    مشخص می‌کند RabbitMQ چند پیام تأییدنشده را هم‌زمان برای هر Consumer ارسال کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Prefetch</span>
+    </div>
+
+    <pre><code>await channel.BasicQosAsync(
+    prefetchSize: 0,
+    prefetchCount: 10,
+    global: false);
+</code></pre>
+
+</div>
+
+<p>
+
+    در این مثال، Notification Service حداکثر ۱۰ پیام تأییدنشده را هم‌زمان دریافت
+    می‌کند.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        مقدار بسیار زیاد Prefetch می‌تواند باعث توزیع نامتعادل پیام‌ها و افزایش
+        مصرف حافظه Consumer شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Queueهای ثابت و موقت</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>نوع Queue</th>
+            <th>تنظیمات معمول</th>
+            <th>کاربرد</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Queue ثابت</td>
+            <td>Durable و Non-Exclusive</td>
+            <td>پردازش OrderCreated</td>
+        </tr>
+
+        <tr>
+            <td>Queue موقت</td>
+            <td>Non-Durable و Exclusive</td>
+            <td>Subscription یا Reply Queue</td>
+        </tr>
+
+        <tr>
+            <td>Auto-Delete Queue</td>
+            <td>AutoDelete برابر true</td>
+            <td>مصرف‌کننده‌های کوتاه‌مدت</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>اشتباه رایج</h2>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        Durable بودن Queue به معنی ماندگاری تمام پیام‌ها نیست. برای پیام‌های مهم
+        باید Message Persistence، Acknowledgment و Publisher Confirm نیز به‌درستی
+        تنظیم شوند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال:</strong>
+
+        تفاوت Durable و Persistent چیست؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        Durable ویژگی Queue است و باعث حفظ تعریف Queue پس از Restart می‌شود؛ اما
+        Persistent ویژگی Message است و برای افزایش ماندگاری خود پیام استفاده
+        می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        برای Queueهای اصلی سیستم معمولاً از durable: true،
+        exclusive: false و autoDelete: false استفاده کنید؛ اما تنظیم نهایی باید
+        بر اساس طول عمر و کاربرد Queue انتخاب شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    Queue پیام‌ها را تا زمان پردازش توسط Consumer نگهداری می‌کند. ویژگی‌های
+    Durable، Exclusive و Auto Delete مشخص می‌کنند Queue چه طول عمری داشته باشد و
+    چگونه حذف شود.
+
+</p>
+
+<p>
+
+    در سناریوی Order Service، پیام OrderCreated داخل
+    order.notification.queue قرار می‌گیرد و Notification Service آن را با
+    Acknowledgment دستی پردازش می‌کند.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد با Binding و Routing Key آشنا می‌شویم و نحوه اتصال Exchange به
+        Queue را با مثال‌های .NET بررسی می‌کنیم.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">4.4 انواع Exchange</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">4.6 Binding و Routing Key</div>
+        </div>
+    </a>
+
+</div>
