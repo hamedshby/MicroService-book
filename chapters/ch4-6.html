@@ -1,0 +1,667 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="rabbitmq">RabbitMQ</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Acknowledgment</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">🐇 RabbitMQ</div>
+
+    <h1>Ack در RabbitMQ</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/30</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۹ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    وقتی RabbitMQ یک پیام را برای Consumer ارسال می‌کند، باید مطمئن شود پیام با
+    موفقیت پردازش شده است. این تأیید با مفهومی به نام
+    <strong>Acknowledgment</strong>
+    یا به‌اختصار
+    <strong>Ack</strong>
+    انجام می‌شود.
+
+</p>
+
+<p>
+
+    در سناریوی ما، Notification Service پیام
+    <strong>OrderCreated</strong>
+    را دریافت کرده و پس از ارسال موفق پیامک تأیید سفارش، آن را Ack می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Message Acknowledgment Flow</span>
+    </div>
+
+    <pre><code>
+Order Service
+      │
+      │ OrderCreated
+      ▼
+RabbitMQ Queue
+      │
+      ▼
+Notification Service
+      │
+      ├── پردازش موفق ──► Ack
+      │
+      └── پردازش ناموفق ──► Nack / Reject
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        RabbitMQ با دریافت Ack متوجه می‌شود که پیام با موفقیت پردازش شده و می‌تواند
+        آن را از Queue حذف کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Automatic Ack</h2>
+
+<p>
+
+    اگر
+    <strong>autoAck</strong>
+    برابر true باشد، RabbitMQ بلافاصله بعد از ارسال پیام به Consumer، آن را
+    پردازش‌شده در نظر می‌گیرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Automatic Ack</span>
+    </div>
+
+    <pre><code>var consumer = new AsyncEventingBasicConsumer(channel);
+
+consumer.ReceivedAsync += async (_, eventArgs) =>
+{
+    string json = Encoding.UTF8.GetString(
+        eventArgs.Body.Span);
+
+    await SendOrderNotificationAsync(json);
+};
+
+await channel.BasicConsumeAsync(
+    queue: "order.notification.queue",
+    autoAck: true,
+    consumer: consumer);
+</code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        اگر Consumer پس از دریافت پیام و قبل از پایان پردازش متوقف شود، پیام از
+        دست می‌رود؛ زیرا RabbitMQ قبلاً آن را تأییدشده در نظر گرفته است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Manual Ack</h2>
+
+<p>
+
+    در حالت
+    <strong>Manual Ack</strong>
+    مقدار autoAck برابر false قرار می‌گیرد و Consumer فقط پس از پردازش موفق، پیام
+    را تأیید می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Manual Ack</span>
+    </div>
+
+    <pre><code>using RabbitMQ.Client.Events;
+using System.Text;
+
+const string queueName = "order.notification.queue";
+
+var consumer = new AsyncEventingBasicConsumer(channel);
+
+consumer.ReceivedAsync += async (_, eventArgs) =>
+{
+    string json = Encoding.UTF8.GetString(
+        eventArgs.Body.Span);
+
+    await SendOrderNotificationAsync(json);
+
+    await channel.BasicAckAsync(
+        deliveryTag: eventArgs.DeliveryTag,
+        multiple: false);
+};
+
+await channel.BasicConsumeAsync(
+    queue: queueName,
+    autoAck: false,
+    consumer: consumer);
+</code></pre>
+
+</div>
+
+<p>
+
+    مقدار
+    <strong>DeliveryTag</strong>
+    شناسه پیام در همان Channel است و برای Ack یا Nack کردن پیام استفاده می‌شود.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        برای پیام‌های مهم مانند OrderCreated معمولاً استفاده از Manual Ack انتخاب
+        مطمئن‌تری است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>BasicAckAsync</h2>
+
+<p>
+
+    متد
+    <strong>BasicAckAsync</strong>
+    به RabbitMQ اعلام می‌کند که پیام با موفقیت پردازش شده است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Basic Ack</span>
+    </div>
+
+    <pre><code>await channel.BasicAckAsync(
+    deliveryTag: eventArgs.DeliveryTag,
+    multiple: false);
+</code></pre>
+
+</div>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>پارامتر</th>
+            <th>توضیح</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>deliveryTag</td>
+            <td>شناسه پیام تحویل‌داده‌شده در Channel</td>
+        </tr>
+
+        <tr>
+            <td>multiple</td>
+            <td>مشخص می‌کند یک پیام یا چند پیام قبلی نیز تأیید شوند.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<p>
+
+    وقتی multiple برابر false باشد، فقط همان پیام تأیید می‌شود.
+
+</p>
+
+<hr>
+
+<h2>BasicNackAsync</h2>
+
+<p>
+
+    اگر پردازش پیام ناموفق باشد، می‌توان با
+    <strong>BasicNackAsync</strong>
+    پیام را رد کرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Basic Nack</span>
+    </div>
+
+    <pre><code>await channel.BasicNackAsync(
+    deliveryTag: eventArgs.DeliveryTag,
+    multiple: false,
+    requeue: false);
+</code></pre>
+
+</div>
+
+<p>
+
+    پارامتر
+    <strong>requeue</strong>
+    تعیین می‌کند پیام دوباره به Queue برگردد یا خیر.
+
+</p>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>مقدار requeue</th>
+            <th>رفتار</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>true</td>
+            <td>پیام دوباره وارد Queue می‌شود.</td>
+        </tr>
+
+        <tr>
+            <td>false</td>
+            <td>پیام حذف یا به Dead Letter Exchange منتقل می‌شود.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        استفاده بدون محدودیت از requeue: true ممکن است باعث ایجاد حلقه بی‌نهایت
+        شود و همان پیام بارها پردازش شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>BasicRejectAsync</h2>
+
+<p>
+
+    متد
+    <strong>BasicRejectAsync</strong>
+    نیز برای رد کردن پیام استفاده می‌شود، اما فقط یک پیام را رد می‌کند و پارامتر
+    multiple ندارد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Basic Reject</span>
+    </div>
+
+    <pre><code>await channel.BasicRejectAsync(
+    deliveryTag: eventArgs.DeliveryTag,
+    requeue: false);
+</code></pre>
+
+</div>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>متد</th>
+            <th>کاربرد</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>BasicAckAsync</td>
+            <td>تأیید پردازش موفق پیام</td>
+        </tr>
+
+        <tr>
+            <td>BasicNackAsync</td>
+            <td>رد کردن یک یا چند پیام</td>
+        </tr>
+
+        <tr>
+            <td>BasicRejectAsync</td>
+            <td>رد کردن یک پیام</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>مدیریت خطا در Consumer</h2>
+
+<p>
+
+    بهتر است Ack فقط بعد از پایان کامل عملیات ارسال شود. در صورت رخ دادن خطا نیز
+    پیام Nack می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - OrderCreated Consumer</span>
+    </div>
+
+    <pre><code>var consumer = new AsyncEventingBasicConsumer(channel);
+
+consumer.ReceivedAsync += async (_, eventArgs) =>
+{
+    try
+    {
+        string json = Encoding.UTF8.GetString(
+            eventArgs.Body.Span);
+
+        var orderCreated =
+            JsonSerializer.Deserialize&lt;OrderCreatedMessage&gt;(json);
+
+        if (orderCreated is null)
+            throw new InvalidOperationException(
+                "OrderCreated message is invalid.");
+
+        await SendOrderNotificationAsync(orderCreated);
+
+        await channel.BasicAckAsync(
+            deliveryTag: eventArgs.DeliveryTag,
+            multiple: false);
+    }
+    catch (Exception exception)
+    {
+        Console.WriteLine(
+            $"OrderCreated processing failed: {exception.Message}");
+
+        await channel.BasicNackAsync(
+            deliveryTag: eventArgs.DeliveryTag,
+            multiple: false,
+            requeue: false);
+    }
+};
+
+await channel.BasicConsumeAsync(
+    queue: "order.notification.queue",
+    autoAck: false,
+    consumer: consumer);
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        قرار دادن Ack داخل finally اشتباه است؛ زیرا حتی در صورت شکست پردازش نیز
+        پیام تأیید و از Queue حذف می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>اگر Consumer قطع شود چه اتفاقی می‌افتد؟</h2>
+
+<p>
+
+    اگر Consumer قبل از ارسال Ack قطع شود، RabbitMQ پیام تأییدنشده را دوباره در
+    اختیار یک Consumer فعال قرار می‌دهد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Unacknowledged Message</span>
+    </div>
+
+    <pre><code>
+Notification Service دریافت پیام
+
+            │
+
+            ▼
+
+پردازش OrderCreated
+
+            │
+
+            ✖ Consumer متوقف شد
+
+            │
+
+            ▼
+
+پیام بدون Ack
+
+            │
+
+            ▼
+
+تحویل مجدد به Consumer
+</code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        تحویل مجدد پیام ممکن است باعث اجرای دوباره عملیات شود. به همین دلیل
+        Consumer باید Idempotent طراحی شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>بررسی Redelivered</h2>
+
+<p>
+
+    ویژگی
+    <strong>Redelivered</strong>
+    نشان می‌دهد RabbitMQ احتمالاً پیام را قبلاً نیز به یک Consumer تحویل داده
+    است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Redelivered Flag</span>
+    </div>
+
+    <pre><code>consumer.ReceivedAsync += async (_, eventArgs) =>
+{
+    if (eventArgs.Redelivered)
+    {
+        Console.WriteLine(
+            "This message has been delivered before.");
+    }
+
+    // Process OrderCreated message...
+};
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        مقدار Redelivered به‌تنهایی جایگزین Idempotency نیست. برای جلوگیری از
+        پردازش تکراری بهتر است MessageId در دیتابیس یا Cache ذخیره و بررسی شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Ack همراه با Prefetch</h2>
+
+<p>
+
+    Prefetch مشخص می‌کند هر Consumer حداکثر چند پیام تأییدنشده دریافت کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# - Prefetch Count</span>
+    </div>
+
+    <pre><code>await channel.BasicQosAsync(
+    prefetchSize: 0,
+    prefetchCount: 10,
+    global: false);
+</code></pre>
+
+</div>
+
+<p>
+
+    در این مثال، Notification Service حداکثر ۱۰ پیام بدون Ack را هم‌زمان در
+    اختیار خواهد داشت.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        ترکیب Manual Ack و Prefetch مناسب باعث کنترل بار Consumer و توزیع بهتر
+        پیام‌ها می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>اشتباهات رایج</h2>
+
+<ul>
+    <li>Ack کردن پیام قبل از پایان پردازش</li>
+    <li>استفاده از autoAck برای پیام‌های مهم</li>
+    <li>بازگرداندن همیشگی پیام خطادار با requeue: true</li>
+    <li>نادیده گرفتن احتمال تحویل تکراری پیام</li>
+</ul>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال:</strong>
+
+        اگر Consumer قبل از ارسال Ack متوقف شود چه اتفاقی می‌افتد؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        RabbitMQ پیام را تأییدنشده در نظر می‌گیرد و پس از بسته شدن Connection یا
+        Channel، آن را دوباره برای یک Consumer فعال ارسال می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        پیام را فقط زمانی Ack کنید که تمام عملیات موردنیاز با موفقیت انجام شده
+        باشد. همچنین Consumer را برای پردازش تکراری پیام آماده کنید.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    Ack به RabbitMQ اعلام می‌کند که پیام با موفقیت پردازش شده است. برای پیام‌های
+    مهم بهتر است autoAck غیرفعال باشد و پس از پایان پردازش از BasicAckAsync
+    استفاده شود.
+
+</p>
+
+<p>
+
+    در صورت شکست پردازش می‌توان پیام را با BasicNackAsync یا BasicRejectAsync رد
+    کرد. تصمیم درباره Requeue نیز باید همراه با Retry محدود و Dead Letter Queue
+    انجام شود.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد Retry را بررسی می‌کنیم و یاد می‌گیریم پیام‌های ناموفق
+        OrderCreated چگونه بدون ایجاد حلقه بی‌نهایت دوباره پردازش شوند.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">4.5 Queue</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">4.7 Retry</div>
+        </div>
+    </a>
+
+</div>
