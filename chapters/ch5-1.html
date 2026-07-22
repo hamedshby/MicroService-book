@@ -1,0 +1,594 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="apache-kafka">
+        Apache Kafka
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">معرفی Kafka</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">⚡ Apache Kafka</div>
+
+    <h1>معرفی Apache Kafka</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/31</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۹ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    <strong>Apache Kafka</strong>
+    یک پلتفرم Distributed Event Streaming است که برای انتقال، ذخیره و پردازش
+    حجم بالایی از Eventها استفاده می‌شود.
+
+</p>
+
+<p>
+
+    سرویس‌های مختلف می‌توانند Eventهای خود را در Kafka منتشر کنند و سرویس‌های
+    دیگر نیز آن‌ها را با سرعت و استقلال بیشتری دریافت و پردازش کنند.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        Kafka فقط یک Message Queue ساده نیست؛ Eventها را برای مدت مشخص نگهداری
+        می‌کند و Consumerها می‌توانند آن‌ها را دوباره بخوانند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>یک مثال ساده</h2>
+
+<p>
+
+    فرض کنید پس از انجام موفق پرداخت، سرویس Payment رویداد
+    <strong>PaymentCompleted</strong>
+    را منتشر می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Kafka Event Flow</span>
+    </div>
+
+    <pre><code>
+Payment Service
+
+      │
+
+PaymentCompleted
+
+      ▼
+
+Kafka Topic
+
+      │
+
+      ├──► Order Service
+      │       Update Order Status
+      │
+      ├──► Notification Service
+      │       Send Notification
+      │
+      └──► Analytics Service
+              Record Transaction
+</code></pre>
+
+</div>
+
+<p>
+
+    هر Consumer می‌تواند Event را به‌صورت مستقل دریافت کند، بدون اینکه Payment
+    Service از وجود آن‌ها اطلاع داشته باشد.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        اضافه شدن یک Consumer جدید معمولاً نیازی به تغییر Producer ندارد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>مفاهیم اصلی Kafka</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>مفهوم</th>
+            <th>توضیح</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Producer</td>
+            <td>Event یا Message را در Kafka منتشر می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Consumer</td>
+            <td>Eventها را از Kafka دریافت و پردازش می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Topic</td>
+            <td>مسیر منطقی نگهداری Eventهای مرتبط است.</td>
+        </tr>
+
+        <tr>
+            <td>Partition</td>
+            <td>Topic را به بخش‌های کوچک‌تر برای پردازش موازی تقسیم می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Broker</td>
+            <td>یکی از سرورهای Kafka است که داده‌ها را نگهداری می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Offset</td>
+            <td>شماره موقعیت هر Event داخل یک Partition است.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Kafka Structure</span>
+    </div>
+
+    <pre><code>
+Kafka Cluster
+
+   ├── Broker 1
+   ├── Broker 2
+   └── Broker 3
+
+Topic: payment-completed
+
+   ├── Partition 0
+   ├── Partition 1
+   └── Partition 2
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>تفاوت Kafka با Message Queue سنتی</h2>
+
+<p>
+
+    در بسیاری از Message Queueها، پیام پس از پردازش و تأیید Consumer حذف می‌شود.
+
+</p>
+
+<p>
+
+    اما Kafka Eventها را براساس مدت زمان یا حجم مشخص نگهداری می‌کند؛ حتی اگر قبلاً
+    توسط Consumer خوانده شده باشند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>ویژگی</th>
+            <th>Message Queue سنتی</th>
+            <th>Kafka</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>نگهداری پیام</td>
+            <td>معمولاً تا زمان پردازش</td>
+            <td>براساس Retention Policy</td>
+        </tr>
+
+        <tr>
+            <td>خواندن مجدد</td>
+            <td>معمولاً محدود</td>
+            <td>امکان‌پذیر است</td>
+        </tr>
+
+        <tr>
+            <td>پردازش موازی</td>
+            <td>با چند Consumer</td>
+            <td>با Partition و Consumer Group</td>
+        </tr>
+
+        <tr>
+            <td>کاربرد اصلی</td>
+            <td>پردازش Job و Command</td>
+            <td>Event Streaming و پردازش داده</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        Kafka برای Event Streaming، پردازش حجم بالا و نگهداری تاریخچه Eventها
+        بسیار مناسب است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نصب پکیج Kafka در .NET</h2>
+
+<p>
+
+    یکی از کتابخانه‌های رایج برای کار با Kafka در .NET،
+    پکیج
+    <strong>Confluent.Kafka</strong>
+    است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">.NET CLI</span>
+    </div>
+
+    <pre><code>dotnet add package Confluent.Kafka</code></pre>
+
+</div>
+
+<hr>
+
+<h2>ارسال Message با Producer در .NET</h2>
+
+<p>
+
+    در مثال زیر، یک Event داخل Topic با نام
+    <strong>payment-completed</strong>
+    منتشر می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# Producer</span>
+    </div>
+
+    <pre><code>using Confluent.Kafka;
+using System.Text.Json;
+
+var config = new ProducerConfig
+{
+    BootstrapServers = "localhost:9092"
+};
+
+using var producer =
+    new ProducerBuilder&lt;string, string&gt;(config).Build();
+
+var paymentEvent = new
+{
+    PaymentId = 1205,
+    OrderId = 1001,
+    Amount = 850000,
+    Status = "Completed",
+    OccurredAt = DateTime.UtcNow
+};
+
+var message = new Message&lt;string, string&gt;
+{
+    Key = paymentEvent.OrderId.ToString(),
+    Value = JsonSerializer.Serialize(paymentEvent)
+};
+
+var result = await producer.ProduceAsync(
+    "payment-completed",
+    message
+);
+
+Console.WriteLine(
+    $"Message published to {result.TopicPartitionOffset}"
+);</code></pre>
+
+</div>
+
+<p>
+
+    مقدار
+    <strong>Key</strong>
+    در انتخاب Partition نقش دارد. پیام‌هایی که Key یکسان دارند معمولاً در یک
+    Partition قرار می‌گیرند.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        استفاده از OrderId به‌عنوان Key می‌تواند به حفظ ترتیب Eventهای مربوط به یک
+        سفارش کمک کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>دریافت Message با Consumer در .NET</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# Consumer</span>
+    </div>
+
+    <pre><code>using Confluent.Kafka;
+
+var config = new ConsumerConfig
+{
+    BootstrapServers = "localhost:9092",
+    GroupId = "order-service",
+    AutoOffsetReset = AutoOffsetReset.Earliest
+};
+
+using var consumer =
+    new ConsumerBuilder&lt;string, string&gt;(config).Build();
+
+consumer.Subscribe("payment-completed");
+
+try
+{
+    while (true)
+    {
+        var result = consumer.Consume();
+
+        Console.WriteLine(
+            $"Received: {result.Message.Value}"
+        );
+
+        // Process the event
+    }
+}
+catch (OperationCanceledException)
+{
+    consumer.Close();
+}</code></pre>
+
+</div>
+
+<p>
+
+    Consumer با استفاده از
+    <strong>GroupId</strong>
+    عضو یک Consumer Group می‌شود. Kafka پیام‌های Partitionها را میان اعضای همان
+    Group تقسیم می‌کند.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        در پروژه واقعی باید خطا، CancellationToken، ثبت Offset و پردازش پیام تکراری
+        به‌درستی مدیریت شوند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Kafka چه کاربردهایی دارد؟</h2>
+
+<ul>
+    <li>انتقال Event میان Microserviceها</li>
+    <li>ثبت و پردازش تراکنش‌های مالی</li>
+    <li>جمع‌آوری Log و داده‌های سیستمی</li>
+    <li>پردازش داده‌های Real-time</li>
+    <li>ساخت Data Pipeline</li>
+    <li>همگام‌سازی اطلاعات میان سیستم‌ها</li>
+</ul>
+
+<hr>
+
+<h2>مزایای Kafka</h2>
+
+<ul>
+    <li>توان پردازش حجم بالای Event</li>
+    <li>مقیاس‌پذیری با استفاده از Partition</li>
+    <li>نگهداری Eventها برای خواندن مجدد</li>
+    <li>تحمل خطا با Replication</li>
+    <li>مناسب برای Event-Driven Architecture</li>
+    <li>امکان پردازش هم‌زمان توسط چند Consumer Group</li>
+</ul>
+
+<hr>
+
+<h2>چالش‌های Kafka</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>چالش</th>
+            <th>توضیح</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>پیچیدگی عملیاتی</td>
+            <td>راه‌اندازی و Monitoring آن نیازمند دانش مناسب است.</td>
+        </tr>
+
+        <tr>
+            <td>Ordering</td>
+            <td>ترتیب فقط داخل یک Partition تضمین می‌شود.</td>
+        </tr>
+
+        <tr>
+            <td>Duplicate Message</td>
+            <td>Consumer باید در برابر پردازش تکراری مقاوم باشد.</td>
+        </tr>
+
+        <tr>
+            <td>Partition Design</td>
+            <td>انتخاب تعداد Partition و Message Key اهمیت زیادی دارد.</td>
+        </tr>
+
+        <tr>
+            <td>Schema Evolution</td>
+            <td>تغییر ساختار Event باید با Consumerها سازگار باشد.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>چه زمانی از Kafka استفاده کنیم؟</h2>
+
+<ul>
+    <li>حجم Eventها بالا است.</li>
+    <li>نیاز به نگهداری و Replay کردن Eventها داریم.</li>
+    <li>چند سیستم باید یک Event را مستقل پردازش کنند.</li>
+    <li>پردازش Real-time یا Streaming موردنیاز است.</li>
+    <li>مقیاس‌پذیری و Throughput بالا اهمیت دارد.</li>
+</ul>
+
+<h2>چه زمانی Kafka انتخاب مناسبی نیست؟</h2>
+
+<ul>
+    <li>سیستم کوچک و دارای تعداد کمی Message است.</li>
+    <li>فقط به یک Queue ساده برای اجرای Job نیاز داریم.</li>
+    <li>تیم توان نگهداری زیرساخت Kafka را ندارد.</li>
+    <li>پیچیدگی Kafka بیشتر از نیاز واقعی پروژه است.</li>
+</ul>
+
+<hr>
+
+<h2>اشتباه رایج</h2>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        انتخاب Kafka فقط به دلیل Performance بالا اشتباه است. قبل از انتخاب آن
+        باید نیاز به Event Streaming، Retention، Replay و پردازش حجم بالا وجود
+        داشته باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نکته مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال:</strong>
+
+        مهم‌ترین تفاوت Kafka با RabbitMQ چیست؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        RabbitMQ بیشتر برای Message Queue، Routing و پردازش Task مناسب است؛ اما
+        Kafka برای Event Streaming، نگهداری تاریخچه Eventها، Replay و پردازش حجم
+        بالای داده طراحی شده است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        Kafka را زمانی انتخاب کنید که Eventها بخشی از جریان داده سیستم باشند و
+        نیاز به نگهداری، پردازش موازی یا خواندن مجدد آن‌ها وجود داشته باشد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    Apache Kafka یک پلتفرم Distributed Event Streaming است که Producerها Eventها
+    را داخل Topic منتشر می‌کنند و Consumerها آن‌ها را به‌صورت مستقل پردازش
+    می‌کنند.
+
+</p>
+
+<p>
+
+    Kafka با استفاده از Topic، Partition، Offset و Consumer Group امکان پردازش
+    حجم بالای Eventها، مقیاس‌پذیری و Replay داده‌ها را فراهم می‌کند.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد معماری Kafka را بررسی می‌کنیم و با Broker، Cluster، Topic،
+        Partition و نحوه ذخیره Eventها آشنا می‌شویم.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">Message-Driven Architecture</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">5.2 معماری Kafka</div>
+        </div>
+    </a>
+
+</div>
