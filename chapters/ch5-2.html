@@ -1,0 +1,895 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="apache-kafka">
+        Apache Kafka
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">معماری Kafka</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">⚡ Apache Kafka</div>
+
+    <h1>معماری Apache Kafka</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/31</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۱۰ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    Kafka از یک معماری Distributed استفاده می‌کند که در آن Eventها داخل
+    <strong>Topic</strong>
+    ذخیره شده و میان چند
+    <strong>Broker</strong>
+    توزیع می‌شوند.
+
+</p>
+
+<p>
+
+    Producerها Eventها را منتشر می‌کنند و Consumerها آن‌ها را براساس
+    <strong>Offset</strong>
+    می‌خوانند.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        هدف معماری Kafka، پردازش حجم بالای Event با مقیاس‌پذیری، تحمل خطا و امکان
+        خواندن مجدد داده‌ها است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>نمای کلی معماری Kafka</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Kafka Architecture</span>
+    </div>
+
+    <pre><code>
+Producer
+
+   │
+
+Publish Event
+
+   ▼
+
+Kafka Cluster
+
+   ├── Broker 1
+   ├── Broker 2
+   └── Broker 3
+
+   │
+
+   ▼
+
+Topic Partitions
+
+   │
+
+   ▼
+
+Consumer Group
+</code></pre>
+
+</div>
+
+<p>
+
+    Kafka Cluster از چند Broker تشکیل می‌شود. هر Broker بخشی از Partitionهای
+    Topicها را نگهداری می‌کند.
+
+</p>
+
+<hr>
+
+<h2>Broker چیست؟</h2>
+
+<p>
+
+    هر سرور Kafka یک
+    <strong>Broker</strong>
+    نامیده می‌شود.
+
+</p>
+
+<p>
+
+    Broker مسئول دریافت Event از Producer، ذخیره آن و ارائه Event به Consumerها
+    است.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Kafka Cluster</span>
+    </div>
+
+    <pre><code>
+Kafka Cluster
+
+   ├── Broker 1
+   │     ├── Topic A - Partition 0
+   │     └── Topic B - Partition 1
+   │
+   ├── Broker 2
+   │     ├── Topic A - Partition 1
+   │     └── Topic B - Partition 0
+   │
+   └── Broker 3
+         └── Topic A - Partition 2
+</code></pre>
+
+</div>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        اضافه کردن Brokerهای بیشتر می‌تواند ظرفیت ذخیره‌سازی و توان پردازش Cluster
+        را افزایش دهد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Topic چیست؟</h2>
+
+<p>
+
+    Topic یک نام منطقی برای دسته‌بندی Eventهای مرتبط است.
+
+</p>
+
+<p>
+
+    برای مثال، Eventهای مربوط به پرداخت می‌توانند داخل Topic زیر قرار بگیرند:
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Topic Name</span>
+    </div>
+
+    <pre><code>payment-completed</code></pre>
+
+</div>
+
+<p>
+
+    Producer پیام را داخل Topic منتشر می‌کند و Consumer به همان Topic Subscribe
+    می‌شود.
+
+</p>
+
+<hr>
+
+<h2>Partition چیست؟</h2>
+
+<p>
+
+    هر Topic می‌تواند به چند
+    <strong>Partition</strong>
+    تقسیم شود.
+
+</p>
+
+<p>
+
+    Partitionها امکان ذخیره و پردازش موازی Eventها را فراهم می‌کنند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Topic Partitions</span>
+    </div>
+
+    <pre><code>
+Topic: payment-completed
+
+   ├── Partition 0
+   │     ├── Offset 0
+   │     ├── Offset 1
+   │     └── Offset 2
+   │
+   ├── Partition 1
+   │     ├── Offset 0
+   │     └── Offset 1
+   │
+   └── Partition 2
+         ├── Offset 0
+         └── Offset 1
+</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        ترتیب Eventها فقط داخل یک Partition تضمین می‌شود، نه در کل Topic.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Message Key و انتخاب Partition</h2>
+
+<p>
+
+    Producer می‌تواند هنگام ارسال Event یک
+    <strong>Key</strong>
+    مشخص کند.
+
+</p>
+
+<p>
+
+    Kafka معمولاً Eventهایی با Key یکسان را داخل یک Partition قرار می‌دهد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Partitioning by Key</span>
+    </div>
+
+    <pre><code>
+OrderId = 1001
+
+PaymentStarted
+PaymentCompleted
+PaymentRefunded
+
+        │
+
+Same Key: 1001
+
+        ▼
+
+Partition 2
+</code></pre>
+
+</div>
+
+<p>
+
+    این کار باعث می‌شود ترتیب Eventهای مربوط به یک Order حفظ شود.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        انتخاب Key نامناسب ممکن است باعث شود بیشتر Eventها وارد یک Partition شوند
+        و Load به‌صورت نامتوازن توزیع شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>ارسال Event با Key در .NET</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# Producer</span>
+    </div>
+
+    <pre><code>using Confluent.Kafka;
+using System.Text.Json;
+
+var config = new ProducerConfig
+{
+    BootstrapServers = "localhost:9092",
+    Acks = Acks.All
+};
+
+using var producer =
+    new ProducerBuilder&lt;string, string&gt;(config).Build();
+
+var paymentCompleted = new
+{
+    PaymentId = 1205,
+    OrderId = 1001,
+    Amount = 850000,
+    OccurredAt = DateTime.UtcNow
+};
+
+var message = new Message&lt;string, string&gt;
+{
+    Key = paymentCompleted.OrderId.ToString(),
+    Value = JsonSerializer.Serialize(paymentCompleted)
+};
+
+var result = await producer.ProduceAsync(
+    "payment-completed",
+    message
+);
+
+Console.WriteLine(
+    $"Partition: {result.Partition}, Offset: {result.Offset}"
+);</code></pre>
+
+</div>
+
+<p>
+
+    در این مثال،
+    <strong>OrderId</strong>
+    به‌عنوان Key استفاده شده است تا Eventهای یک سفارش معمولاً در یک Partition قرار
+    بگیرند.
+
+</p>
+
+<hr>
+
+<h2>Offset چیست؟</h2>
+
+<p>
+
+    هر Event داخل Partition یک شماره ترتیبی به نام
+    <strong>Offset</strong>
+    دارد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Partition Offset</span>
+    </div>
+
+    <pre><code>
+Partition 0
+
+Offset 0 → PaymentStarted
+
+Offset 1 → PaymentCompleted
+
+Offset 2 → PaymentRefunded
+</code></pre>
+
+</div>
+
+<p>
+
+    Consumer با نگهداری Offset مشخص می‌کند تا کدام Event را پردازش کرده است.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        Kafka Event را پس از خوانده شدن حذف نمی‌کند. Consumer فقط Offset خود را
+        جلو می‌برد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Consumer Group</h2>
+
+<p>
+
+    چند Consumer می‌توانند با یک
+    <strong>GroupId</strong>
+    مشترک عضو یک Consumer Group شوند.
+
+</p>
+
+<p>
+
+    Kafka هر Partition را در یک Consumer Group فقط به یک Consumer اختصاص می‌دهد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Consumer Group</span>
+    </div>
+
+    <pre><code>
+Topic: payment-completed
+
+Partition 0 ───► Consumer 1
+
+Partition 1 ───► Consumer 2
+
+Partition 2 ───► Consumer 3
+</code></pre>
+
+</div>
+
+<p>
+
+    اگر تعداد Consumerها بیشتر از تعداد Partitionها باشد، بعضی Consumerها بدون
+    Partition باقی می‌مانند.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        حداکثر میزان پردازش موازی در یک Consumer Group به تعداد Partitionهای Topic
+        وابسته است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Consumer در .NET</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# Consumer</span>
+    </div>
+
+    <pre><code>using Confluent.Kafka;
+
+var config = new ConsumerConfig
+{
+    BootstrapServers = "localhost:9092",
+    GroupId = "order-service-group",
+    AutoOffsetReset = AutoOffsetReset.Earliest,
+    EnableAutoCommit = false
+};
+
+using var consumer =
+    new ConsumerBuilder&lt;string, string&gt;(config).Build();
+
+consumer.Subscribe("payment-completed");
+
+using var cancellationTokenSource = new CancellationTokenSource();
+
+Console.CancelKeyPress += (_, eventArgs) =>
+{
+    eventArgs.Cancel = true;
+    cancellationTokenSource.Cancel();
+};
+
+try
+{
+    while (!cancellationTokenSource.IsCancellationRequested)
+    {
+        var result = consumer.Consume(
+            cancellationTokenSource.Token
+        );
+
+        Console.WriteLine(
+            $"Partition: {result.Partition}, " +
+            $"Offset: {result.Offset}"
+        );
+
+        Console.WriteLine(result.Message.Value);
+
+        // پردازش موفق Event
+        consumer.Commit(result);
+    }
+}
+catch (OperationCanceledException)
+{
+    consumer.Close();
+}</code></pre>
+
+</div>
+
+<p>
+
+    در این نمونه، Auto Commit غیرفعال شده و Offset پس از پردازش موفق Event ثبت
+    می‌شود.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        اگر Offset قبل از تکمیل عملیات ثبت شود، ممکن است در صورت Crash شدن Consumer،
+        Event پردازش‌نشده از دست برود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Replication</h2>
+
+<p>
+
+    Kafka برای افزایش تحمل خطا، از هر Partition چند نسخه روی Brokerهای مختلف
+    نگهداری می‌کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Partition Replication</span>
+    </div>
+
+    <pre><code>
+Partition 0
+
+   ├── Leader   → Broker 1
+   ├── Replica  → Broker 2
+   └── Replica  → Broker 3
+</code></pre>
+
+</div>
+
+<p>
+
+    عملیات خواندن و نوشتن روی Leader انجام می‌شود و Replicaها اطلاعات را از آن
+    کپی می‌کنند.
+
+</p>
+
+<p>
+
+    اگر Broker مربوط به Leader از دسترس خارج شود، یکی از Replicaها می‌تواند Leader
+    جدید شود.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        Replication باعث می‌شود خرابی یک Broker لزوماً باعث از دست رفتن Eventها
+        نشود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Kafka Controller</h2>
+
+<p>
+
+    Kafka برای مدیریت Metadataهای Cluster، انتخاب Leader و تشخیص Brokerهای فعال
+    به یک Controller نیاز دارد.
+
+</p>
+
+<p>
+
+    در معماری‌های جدید Kafka این هماهنگی با
+    <strong>KRaft</strong>
+    انجام می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Cluster Coordination</span>
+    </div>
+
+    <pre><code>
+Kafka Controllers
+
+      │
+
+      ├── Manage Cluster Metadata
+      ├── Detect Broker Failure
+      └── Select Partition Leaders
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>جریان کامل یک Event</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Complete Flow</span>
+    </div>
+
+    <pre><code>
+1. Producer creates an Event
+
+2. Message Key selects a Partition
+
+3. Producer sends Event to Partition Leader
+
+4. Event is replicated to other Brokers
+
+5. Consumer Group reads the Event
+
+6. One Consumer processes the Partition
+
+7. Consumer commits the Offset
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>نکات مهم طراحی</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>موضوع</th>
+            <th>نکته</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>تعداد Partition</td>
+            <td>میزان Parallelism و توسعه آینده را مشخص می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Message Key</td>
+            <td>روی Ordering و توزیع Eventها اثر می‌گذارد.</td>
+        </tr>
+
+        <tr>
+            <td>Replication Factor</td>
+            <td>تحمل خطای Topic را مشخص می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>Offset Commit</td>
+            <td>زمان ثبت آن باید با موفقیت پردازش هماهنگ باشد.</td>
+        </tr>
+
+        <tr>
+            <td>Consumer Group</td>
+            <td>برای توزیع پردازش میان چند Consumer استفاده می‌شود.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>اشتباهات رایج</h2>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        استفاده از یک Key ثابت برای تمام Eventها باعث می‌شود همه Messageها وارد
+        یک Partition شوند و قابلیت پردازش موازی از بین برود.
+
+    </div>
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        افزایش تعداد Consumerها بدون افزایش تعداد Partitionها لزوماً Performance
+        را بیشتر نمی‌کند.
+
+    </div>
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        Commit کردن Offset قبل از پردازش کامل Event ممکن است باعث از دست رفتن
+        منطقی Message شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>سؤالات مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۱:</strong>
+
+        Broker در Kafka چیست؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        هر سرور Kafka یک Broker است که مسئول دریافت، ذخیره و ارائه Eventهای Topicها
+        به Producer و Consumer است.
+
+    </div>
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۲:</strong>
+
+        چرا Topic به چند Partition تقسیم می‌شود؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        برای توزیع داده میان Brokerها و فراهم کردن پردازش موازی، مقیاس‌پذیری و
+        Throughput بیشتر.
+
+    </div>
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۳:</strong>
+
+        آیا Kafka ترتیب تمام Eventهای یک Topic را تضمین می‌کند؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        خیر. ترتیب فقط داخل هر Partition تضمین می‌شود. برای حفظ ترتیب Eventهای یک
+        Entity باید از Key یکسان استفاده شود.
+
+    </div>
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۴:</strong>
+
+        اگر تعداد Consumerها بیشتر از Partitionها باشد چه اتفاقی می‌افتد؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        در یک Consumer Group، هر Partition فقط به یک Consumer اختصاص داده می‌شود؛
+        بنابراین Consumerهای اضافه بیکار باقی می‌مانند.
+
+    </div>
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۵:</strong>
+
+        Offset چه کاربردی دارد؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        Offset موقعیت Event در Partition را مشخص می‌کند و Consumer با ثبت آن می‌داند
+        تا کدام Event را پردازش کرده است.
+
+    </div>
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۶:</strong>
+
+        Replication چه مشکلی را حل می‌کند؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        با نگهداری نسخه‌های یک Partition روی Brokerهای مختلف، از دسترس‌پذیری سیستم
+        در زمان خرابی Broker افزایش پیدا می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        در Kafka، انتخاب صحیح Partition، Message Key و Consumer Group مستقیماً روی
+        Ordering، Performance و مقیاس‌پذیری سیستم اثر می‌گذارد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    معماری Kafka از Broker، Topic، Partition، Producer، Consumer و Consumer Group
+    تشکیل شده است. Eventها داخل Partitionها ذخیره می‌شوند و هر Event یک Offset
+    مشخص دارد.
+
+</p>
+
+<p>
+
+    Partitionها امکان پردازش موازی را فراهم می‌کنند و Replication باعث افزایش
+    تحمل خطا می‌شود. طراحی صحیح Message Key، تعداد Partitionها و نحوه Commit کردن
+    Offset از مهم‌ترین بخش‌های کار با Kafka است.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد Producer در Kafka را بررسی می‌کنیم و با تنظیمات ارسال Event،
+        Acknowledgment و Message Key در .NET آشنا می‌شویم.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">5.1 معرفی Kafka</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">5.3 Producer</div>
+        </div>
+    </a>
+
+</div>
