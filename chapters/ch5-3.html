@@ -1,0 +1,938 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="#">مستندات</a>
+    <span class="breadcrumb-sep">›</span>
+    <a href="#" data-target="apache-kafka">
+        Apache Kafka
+    </a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">Producer</span>
+</div>
+
+<!-- Article Header -->
+<div class="article-header">
+    <div class="article-tag">⚡ Apache Kafka</div>
+
+    <h1>Producer در Kafka</h1>
+
+    <div class="article-meta">
+        <div class="meta-item">📅 به‌روزرسانی: 1405/04/31</div>
+        <div class="meta-item">⏱️ زمان مطالعه: ۹ دقیقه</div>
+        <div class="meta-item">👤 تیم فنی</div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<p>
+
+    <strong>Producer</strong>
+    سرویسی است که Message یا Event را تولید کرده و در یک Topic از Kafka منتشر
+    می‌کند.
+
+</p>
+
+<p>
+
+    Producer مشخص می‌کند پیام در کدام Topic قرار بگیرد و می‌تواند با استفاده از
+    Message Key روی انتخاب Partition نیز تأثیر بگذارد.
+
+</p>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        وظیفه Producer فقط ارسال Event نیست؛ نحوه انتخاب Key، سطح Acknowledgment و
+        مدیریت Retry مستقیماً بر Performance و قابلیت اطمینان سیستم اثر می‌گذارد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جریان ارسال Message</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Producer Flow</span>
+    </div>
+
+    <pre><code>
+Application
+
+    │
+
+Create Event
+
+    ▼
+
+Serialize Message
+
+    │
+
+Select Partition
+
+    ▼
+
+Kafka Broker
+
+    │
+
+Store Message
+
+    ▼
+
+Acknowledgment
+</code></pre>
+
+</div>
+
+<p>
+
+    Producer ابتدا Event را Serialize می‌کند، سپس Topic و Partition مقصد را مشخص
+    کرده و Message را برای Broker ارسال می‌کند.
+
+</p>
+
+<hr>
+
+<h2>ساختار Message</h2>
+
+<p>
+
+    هر Message در Kafka می‌تواند شامل Key، Value، Header و Timestamp باشد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Kafka Message</span>
+    </div>
+
+    <pre><code>
+Message
+
+   ├── Key
+   ├── Value
+   ├── Headers
+   └── Timestamp
+</code></pre>
+
+</div>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>بخش</th>
+            <th>کاربرد</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Key</td>
+            <td>انتخاب Partition و حفظ ترتیب Eventهای مرتبط</td>
+        </tr>
+
+        <tr>
+            <td>Value</td>
+            <td>محتوای اصلی Event</td>
+        </tr>
+
+        <tr>
+            <td>Headers</td>
+            <td>اطلاعات جانبی مانند CorrelationId و Version</td>
+        </tr>
+
+        <tr>
+            <td>Timestamp</td>
+            <td>زمان ایجاد یا ثبت Message</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>ارسال Event در .NET</h2>
+
+<p>
+
+    برای کار با Kafka در .NET معمولاً از پکیج
+    <strong>Confluent.Kafka</strong>
+    استفاده می‌شود.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">.NET CLI</span>
+    </div>
+
+    <pre><code>dotnet add package Confluent.Kafka</code></pre>
+
+</div>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">C# Producer</span>
+    </div>
+
+    <pre><code>using Confluent.Kafka;
+using System.Text.Json;
+
+var producerConfig = new ProducerConfig
+{
+    BootstrapServers = "localhost:9092",
+    Acks = Acks.All
+};
+
+using var producer =
+    new ProducerBuilder&lt;string, string&gt;(producerConfig).Build();
+
+var orderCreated = new
+{
+    EventId = Guid.NewGuid(),
+    OrderId = 1001,
+    CustomerId = 25,
+    TotalAmount = 850000,
+    OccurredAt = DateTime.UtcNow
+};
+
+var message = new Message&lt;string, string&gt;
+{
+    Key = orderCreated.OrderId.ToString(),
+    Value = JsonSerializer.Serialize(orderCreated)
+};
+
+var deliveryResult = await producer.ProduceAsync(
+    "order-created",
+    message
+);
+
+Console.WriteLine(
+    $"Topic: {deliveryResult.Topic}, " +
+    $"Partition: {deliveryResult.Partition}, " +
+    $"Offset: {deliveryResult.Offset}"
+);</code></pre>
+
+</div>
+
+<p>
+
+    متد
+    <strong>ProduceAsync</strong>
+    پس از ارسال Message، اطلاعات Topic، Partition و Offset ثبت‌شده را برمی‌گرداند.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">✅</span>
+    <div class="callout-content">
+
+        بهتر است Producer به‌صورت Singleton ساخته شود و برای هر Message نمونه جدیدی
+        از آن ایجاد نشود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Producer به‌صورت سرویس در ASP.NET Core</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">KafkaProducer.cs</span>
+    </div>
+
+    <pre><code>using Confluent.Kafka;
+using System.Text.Json;
+
+public sealed class KafkaProducer : IDisposable
+{
+    private readonly IProducer&lt;string, string&gt; _producer;
+
+    public KafkaProducer(IConfiguration configuration)
+    {
+        var producerConfig = new ProducerConfig
+        {
+            BootstrapServers =
+                configuration["Kafka:BootstrapServers"],
+
+            Acks = Acks.All,
+            EnableIdempotence = true
+        };
+
+        _producer = new ProducerBuilder&lt;string, string&gt;(
+            producerConfig
+        ).Build();
+    }
+
+    public async Task PublishAsync&lt;T&gt;(
+        string topic,
+        string key,
+        T value,
+        CancellationToken cancellationToken = default)
+    {
+        var message = new Message&lt;string, string&gt;
+        {
+            Key = key,
+            Value = JsonSerializer.Serialize(value)
+        };
+
+        await _producer.ProduceAsync(
+            topic,
+            message,
+            cancellationToken
+        );
+    }
+
+    public void Dispose()
+    {
+        _producer.Flush(TimeSpan.FromSeconds(10));
+        _producer.Dispose();
+    }
+}</code></pre>
+
+</div>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Program.cs</span>
+    </div>
+
+    <pre><code>builder.Services.AddSingleton&lt;KafkaProducer&gt;();</code></pre>
+
+</div>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">appsettings.json</span>
+    </div>
+
+    <pre><code>{
+  "Kafka": {
+    "BootstrapServers": "localhost:9092"
+  }
+}</code></pre>
+
+</div>
+
+<hr>
+
+<h2>استفاده در Order Service</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">OrderService.cs</span>
+    </div>
+
+    <pre><code>public sealed class OrderService
+{
+    private readonly KafkaProducer _producer;
+
+    public OrderService(KafkaProducer producer)
+    {
+        _producer = producer;
+    }
+
+    public async Task CreateOrderAsync(
+        int orderId,
+        decimal totalAmount,
+        CancellationToken cancellationToken)
+    {
+        // Save order in database
+
+        var orderCreated = new
+        {
+            EventId = Guid.NewGuid(),
+            OrderId = orderId,
+            TotalAmount = totalAmount,
+            OccurredAt = DateTime.UtcNow
+        };
+
+        await _producer.PublishAsync(
+            topic: "order-created",
+            key: orderId.ToString(),
+            value: orderCreated,
+            cancellationToken
+        );
+    }
+}</code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        ذخیره Order در Database و انتشار Event دو عملیات جدا هستند. برای جلوگیری
+        از ذخیره موفق Order و شکست انتشار Event، معمولاً از الگوی Transactional
+        Outbox استفاده می‌شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Message Key</h2>
+
+<p>
+
+    Message Key مشخص می‌کند Event معمولاً در کدام Partition قرار بگیرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Message Key</span>
+    </div>
+
+    <pre><code>
+OrderId: 1001
+
+OrderCreated
+OrderPaid
+OrderShipped
+
+      │
+
+Same Key: 1001
+
+      ▼
+
+Same Partition
+</code></pre>
+
+</div>
+
+<p>
+
+    قرار گرفتن Eventهای مربوط به یک Order در یک Partition، امکان حفظ ترتیب آن‌ها
+    را فراهم می‌کند.
+
+</p>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        استفاده از یک Key ثابت برای تمام Messageها باعث می‌شود همه Eventها وارد یک
+        Partition شوند و پردازش موازی کاهش پیدا کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Acknowledgment</h2>
+
+<p>
+
+    تنظیم
+    <strong>Acks</strong>
+    مشخص می‌کند Producer برای موفق تلقی کردن ارسال Message منتظر چه سطحی از تأیید
+    Broker بماند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>مقدار</th>
+            <th>رفتار</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Acks.None</td>
+            <td>Producer منتظر تأیید Broker نمی‌ماند.</td>
+        </tr>
+
+        <tr>
+            <td>Acks.Leader</td>
+            <td>پس از ذخیره Message توسط Leader تأیید دریافت می‌شود.</td>
+        </tr>
+
+        <tr>
+            <td>Acks.All</td>
+            <td>Leader منتظر تأیید Replicaهای همگام می‌ماند.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        Acks.All قابلیت اطمینان بیشتری دارد، اما ممکن است Latency بیشتری نسبت به
+        تنظیمات ضعیف‌تر ایجاد کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Idempotent Producer</h2>
+
+<p>
+
+    ممکن است Producer پس از Timeout یا خطای شبکه همان Message را دوباره ارسال کند
+    و باعث ایجاد Duplicate شود.
+
+</p>
+
+<p>
+
+    با فعال کردن
+    <strong>EnableIdempotence</strong>
+    Kafka می‌تواند از ثبت تکراری برخی ارسال‌های مجدد Producer جلوگیری کند.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Idempotent Producer</span>
+    </div>
+
+    <pre><code>var config = new ProducerConfig
+{
+    BootstrapServers = "localhost:9092",
+    Acks = Acks.All,
+    EnableIdempotence = true
+};</code></pre>
+
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+
+        Idempotent Producer فقط ارسال به Kafka را پوشش می‌دهد. Consumer همچنان باید
+        برای جلوگیری از اجرای دوباره عملیات Business به‌صورت Idempotent طراحی شود.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Headers</h2>
+
+<p>
+
+    برای ارسال اطلاعات جانبی مانند CorrelationId، نوع Event و نسخه قرارداد می‌توان
+    از Header استفاده کرد.
+
+</p>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Message Headers</span>
+    </div>
+
+    <pre><code>using System.Text;
+
+var message = new Message&lt;string, string&gt;
+{
+    Key = orderId.ToString(),
+    Value = JsonSerializer.Serialize(orderCreated),
+    Headers = new Headers
+    {
+        {
+            "correlation-id",
+            Encoding.UTF8.GetBytes(Guid.NewGuid().ToString())
+        },
+        {
+            "event-version",
+            Encoding.UTF8.GetBytes("1")
+        }
+    }
+};</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+
+        CorrelationId برای Distributed Tracing و پیدا کردن جریان یک درخواست میان
+        چند Microservice بسیار مفید است.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>مدیریت خطای ارسال</h2>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Error Handling</span>
+    </div>
+
+    <pre><code>try
+{
+    var result = await producer.ProduceAsync(
+        "order-created",
+        message,
+        cancellationToken
+    );
+
+    Console.WriteLine(
+        $"Published at {result.TopicPartitionOffset}"
+    );
+}
+catch (ProduceException&lt;string, string&gt; exception)
+{
+    Console.WriteLine(
+        $"Kafka publish failed: {exception.Error.Reason}"
+    );
+
+    throw;
+}</code></pre>
+
+</div>
+
+<p>
+
+    خطای انتشار نباید نادیده گرفته شود. این خطا باید Log شده و براساس سناریوی
+    سیستم، Retry یا ذخیره برای پردازش مجدد انجام شود.
+
+</p>
+
+<hr>
+
+<h2>بهبود Performance با Batching</h2>
+
+<p>
+
+    Kafka Producer می‌تواند چند Message را جمع‌آوری کرده و آن‌ها را به‌صورت Batch
+    ارسال کند.
+
+</p>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>تنظیم</th>
+            <th>کاربرد</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>LingerMs</td>
+            <td>مدت کوتاهی برای جمع‌آوری Messageهای بیشتر منتظر می‌ماند.</td>
+        </tr>
+
+        <tr>
+            <td>BatchSize</td>
+            <td>حداکثر اندازه تقریبی Batch را مشخص می‌کند.</td>
+        </tr>
+
+        <tr>
+            <td>CompressionType</td>
+            <td>حجم داده ارسالی را با Compression کاهش می‌دهد.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<div class="code-block">
+
+    <div class="code-header">
+        <span class="code-lang">Producer Performance</span>
+    </div>
+
+    <pre><code>var config = new ProducerConfig
+{
+    BootstrapServers = "localhost:9092",
+    Acks = Acks.All,
+    EnableIdempotence = true,
+    LingerMs = 5,
+    BatchSize = 32 * 1024,
+    CompressionType = CompressionType.Snappy
+};</code></pre>
+
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">📌</span>
+    <div class="callout-content">
+
+        افزایش Batching معمولاً Throughput را بیشتر می‌کند، اما ممکن است Latency
+        ارسال هر Message را کمی افزایش دهد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>Best Practiceها</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>انجام دهید ✅</th>
+            <th>انجام ندهید ❌</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Producer را به‌صورت Singleton استفاده کنید.</td>
+            <td>برای هر Message یک Producer جدید نسازید.</td>
+        </tr>
+
+        <tr>
+            <td>Message Key مناسب انتخاب کنید.</td>
+            <td>برای تمام Messageها Key ثابت قرار ندهید.</td>
+        </tr>
+
+        <tr>
+            <td>خطای ProduceAsync را مدیریت کنید.</td>
+            <td>ارسال موفق Message را بدون بررسی فرض نکنید.</td>
+        </tr>
+
+        <tr>
+            <td>برای داده‌های مهم از Acks.All استفاده کنید.</td>
+            <td>فقط برای Performance قابلیت اطمینان را حذف نکنید.</td>
+        </tr>
+
+        <tr>
+            <td>از Outbox Pattern استفاده کنید.</td>
+            <td>Database و Kafka را یک Transaction واحد فرض نکنید.</td>
+        </tr>
+    </tbody>
+
+</table>
+
+<hr>
+
+<h2>اشتباهات رایج</h2>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        ایجاد Producer جدید برای هر درخواست باعث مصرف Connection و کاهش Performance
+        می‌شود.
+
+    </div>
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        استفاده نکردن از Message Key مناسب می‌تواند Ordering موردنیاز Business را
+        از بین ببرد.
+
+    </div>
+</div>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">❌</span>
+    <div class="callout-content">
+
+        انتشار Event قبل از ذخیره موفق اطلاعات در Database ممکن است Eventی ایجاد
+        کند که وضعیت واقعی سیستم را نمایش نمی‌دهد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>سؤالات مصاحبه</h2>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۱:</strong>
+
+        Producer در Kafka چه وظیفه‌ای دارد؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        Producer مسئول Serialize کردن و ارسال Message به Topic مناسب است و می‌تواند
+        با استفاده از Key روی انتخاب Partition تأثیر بگذارد.
+
+    </div>
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۲:</strong>
+
+        Message Key چه کاربردی دارد؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        Message Key برای انتخاب Partition استفاده می‌شود. Messageهایی با Key یکسان
+        معمولاً در یک Partition قرار می‌گیرند و ترتیب آن‌ها حفظ می‌شود.
+
+    </div>
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۳:</strong>
+
+        تفاوت Acks.Leader و Acks.All چیست؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        در Acks.Leader پس از ثبت Message توسط Leader پاسخ موفق دریافت می‌شود؛ اما
+        در Acks.All، Leader منتظر تأیید Replicaهای همگام نیز می‌ماند.
+
+    </div>
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۴:</strong>
+
+        EnableIdempotence چه کاربردی دارد؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        از ثبت تکراری Messageهایی که به دلیل Retry مجدداً توسط همان Producer ارسال
+        شده‌اند جلوگیری می‌کند.
+
+    </div>
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۵:</strong>
+
+        چرا Kafka Producer بهتر است Singleton باشد؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        Producer برای مدیریت Connection، Batching و ارسال Message طراحی شده و
+        ساخت مداوم آن باعث مصرف منابع و کاهش Performance می‌شود.
+
+    </div>
+</div>
+
+<div class="callout callout-info">
+    <span class="callout-icon">🎓</span>
+    <div class="callout-content">
+
+        <strong>سؤال ۶:</strong>
+
+        چگونه مشکل ذخیره موفق داده و شکست انتشار Event را حل می‌کنید؟
+
+        <br><br>
+
+        <strong>پاسخ:</strong>
+
+        با استفاده از Transactional Outbox، داده Business و Event در یک Transaction
+        داخل Database ذخیره می‌شوند و Worker جداگانه Event را به Kafka منتشر
+        می‌کند.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>قانون طلایی</h2>
+
+<div class="callout callout-success">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-content">
+
+        Producer باید طوری طراحی شود که ارسال Message قابل اعتماد باشد، اما موفقیت
+        انتشار Event را با موفقیت کامل عملیات Business اشتباه نگیرد.
+
+    </div>
+</div>
+
+<hr>
+
+<h2>جمع‌بندی</h2>
+
+<p>
+
+    Kafka Producer مسئول تولید و انتشار Event در Topic است. Message Key، تنظیم
+    Acks، Retry، Batching و Idempotence از مهم‌ترین تنظیمات Producer هستند.
+
+</p>
+
+<p>
+
+    در پروژه‌های .NET بهتر است Producer به‌صورت Singleton ثبت شود، خطاهای ارسال
+    مدیریت شوند و برای هماهنگی Database و Kafka از Transactional Outbox استفاده
+    شود.
+
+</p>
+
+<div class="callout callout-success">
+    <span class="callout-icon">➡️</span>
+    <div class="callout-content">
+
+        در بخش بعد Consumer در Kafka را بررسی می‌کنیم و با دریافت Message، مدیریت
+        Offset و پردازش مطمئن Eventها در .NET آشنا می‌شویم.
+
+    </div>
+</div>
+
+<!-- Navigation Footer -->
+<div class="nav-footer">
+
+    <a class="nav-card prev" href="#">
+        <span class="nav-card-arrow">›</span>
+        <div>
+            <div class="nav-card-label">قبلی</div>
+            <div class="nav-card-title">5.2 معماری Kafka</div>
+        </div>
+    </a>
+
+    <a class="nav-card next" href="#">
+        <span class="nav-card-arrow">‹</span>
+        <div>
+            <div class="nav-card-label">بعدی</div>
+            <div class="nav-card-title">5.4 Consumer</div>
+        </div>
+    </a>
+
+</div>
