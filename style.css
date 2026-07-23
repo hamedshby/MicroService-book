@@ -126,10 +126,10 @@ header {
 .sidebar {
     width: var(--sidebar-width);
     background: var(--bg-sidebar);
-    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
     position: fixed;
     top: 64px;
-    right: 0;
+    left: 0;
     bottom: 0;
     overflow-y: auto;
     padding: 1.5rem 0;
@@ -162,8 +162,10 @@ header {
     cursor: pointer;
     user-select: none;
     transition: background 0.2s;
-    border-radius: 0 8px 8px 0;
-    margin-left: 0.5rem;
+    border-radius: 8px 0 0 8px;
+    margin-right: 0.5rem;
+    direction: ltr;
+    text-align: left;
     /* background-color: darkgreen; */
     background-color: #4C1D95;
 }
@@ -210,25 +212,27 @@ header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.55rem 1.5rem 0.55rem 2.5rem;
+    padding: 0.55rem 1.5rem 0.55rem 0.5rem;
     color: var(--text-muted);
     text-decoration: none;
     font-size: 0.88rem;
     transition: all 0.15s;
-    border-right: 3px solid transparent;
+    border-left: 3px solid transparent;
     cursor: pointer;
+    direction: ltr;
+    text-align: left;
 }
 
 .nav-item:hover {
     color: var(--text);
     background: var(--bg-card);
-    border-right-color: var(--border);
+    border-left-color: var(--border);
 }
 
 .nav-item.active {
     color: var(--primary-light);
     background: rgba(99, 102, 241, 0.1);
-    border-right-color: var(--primary);
+    border-left-color: var(--primary);
     font-weight: 500;
 }
 
@@ -246,7 +250,7 @@ header {
 
 /* Main Content */
 .main {
-    margin-right: var(--sidebar-width);
+    margin-left: var(--sidebar-width);
     flex: 1;
     padding: 3rem 4rem;
     max-width: calc(100% - var(--sidebar-width));
@@ -353,7 +357,7 @@ h1 {
 
 .content ul,
 .content ol {
-    padding-right: 1.5rem;
+    padding-left: 1.5rem;
     margin-bottom: 1rem;
 }
 
@@ -571,7 +575,7 @@ code:not(pre code) {
     }
 
     .sidebar {
-        transform: translateX(100%);
+        transform: translateX(-100%);
         transition: transform 0.3s ease;
         z-index: 90;
     }
@@ -581,7 +585,7 @@ code:not(pre code) {
     }
 
     .main {
-        margin-right: 0;
+        margin-left: 0;
         max-width: 100%;
         padding: 2rem 1.5rem;
     }
@@ -665,7 +669,7 @@ code:not(pre code) {
 
 /* وقتی سایدبار مخفی است */
 .sidebar.closed {
-    transform: translateX(100%);
+    transform: translateX(-100%);
 }
 
 /* تغییر اندازه محتوا */
@@ -674,6 +678,6 @@ code:not(pre code) {
 }
 
 .main.full {
-    margin-right: 0;
+    margin-left: 0;
     max-width: 100%;
 }

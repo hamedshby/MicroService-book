@@ -45,7 +45,15 @@ document.querySelectorAll('.chapter-list a').forEach(link => {
 
 });
 
-async function showChapter(chapterId) {
+function chapterIdToSection(chapterId) {
+    return chapterId.replace(/^ch/, "").replace(/-/g, ".");
+}
+
+function sectionToChapterId(section) {
+    return "ch" + section.replace(/\./g, "-");
+}
+
+async function showChapter(chapterId, { updateUrl = true, historyMode = "push" } = {}) {
 
     const content = document.getElementById("content");
 
@@ -62,6 +70,20 @@ async function showChapter(chapterId) {
         content.innerHTML = html;
 
         localStorage.setItem("currentChapter", chapterId);
+
+        if (updateUrl) {
+
+            const section = chapterIdToSection(chapterId);
+            const url = new URL(window.location.href);
+            url.searchParams.set("s", section);
+
+            if (historyMode === "replace") {
+                history.replaceState({ chapter: chapterId }, "", url);
+            } else {
+                history.pushState({ chapter: chapterId }, "", url);
+            }
+
+        }
 
         window.scrollTo({
             top: 0,
@@ -85,9 +107,14 @@ async function showChapter(chapterId) {
 // نمایش خودکار فصل اول هنگام باز شدن سایت
 document.addEventListener("DOMContentLoaded", () => {
 
-    const chapter = localStorage.getItem("currentChapter") || "ch1";
+    const params = new URLSearchParams(window.location.search);
+    const sectionParam = params.get("s");
 
-    showChapter(chapter);
+    const chapter = sectionParam
+        ? sectionToChapterId(sectionParam)
+        : (localStorage.getItem("currentChapter") || "ch1-1");
+
+    showChapter(chapter, { historyMode: "replace" });
 
     const item = document.querySelector(`.chapter-list a[data-target="${chapter}"]`);
 
@@ -104,6 +131,17 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
+
+});
+
+// همگام‌سازی محتوا هنگام استفاده از دکمه‌های Back/Forward مرورگر
+window.addEventListener("popstate", () => {
+
+    const params = new URLSearchParams(window.location.search);
+    const sectionParam = params.get("s");
+    const chapter = sectionParam ? sectionToChapterId(sectionParam) : "ch1-1";
+
+    showChapter(chapter, { updateUrl: false });
 
 });
 
