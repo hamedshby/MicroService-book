@@ -162,7 +162,7 @@ header {
     cursor: pointer;
     user-select: none;
     transition: background 0.2s;
-    border-radius: 8px 0 0 8px;
+    border-radius: 0 8px 8px 0;
     margin-right: 0.5rem;
     direction: ltr;
     text-align: left;
@@ -656,6 +656,10 @@ code:not(pre code) {
     cursor: pointer;
     font-size: 18px;
     transition: .3s;
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .sidebar-toggle:hover {
